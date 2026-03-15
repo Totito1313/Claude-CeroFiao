@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(find C:UsersSchwaOneDriveDesktopSchwarckDevCeroFiao -type f -name *)",
+      "Bash(find C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao -type f -name *.kt -o -name *.kts -o -name *.toml -o -name *.xml -o -name *.gradle)"
+    ]
+  }
+}
