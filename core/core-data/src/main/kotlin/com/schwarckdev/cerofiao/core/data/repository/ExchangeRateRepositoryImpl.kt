@@ -48,75 +48,83 @@ class ExchangeRateRepositoryImpl @Inject constructor(
         exchangeRateDao.getUsdToVesRates().map { list -> list.map { it.toModel() } }
 
     override suspend fun refreshRates() {
-        // Check cache freshness
         val today = DateUtils.todayIsoDate()
-        val cached = exchangeRateDao.getRatesForDate("USD", "VES", today)
         val now = DateUtils.now()
 
-        if (cached.isNotEmpty() && (now - cached.first().fetchedAt) < CACHE_TTL_MS) {
-            return // Cache is still fresh
+        // Check cache freshness for both USD and EUR
+        val cachedUsd = exchangeRateDao.getRatesForDate("USD", "VES", today)
+        val cachedEur = exchangeRateDao.getRatesForDate("EUR", "VES", today)
+        val usdFresh = cachedUsd.size >= 2 && (now - cachedUsd.first().fetchedAt) < CACHE_TTL_MS
+        val eurFresh = cachedEur.size >= 2 && (now - cachedEur.first().fetchedAt) < CACHE_TTL_MS
+
+        if (usdFresh && eurFresh) {
+            return // Both caches are fresh (BCV + market for each)
         }
 
         try {
             // Fetch USD rates
-            val dollarRates = exchangeRateApi.getAllDollarRates()
-            val dollarEntities = dollarRates.map { apiRate ->
-                val source = when (apiRate.fuente) {
-                    "oficial" -> ExchangeRateSource.BCV.name
-                    "paralelo" -> ExchangeRateSource.USDT.name
-                    else -> ExchangeRateSource.USDT.name
+            if (!usdFresh) {
+                val dollarRates = exchangeRateApi.getAllDollarRates()
+                val dollarEntities = dollarRates.map { apiRate ->
+                    val source = when (apiRate.fuente) {
+                        "oficial" -> ExchangeRateSource.BCV.name
+                        "paralelo" -> ExchangeRateSource.USDT.name
+                        else -> ExchangeRateSource.USDT.name
+                    }
+                    ExchangeRateEntity(
+                        fromCurrency = "USD",
+                        toCurrency = "VES",
+                        rate = apiRate.promedio,
+                        date = today,
+                        source = source,
+                        fetchedAt = now,
+                    )
                 }
-                ExchangeRateEntity(
-                    fromCurrency = "USD",
-                    toCurrency = "VES",
-                    rate = apiRate.promedio,
-                    date = today,
-                    source = source,
-                    fetchedAt = now,
-                )
-            }
 
-            exchangeRateDao.insertAll(dollarEntities)
+                exchangeRateDao.insertAll(dollarEntities)
 
-            // Store inverse rates (VES -> USD)
-            val inverseDollar = dollarEntities.map { entity ->
-                entity.copy(
-                    fromCurrency = "VES",
-                    toCurrency = "USD",
-                    rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
-                )
+                // Store inverse rates (VES -> USD)
+                val inverseDollar = dollarEntities.map { entity ->
+                    entity.copy(
+                        fromCurrency = "VES",
+                        toCurrency = "USD",
+                        rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
+                    )
+                }
+                exchangeRateDao.insertAll(inverseDollar)
             }
-            exchangeRateDao.insertAll(inverseDollar)
 
             // Fetch EUR rates
-            val euroRates = exchangeRateApi.getAllEuroRates()
-            val euroEntities = euroRates.map { apiRate ->
-                val source = when (apiRate.fuente) {
-                    "oficial" -> ExchangeRateSource.BCV.name
-                    "paralelo" -> ExchangeRateSource.EURI.name
-                    else -> ExchangeRateSource.EURI.name
+            if (!eurFresh) {
+                val euroRates = exchangeRateApi.getAllEuroRates()
+                val euroEntities = euroRates.map { apiRate ->
+                    val source = when (apiRate.fuente) {
+                        "oficial" -> ExchangeRateSource.BCV.name
+                        "paralelo" -> ExchangeRateSource.EURI.name
+                        else -> ExchangeRateSource.EURI.name
+                    }
+                    ExchangeRateEntity(
+                        fromCurrency = "EUR",
+                        toCurrency = "VES",
+                        rate = apiRate.promedio,
+                        date = today,
+                        source = source,
+                        fetchedAt = now,
+                    )
                 }
-                ExchangeRateEntity(
-                    fromCurrency = "EUR",
-                    toCurrency = "VES",
-                    rate = apiRate.promedio,
-                    date = today,
-                    source = source,
-                    fetchedAt = now,
-                )
-            }
 
-            exchangeRateDao.insertAll(euroEntities)
+                exchangeRateDao.insertAll(euroEntities)
 
-            // Store inverse rates (VES -> EUR)
-            val inverseEuro = euroEntities.map { entity ->
-                entity.copy(
-                    fromCurrency = "VES",
-                    toCurrency = "EUR",
-                    rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
-                )
+                // Store inverse rates (VES -> EUR)
+                val inverseEuro = euroEntities.map { entity ->
+                    entity.copy(
+                        fromCurrency = "VES",
+                        toCurrency = "EUR",
+                        rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
+                    )
+                }
+                exchangeRateDao.insertAll(inverseEuro)
             }
-            exchangeRateDao.insertAll(inverseEuro)
         } catch (_: Exception) {
             // Network failure - app continues with cached data (offline-first)
         }

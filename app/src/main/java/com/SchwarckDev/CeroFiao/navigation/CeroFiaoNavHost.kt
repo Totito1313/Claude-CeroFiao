@@ -69,9 +69,13 @@ fun CeroFiaoNavHost(
         )
 
         accountListScreen(
-            onAccountClick = { /* TODO: account detail */ },
+            onAccountClick = { accountId -> navController.navigateToAccountDetail(accountId) },
             onAddAccount = { navController.navigateToAddAccount() },
             onTransfer = { navController.navigateToTransfer() },
+        )
+
+        accountDetailScreen(
+            onBack = { navController.popBackStack() },
         )
 
         addAccountScreen(

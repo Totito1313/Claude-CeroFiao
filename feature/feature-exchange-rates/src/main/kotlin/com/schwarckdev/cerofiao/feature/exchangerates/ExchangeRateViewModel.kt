@@ -33,37 +33,32 @@ class ExchangeRateViewModel @Inject constructor(
     val uiState: StateFlow<ExchangeRateUiState> = _uiState
 
     init {
-        loadRates()
         refresh()
     }
 
-    private fun loadRates() {
-        viewModelScope.launch {
-            val bcvUsd = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
-            val usdt = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.USDT)
-            val bcvEur = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.BCV)
-            val euri = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.EURI)
-            _uiState.update {
-                it.copy(
-                    bcvUsdRate = bcvUsd,
-                    usdtRate = usdt,
-                    bcvEurRate = bcvEur,
-                    euriRate = euri,
-                )
-            }
+    private suspend fun loadRates() {
+        val bcvUsd = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
+        val usdt = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.USDT)
+        val bcvEur = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.BCV)
+        val euri = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.EURI)
+        _uiState.update {
+            it.copy(
+                bcvUsdRate = bcvUsd,
+                usdtRate = usdt,
+                bcvEurRate = bcvEur,
+                euriRate = euri,
+            )
         }
     }
 
-    private fun loadHistorical() {
-        viewModelScope.launch {
-            val usdHistory = exchangeRateRepository.getHistoricalRates("USD")
-            val eurHistory = exchangeRateRepository.getHistoricalRates("EUR")
-            _uiState.update {
-                it.copy(
-                    historicalUsd = usdHistory,
-                    historicalEur = eurHistory,
-                )
-            }
+    private suspend fun loadHistorical() {
+        val usdHistory = exchangeRateRepository.getHistoricalRates("USD")
+        val eurHistory = exchangeRateRepository.getHistoricalRates("EUR")
+        _uiState.update {
+            it.copy(
+                historicalUsd = usdHistory,
+                historicalEur = eurHistory,
+            )
         }
     }
 
