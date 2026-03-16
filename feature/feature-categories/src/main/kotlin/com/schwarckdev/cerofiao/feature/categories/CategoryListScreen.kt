@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -33,6 +36,7 @@ import com.schwarckdev.cerofiao.core.model.Category
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryListScreen(
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: CategoryListViewModel = hiltViewModel(),
 ) {
@@ -41,7 +45,14 @@ fun CategoryListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(title = { Text("Categorías") })
+            TopAppBar(
+                title = { Text("Categorías") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+            )
         },
     ) { innerPadding ->
         LazyColumn(

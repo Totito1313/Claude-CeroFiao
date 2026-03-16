@@ -6,8 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.schwarckdev.cerofiao.feature.accounts.AccountListRoute
 import com.schwarckdev.cerofiao.feature.accounts.AddAccountRoute
+import com.schwarckdev.cerofiao.feature.accounts.accountDetailScreen
 import com.schwarckdev.cerofiao.feature.accounts.accountListScreen
 import com.schwarckdev.cerofiao.feature.accounts.addAccountScreen
+import com.schwarckdev.cerofiao.feature.accounts.navigateToAccountDetail
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAddAccount
 import com.schwarckdev.cerofiao.feature.categories.categoryListScreen
 import com.schwarckdev.cerofiao.feature.categories.navigateToCategories
@@ -77,9 +79,13 @@ fun CeroFiaoNavHost(
             onAccountCreated = { navController.popBackStack() },
         )
 
-        categoryListScreen()
+        categoryListScreen(
+            onBack = { navController.popBackStack() },
+        )
 
-        exchangeRateScreen()
+        exchangeRateScreen(
+            onBack = { navController.popBackStack() },
+        )
 
         settingsScreen(
             onNavigateToCategories = { navController.navigateToCategories() },

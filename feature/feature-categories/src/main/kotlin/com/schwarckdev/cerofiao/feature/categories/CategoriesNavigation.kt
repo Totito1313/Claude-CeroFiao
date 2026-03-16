@@ -8,9 +8,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 object CategoryListRoute
 
-fun NavGraphBuilder.categoryListScreen() {
+fun NavGraphBuilder.categoryListScreen(
+    onBack: () -> Unit = {},
+) {
     composable<CategoryListRoute> {
-        CategoryListScreen()
+        CategoryListScreen(onBack = onBack)
     }
 }
 

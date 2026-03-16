@@ -8,9 +8,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 object ExchangeRateRoute
 
-fun NavGraphBuilder.exchangeRateScreen() {
+fun NavGraphBuilder.exchangeRateScreen(
+    onBack: () -> Unit = {},
+) {
     composable<ExchangeRateRoute> {
-        ExchangeRateScreen()
+        ExchangeRateScreen(onBack = onBack)
     }
 }
 

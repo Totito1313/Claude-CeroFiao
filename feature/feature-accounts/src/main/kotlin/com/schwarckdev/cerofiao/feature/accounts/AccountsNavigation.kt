@@ -41,10 +41,22 @@ fun NavGraphBuilder.addAccountScreen(
     }
 }
 
+fun NavGraphBuilder.accountDetailScreen(
+    onBack: () -> Unit,
+) {
+    composable<AccountDetailRoute> {
+        AccountDetailScreen(onBack = onBack)
+    }
+}
+
 fun NavController.navigateToAccountList() {
     navigate(AccountListRoute)
 }
 
 fun NavController.navigateToAddAccount() {
     navigate(AddAccountRoute)
+}
+
+fun NavController.navigateToAccountDetail(accountId: String) {
+    navigate(AccountDetailRoute(accountId))
 }
