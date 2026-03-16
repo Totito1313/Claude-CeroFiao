@@ -10,9 +10,11 @@ import com.schwarckdev.cerofiao.feature.accounts.accountListScreen
 import com.schwarckdev.cerofiao.feature.accounts.addAccountScreen
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAddAccount
 import com.schwarckdev.cerofiao.feature.categories.categoryListScreen
+import com.schwarckdev.cerofiao.feature.categories.navigateToCategories
 import com.schwarckdev.cerofiao.feature.dashboard.DashboardRoute
 import com.schwarckdev.cerofiao.feature.dashboard.dashboardScreen
 import com.schwarckdev.cerofiao.feature.exchangerates.exchangeRateScreen
+import com.schwarckdev.cerofiao.feature.exchangerates.navigateToExchangeRates
 import com.schwarckdev.cerofiao.feature.onboarding.OnboardingRoute
 import com.schwarckdev.cerofiao.feature.onboarding.onboardingScreen
 import com.schwarckdev.cerofiao.feature.settings.settingsScreen
@@ -79,6 +81,9 @@ fun CeroFiaoNavHost(
 
         exchangeRateScreen()
 
-        settingsScreen()
+        settingsScreen(
+            onNavigateToCategories = { navController.navigateToCategories() },
+            onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
+        )
     }
 }

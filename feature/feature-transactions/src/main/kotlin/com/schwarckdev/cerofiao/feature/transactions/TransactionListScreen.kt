@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -22,12 +25,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -172,11 +180,40 @@ fun TransactionListScreen(
                         items = uiState.transactions,
                         key = { it.id },
                     ) { transaction ->
-                        TransactionListItem(
-                            transaction = transaction,
-                            accountName = uiState.accounts
-                                .find { it.id == transaction.accountId }?.name,
-                        )
+                        val dismissState = rememberSwipeToDismissBoxState()
+
+                        LaunchedEffect(dismissState.currentValue) {
+                            if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                                viewModel.deleteTransaction(transaction.id)
+                            }
+                        }
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = false,
+                            backgroundContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.errorContainer),
+                                    contentAlignment = Alignment.CenterEnd,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Eliminar",
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.padding(end = 16.dp),
+                                    )
+                                }
+                            },
+                        ) {
+                            TransactionListItem(
+                                transaction = transaction,
+                                accountName = uiState.accounts
+                                    .find { it.id == transaction.accountId }?.name,
+                            )
+                        }
                     }
                 }
             }

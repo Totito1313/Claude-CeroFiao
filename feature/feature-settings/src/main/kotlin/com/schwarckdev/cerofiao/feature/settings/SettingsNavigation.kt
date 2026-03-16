@@ -8,9 +8,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 object SettingsRoute
 
-fun NavGraphBuilder.settingsScreen() {
+fun NavGraphBuilder.settingsScreen(
+    onNavigateToCategories: () -> Unit = {},
+    onNavigateToExchangeRates: () -> Unit = {},
+) {
     composable<SettingsRoute> {
-        SettingsScreen()
+        SettingsScreen(
+            onNavigateToCategories = onNavigateToCategories,
+            onNavigateToExchangeRates = onNavigateToExchangeRates,
+        )
     }
 }
 

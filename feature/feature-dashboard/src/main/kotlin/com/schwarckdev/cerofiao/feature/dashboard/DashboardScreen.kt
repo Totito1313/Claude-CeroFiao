@@ -38,6 +38,7 @@ import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.model.CurrencyBalance
+import com.schwarckdev.cerofiao.core.model.ExchangeRate
 import com.schwarckdev.cerofiao.core.model.GlobalBalance
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
@@ -95,6 +96,16 @@ fun DashboardScreen(
                 if (breakdown.isNotEmpty()) {
                     item {
                         CurrencyBreakdownSection(breakdown = breakdown)
+                    }
+                }
+
+                // Exchange rate banner
+                if (uiState.bcvRate != null || uiState.parallelRate != null) {
+                    item {
+                        ExchangeRateBanner(
+                            bcvRate = uiState.bcvRate,
+                            parallelRate = uiState.parallelRate,
+                        )
                     }
                 }
 
@@ -276,6 +287,71 @@ private fun TransactionRow(
                 fontWeight = FontWeight.SemiBold,
                 color = iconColor,
             )
+        }
+    }
+}
+
+@Composable
+private fun ExchangeRateBanner(
+    bcvRate: ExchangeRate?,
+    parallelRate: ExchangeRate?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (bcvRate != null) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "BCV",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                    )
+                    Text(
+                        text = CurrencyFormatter.format(bcvRate.rate, "VES"),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                    Text(
+                        text = "Bs/USD",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+        if (parallelRate != null) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "Paralelo",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    )
+                    Text(
+                        text = CurrencyFormatter.format(parallelRate.rate, "VES"),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                    Text(
+                        text = "Bs/USD",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
         }
     }
 }

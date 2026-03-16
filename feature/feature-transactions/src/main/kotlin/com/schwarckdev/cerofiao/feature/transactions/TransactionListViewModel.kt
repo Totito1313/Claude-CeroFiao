@@ -2,6 +2,7 @@ package com.schwarckdev.cerofiao.feature.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
 import com.schwarckdev.cerofiao.core.model.Account
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TransactionListUiState(
@@ -27,6 +29,7 @@ data class TransactionListUiState(
 class TransactionListViewModel @Inject constructor(
     getTransactionsUseCase: GetTransactionsUseCase,
     getAccountsUseCase: GetAccountsUseCase,
+    private val transactionRepository: TransactionRepository,
 ) : ViewModel() {
 
     private val filters = MutableStateFlow(Filters())
@@ -60,6 +63,12 @@ class TransactionListViewModel @Inject constructor(
 
     fun setAccountFilter(accountId: String?) {
         filters.update { it.copy(accountId = accountId) }
+    }
+
+    fun deleteTransaction(transactionId: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransaction(transactionId)
+        }
     }
 
     private data class Filters(
