@@ -20,7 +20,8 @@
       "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\")",
       "Bash(for dir:*)",
       "Bash(do touch:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "WebFetch(domain:ve.dolarapi.com)"
     ]
   }
 }
