@@ -18,11 +18,13 @@ object AddAccountRoute
 fun NavGraphBuilder.accountListScreen(
     onAccountClick: (String) -> Unit,
     onAddAccount: () -> Unit,
+    onTransfer: () -> Unit,
 ) {
     composable<AccountListRoute> {
         AccountListScreen(
             onAccountClick = onAccountClick,
             onAddAccount = onAddAccount,
+            onTransfer = onTransfer,
         )
     }
 }
