@@ -1,3 +1,10 @@
 package com.schwarckdev.cerofiao.core.network
 
-// Network API will be added in Bloque 3
+import com.schwarckdev.cerofiao.core.network.model.DolarApiResponse
+
+interface ExchangeRateApi {
+    suspend fun getAllDollarRates(): List<DolarApiResponse>
+    suspend fun getOfficialRate(): DolarApiResponse
+    suspend fun getParallelRate(): DolarApiResponse
+    suspend fun getAllEuroRates(): List<DolarApiResponse>
+}
