@@ -33,7 +33,7 @@ CeroFiao is a multi-currency expense tracking Android app for Venezuela. Offline
 
 ## Build System
 - AGP 9.1.0, Compile SDK 36, Min SDK 34, Target SDK 36
-- Java 11 compatibility
+- Java 21 compatibility (Android Studio bundled JBR)
 - Convention plugins: `cerofiao.android.application`, `cerofiao.android.library`, `cerofiao.android.feature`, `cerofiao.android.compose`, `cerofiao.android.hilt`, `cerofiao.android.room`
 - Version catalog: `gradle/libs.versions.toml`
 

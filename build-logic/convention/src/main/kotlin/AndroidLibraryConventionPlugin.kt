@@ -1,4 +1,4 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -8,7 +8,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("com.android.library")
-                apply("org.jetbrains.kotlin.android")
                 apply("org.jetbrains.kotlin.plugin.serialization")
             }
 
@@ -22,8 +21,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 }
 
                 compileOptions {
-                    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11
-                    targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
+                    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_21
+                    targetCompatibility = org.gradle.api.JavaVersion.VERSION_21
                 }
             }
         }

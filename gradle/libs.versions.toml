@@ -2,7 +2,7 @@
 # Android & Kotlin
 agp = "9.1.0"
 kotlin = "2.2.10"
-ksp = "2.2.10-1.0.31"
+ksp = "2.2.10-2.0.2"
 
 # AndroidX Core
 coreKtx = "1.15.0"
@@ -16,7 +16,7 @@ composeBom = "2024.12.01"
 navigationCompose = "2.8.5"
 
 # Hilt
-hilt = "2.54"
+hilt = "2.59.2"
 hiltNavigationCompose = "1.2.0"
 
 # Room

@@ -7,7 +7,20 @@
       "Bash(gh auth:*)",
       "Bash(where gh:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:repo.maven.apache.org)",
+      "Bash(echo \"$JAVA_HOME\")",
+      "Read(//c/Program Files/Android/Android Studio/jbr/bin/**)",
+      "Bash(\"/c/Program Files/Android/Android Studio/jbr/bin/java.exe\" -version)",
+      "Bash(wc -l feature/*/src/main/kotlin/com/schwarckdev/cerofiao/feature/*/*.kt)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(echo $JAVA_HOME)",
+      "Read(//c/Program Files/Android Studio/jbr/bin/**)",
+      "Bash(where java:*)",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\")",
+      "Bash(for dir:*)",
+      "Bash(do touch:*)",
+      "Bash(done)"
     ]
   }
 }
