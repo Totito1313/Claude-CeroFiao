@@ -19,7 +19,7 @@ import javax.inject.Inject
 data class OnboardingUiState(
     val currentStep: Int = 0,
     val selectedCurrency: String = "USD",
-    val selectedRateSource: ExchangeRateSource = ExchangeRateSource.PARALLEL,
+    val selectedRateSource: ExchangeRateSource = ExchangeRateSource.USDT,
     val selectedPlatforms: Set<AccountPlatform> = emptySet(),
     val isLoading: Boolean = false,
 )

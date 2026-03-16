@@ -34,8 +34,8 @@ class UserPreferencesDataStore @Inject constructor(
         UserPreferences(
             displayCurrencyCode = prefs[Keys.DISPLAY_CURRENCY] ?: "USD",
             preferredRateSource = prefs[Keys.PREFERRED_RATE_SOURCE]?.let {
-                try { ExchangeRateSource.valueOf(it) } catch (_: Exception) { ExchangeRateSource.PARALLEL }
-            } ?: ExchangeRateSource.PARALLEL,
+                try { ExchangeRateSource.valueOf(it) } catch (_: Exception) { ExchangeRateSource.USDT }
+            } ?: ExchangeRateSource.USDT,
             themeMode = prefs[Keys.THEME_MODE]?.let {
                 try { ThemeMode.valueOf(it) } catch (_: Exception) { ThemeMode.SYSTEM }
             } ?: ThemeMode.SYSTEM,

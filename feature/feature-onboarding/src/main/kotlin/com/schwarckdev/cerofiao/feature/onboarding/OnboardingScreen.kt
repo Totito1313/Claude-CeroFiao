@@ -207,10 +207,10 @@ private fun RateSourceStep(
         Spacer(modifier = Modifier.height(12.dp))
 
         RateSourceCard(
-            title = "Paralelo",
-            description = "Tasa del mercado paralelo",
-            isSelected = selectedSource == ExchangeRateSource.PARALLEL,
-            onClick = { onSourceSelected(ExchangeRateSource.PARALLEL) },
+            title = "USDT",
+            description = "Tasa del mercado",
+            isSelected = selectedSource == ExchangeRateSource.USDT,
+            onClick = { onSourceSelected(ExchangeRateSource.USDT) },
         )
     }
 }

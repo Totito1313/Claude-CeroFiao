@@ -100,11 +100,11 @@ fun DashboardScreen(
                 }
 
                 // Exchange rate banner
-                if (uiState.bcvRate != null || uiState.parallelRate != null) {
+                if (uiState.bcvRate != null || uiState.usdtRate != null) {
                     item {
                         ExchangeRateBanner(
                             bcvRate = uiState.bcvRate,
-                            parallelRate = uiState.parallelRate,
+                            usdtRate = uiState.usdtRate,
                         )
                     }
                 }
@@ -294,7 +294,7 @@ private fun TransactionRow(
 @Composable
 private fun ExchangeRateBanner(
     bcvRate: ExchangeRate?,
-    parallelRate: ExchangeRate?,
+    usdtRate: ExchangeRate?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -327,7 +327,7 @@ private fun ExchangeRateBanner(
                 }
             }
         }
-        if (parallelRate != null) {
+        if (usdtRate != null) {
             Surface(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),
@@ -335,12 +335,12 @@ private fun ExchangeRateBanner(
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        text = "Paralelo",
+                        text = "USDT",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                     )
                     Text(
-                        text = CurrencyFormatter.format(parallelRate.rate, "VES"),
+                        text = CurrencyFormatter.format(usdtRate.rate, "VES"),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,

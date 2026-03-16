@@ -49,6 +49,12 @@ interface ExchangeRateDao {
     )
     fun getUsdToVesRates(): Flow<List<ExchangeRateEntity>>
 
+    @Query(
+        "SELECT * FROM exchange_rate WHERE fromCurrency = 'EUR' AND toCurrency = 'VES' " +
+            "ORDER BY date DESC, fetchedAt DESC"
+    )
+    fun getEurToVesRates(): Flow<List<ExchangeRateEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(rates: List<ExchangeRateEntity>)
 

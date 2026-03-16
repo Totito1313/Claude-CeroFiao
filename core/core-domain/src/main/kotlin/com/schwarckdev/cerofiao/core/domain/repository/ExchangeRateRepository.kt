@@ -12,4 +12,5 @@ interface ExchangeRateRepository {
     fun getUsdToVesRates(): Flow<List<ExchangeRate>>
     suspend fun refreshRates()
     suspend fun insertManualRate(rate: ExchangeRate)
+    suspend fun getHistoricalRates(currency: String): List<ExchangeRate>
 }

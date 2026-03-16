@@ -99,7 +99,7 @@ fun SettingsScreen(
             SectionHeader("Fuente de tasa de cambio")
 
             val sources = listOf(
-                ExchangeRateSource.PARALLEL to "Paralelo",
+                ExchangeRateSource.USDT to "USDT (Mercado)",
                 ExchangeRateSource.BCV to "BCV (Oficial)",
             )
             sources.forEach { (source, label) ->

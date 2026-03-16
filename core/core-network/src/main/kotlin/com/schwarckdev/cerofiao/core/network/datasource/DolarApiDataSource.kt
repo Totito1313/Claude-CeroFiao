@@ -2,6 +2,7 @@ package com.schwarckdev.cerofiao.core.network.datasource
 
 import com.schwarckdev.cerofiao.core.network.ExchangeRateApi
 import com.schwarckdev.cerofiao.core.network.model.DolarApiResponse
+import com.schwarckdev.cerofiao.core.network.model.HistoricalRateResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -31,5 +32,13 @@ class DolarApiDataSource @Inject constructor(
 
     override suspend fun getAllEuroRates(): List<DolarApiResponse> {
         return httpClient.get("$BASE_URL/euros").body()
+    }
+
+    override suspend fun getHistoricalDollarRates(): List<HistoricalRateResponse> {
+        return httpClient.get("$BASE_URL/historicos/dolares").body()
+    }
+
+    override suspend fun getHistoricalEuroRates(): List<HistoricalRateResponse> {
+        return httpClient.get("$BASE_URL/historicos/euros").body()
     }
 }

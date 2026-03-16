@@ -23,7 +23,7 @@ data class DashboardUiState(
     val globalBalance: GlobalBalance? = null,
     val recentTransactions: List<Transaction> = emptyList(),
     val bcvRate: ExchangeRate? = null,
-    val parallelRate: ExchangeRate? = null,
+    val usdtRate: ExchangeRate? = null,
     val isRefreshing: Boolean = false,
 )
 
@@ -48,7 +48,7 @@ class DashboardViewModel @Inject constructor(
             globalBalance = balance,
             recentTransactions = transactions,
             bcvRate = rates.first,
-            parallelRate = rates.second,
+            usdtRate = rates.second,
             isRefreshing = refreshing,
         )
     }.stateIn(
@@ -76,7 +76,7 @@ class DashboardViewModel @Inject constructor(
 
     private suspend fun loadRates() {
         val bcv = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
-        val parallel = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.PARALLEL)
-        ratesState.value = bcv to parallel
+        val usdt = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.USDT)
+        ratesState.value = bcv to usdt
     }
 }

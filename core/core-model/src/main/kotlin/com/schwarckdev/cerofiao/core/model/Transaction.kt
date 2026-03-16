@@ -13,6 +13,8 @@ enum class TransactionType {
 enum class ExchangeRateSource {
     BCV,
     PARALLEL,
+    USDT,
+    EURI,
     BINANCE_P2P,
     MANUAL,
 }

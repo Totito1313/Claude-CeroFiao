@@ -14,8 +14,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ExchangeRateUiState(
-    val bcvRate: ExchangeRate? = null,
-    val parallelRate: ExchangeRate? = null,
+    val bcvUsdRate: ExchangeRate? = null,
+    val usdtRate: ExchangeRate? = null,
+    val bcvEurRate: ExchangeRate? = null,
+    val euriRate: ExchangeRate? = null,
+    val historicalUsd: List<ExchangeRate> = emptyList(),
+    val historicalEur: List<ExchangeRate> = emptyList(),
     val isLoading: Boolean = false,
 )
 
@@ -35,9 +39,31 @@ class ExchangeRateViewModel @Inject constructor(
 
     private fun loadRates() {
         viewModelScope.launch {
-            val bcv = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
-            val parallel = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.PARALLEL)
-            _uiState.update { it.copy(bcvRate = bcv, parallelRate = parallel) }
+            val bcvUsd = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
+            val usdt = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.USDT)
+            val bcvEur = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.BCV)
+            val euri = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.EURI)
+            _uiState.update {
+                it.copy(
+                    bcvUsdRate = bcvUsd,
+                    usdtRate = usdt,
+                    bcvEurRate = bcvEur,
+                    euriRate = euri,
+                )
+            }
+        }
+    }
+
+    private fun loadHistorical() {
+        viewModelScope.launch {
+            val usdHistory = exchangeRateRepository.getHistoricalRates("USD")
+            val eurHistory = exchangeRateRepository.getHistoricalRates("EUR")
+            _uiState.update {
+                it.copy(
+                    historicalUsd = usdHistory,
+                    historicalEur = eurHistory,
+                )
+            }
         }
     }
 
@@ -50,6 +76,7 @@ class ExchangeRateViewModel @Inject constructor(
                 // Offline-first
             }
             loadRates()
+            loadHistorical()
             _uiState.update { it.copy(isLoading = false) }
         }
     }

@@ -58,15 +58,14 @@ class ExchangeRateRepositoryImpl @Inject constructor(
         }
 
         try {
-            val rates = exchangeRateApi.getAllDollarRates()
-            val entities = rates.map { apiRate ->
+            // Fetch USD rates
+            val dollarRates = exchangeRateApi.getAllDollarRates()
+            val dollarEntities = dollarRates.map { apiRate ->
                 val source = when (apiRate.fuente) {
                     "oficial" -> ExchangeRateSource.BCV.name
-                    "paralelo" -> ExchangeRateSource.PARALLEL.name
-                    else -> ExchangeRateSource.PARALLEL.name
+                    "paralelo" -> ExchangeRateSource.USDT.name
+                    else -> ExchangeRateSource.USDT.name
                 }
-
-                // API returns rate as: 1 USD = X VES (promedio)
                 ExchangeRateEntity(
                     fromCurrency = "USD",
                     toCurrency = "VES",
@@ -77,19 +76,75 @@ class ExchangeRateRepositoryImpl @Inject constructor(
                 )
             }
 
-            exchangeRateDao.insertAll(entities)
+            exchangeRateDao.insertAll(dollarEntities)
 
-            // Also store inverse rates (VES -> USD) for convenience
-            val inverseEntities = entities.map { entity ->
+            // Store inverse rates (VES -> USD)
+            val inverseDollar = dollarEntities.map { entity ->
                 entity.copy(
                     fromCurrency = "VES",
                     toCurrency = "USD",
                     rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
                 )
             }
-            exchangeRateDao.insertAll(inverseEntities)
+            exchangeRateDao.insertAll(inverseDollar)
+
+            // Fetch EUR rates
+            val euroRates = exchangeRateApi.getAllEuroRates()
+            val euroEntities = euroRates.map { apiRate ->
+                val source = when (apiRate.fuente) {
+                    "oficial" -> ExchangeRateSource.BCV.name
+                    "paralelo" -> ExchangeRateSource.EURI.name
+                    else -> ExchangeRateSource.EURI.name
+                }
+                ExchangeRateEntity(
+                    fromCurrency = "EUR",
+                    toCurrency = "VES",
+                    rate = apiRate.promedio,
+                    date = today,
+                    source = source,
+                    fetchedAt = now,
+                )
+            }
+
+            exchangeRateDao.insertAll(euroEntities)
+
+            // Store inverse rates (VES -> EUR)
+            val inverseEuro = euroEntities.map { entity ->
+                entity.copy(
+                    fromCurrency = "VES",
+                    toCurrency = "EUR",
+                    rate = if (entity.rate > 0) 1.0 / entity.rate else 0.0,
+                )
+            }
+            exchangeRateDao.insertAll(inverseEuro)
         } catch (_: Exception) {
             // Network failure - app continues with cached data (offline-first)
+        }
+    }
+
+    override suspend fun getHistoricalRates(currency: String): List<ExchangeRate> {
+        return try {
+            val historicalData = when (currency) {
+                "EUR" -> exchangeRateApi.getHistoricalEuroRates()
+                else -> exchangeRateApi.getHistoricalDollarRates()
+            }
+
+            historicalData.map { entry ->
+                val source = when (entry.fuente) {
+                    "oficial" -> ExchangeRateSource.BCV
+                    "paralelo" -> if (currency == "EUR") ExchangeRateSource.EURI else ExchangeRateSource.USDT
+                    else -> if (currency == "EUR") ExchangeRateSource.EURI else ExchangeRateSource.USDT
+                }
+                ExchangeRate(
+                    fromCurrency = currency,
+                    toCurrency = "VES",
+                    rate = entry.promedio,
+                    date = entry.fecha,
+                    source = source,
+                )
+            }
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
