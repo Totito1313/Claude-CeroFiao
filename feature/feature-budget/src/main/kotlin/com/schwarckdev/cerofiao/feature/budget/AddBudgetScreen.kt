@@ -87,11 +87,32 @@ fun AddBudgetScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Currency selector
+            Text(
+                text = "Moneda",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf("USD", "VES", "USDT", "EUR", "EURI").forEach { code ->
+                    FilterChip(
+                        selected = uiState.currencyCode == code,
+                        onClick = { viewModel.setCurrencyCode(code) },
+                        label = { Text(code) },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Amount
             OutlinedTextField(
                 value = uiState.limitAmount,
                 onValueChange = viewModel::setLimitAmount,
-                label = { Text("Límite (USD)") },
+                label = { Text("Límite (${uiState.currencyCode})") },
                 placeholder = { Text("0.00") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,

@@ -137,7 +137,7 @@ fun AddDebtScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val currencies = listOf("USD", "VES", "USDT", "EUR")
+                val currencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
                 currencies.forEach { code ->
                     FilterChip(
                         selected = uiState.currencyCode == code,

@@ -86,7 +86,7 @@ fun SettingsScreen(
             // Currency section
             SectionHeader("Moneda de referencia")
 
-            val currencies = listOf("USD", "VES", "USDT", "EUR")
+            val currencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
             currencies.forEach { code ->
                 RadioRow(
                     label = code,
@@ -103,6 +103,7 @@ fun SettingsScreen(
             val sources = listOf(
                 ExchangeRateSource.USDT to "USDT (Mercado)",
                 ExchangeRateSource.BCV to "BCV (Oficial)",
+                ExchangeRateSource.EURI to "EURI (Mercado EUR)",
             )
             sources.forEach { (source, label) ->
                 RadioRow(

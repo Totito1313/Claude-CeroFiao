@@ -26,6 +26,7 @@ import javax.inject.Inject
 data class AddBudgetUiState(
     val name: String = "",
     val limitAmount: String = "",
+    val currencyCode: String = "USD",
     val period: BudgetPeriod = BudgetPeriod.MONTHLY,
     val selectedCategoryId: String? = null,
     val categories: List<Category> = emptyList(),
@@ -56,6 +57,7 @@ class AddBudgetViewModel @Inject constructor(
         AddBudgetUiState(
             name = form.name,
             limitAmount = form.limitAmount,
+            currencyCode = form.currencyCode,
             period = form.period,
             selectedCategoryId = form.selectedCategoryId,
             categories = expenseCategories,
@@ -88,6 +90,7 @@ class AddBudgetViewModel @Inject constructor(
                 it.copy(
                     name = budget.name,
                     limitAmount = amountStr,
+                    currencyCode = budget.anchorCurrencyCode,
                     period = budget.period,
                     selectedCategoryId = budget.categoryId,
                 )
@@ -101,6 +104,10 @@ class AddBudgetViewModel @Inject constructor(
 
     fun setLimitAmount(amount: String) {
         formState.update { it.copy(limitAmount = amount) }
+    }
+
+    fun setCurrencyCode(code: String) {
+        formState.update { it.copy(currencyCode = code) }
     }
 
     fun setPeriod(period: BudgetPeriod) {
@@ -127,6 +134,7 @@ class AddBudgetViewModel @Inject constructor(
                     val updated = originalBudget!!.copy(
                         name = current.name,
                         limitAmount = amount,
+                        anchorCurrencyCode = current.currencyCode,
                         period = current.period,
                         categoryId = current.selectedCategoryId,
                         updatedAt = now,
@@ -137,7 +145,7 @@ class AddBudgetViewModel @Inject constructor(
                         id = UuidGenerator.generate(),
                         name = current.name,
                         limitAmount = amount,
-                        anchorCurrencyCode = "USD",
+                        anchorCurrencyCode = current.currencyCode,
                         period = current.period,
                         categoryId = current.selectedCategoryId,
                         startDate = DateUtils.todayIsoDate(),
@@ -158,6 +166,7 @@ class AddBudgetViewModel @Inject constructor(
     private data class FormState(
         val name: String = "",
         val limitAmount: String = "",
+        val currencyCode: String = "USD",
         val period: BudgetPeriod = BudgetPeriod.MONTHLY,
         val selectedCategoryId: String? = null,
         val isSaving: Boolean = false,
