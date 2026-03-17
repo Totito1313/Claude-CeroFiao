@@ -24,6 +24,7 @@ object CurrencyFormatter {
             "VES" -> "$formatted Bs"
             "USDT" -> "$formatted USDT"
             "EUR" -> "€$formatted"
+            "EURI" -> "€$formatted"
             else -> "$formatted $currencyCode"
         }
     }
@@ -34,6 +35,7 @@ object CurrencyFormatter {
             "VES" -> "Bs"
             "USDT" -> "USDT"
             "EUR" -> "€"
+            "EURI" -> "€"
             else -> currencyCode
         }
         return when {

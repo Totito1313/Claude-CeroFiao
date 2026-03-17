@@ -4,7 +4,6 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.common.UuidGenerator
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
-import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
@@ -16,7 +15,7 @@ import javax.inject.Inject
 class RecordTransactionUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
-    private val exchangeRateRepository: ExchangeRateRepository,
+    private val resolveExchangeRate: ResolveExchangeRateUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) {
     suspend operator fun invoke(
@@ -39,18 +38,10 @@ class RecordTransactionUseCase @Inject constructor(
         if (manualRateToUsd != null) {
             rateToUsd = manualRateToUsd
             rateSource = ExchangeRateSource.MANUAL
-        } else if (currencyCode == "USD") {
-            rateToUsd = 1.0
-            rateSource = prefs.preferredRateSource
         } else {
-            val rate = exchangeRateRepository.getLatestRateBySource(
-                from = currencyCode,
-                to = "USD",
-                source = prefs.preferredRateSource,
-            ) ?: exchangeRateRepository.getLatestRate(currencyCode, "USD")
-
-            rateToUsd = rate?.rate ?: 1.0
-            rateSource = rate?.source ?: ExchangeRateSource.MANUAL
+            val result = resolveExchangeRate.toUsd(currencyCode, prefs.preferredRateSource)
+            rateToUsd = result.rate
+            rateSource = result.source
         }
 
         val amountInUsd = MoneyCalculator.toUsd(amount, currencyCode, rateToUsd)

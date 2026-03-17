@@ -8,15 +8,14 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.common.ExpressionEvaluator
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
-import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RecordTransactionUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
-import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,7 +51,7 @@ class TransactionEntryViewModel @Inject constructor(
     private val recordTransactionUseCase: RecordTransactionUseCase,
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
-    private val exchangeRateRepository: ExchangeRateRepository,
+    private val resolveExchangeRate: ResolveExchangeRateUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
@@ -216,22 +215,10 @@ class TransactionEntryViewModel @Inject constructor(
         val now = DateUtils.now()
         val prefs = userPreferencesRepository.userPreferences.first()
 
-        // Recalculate exchange rate
-        val rateToUsd: Double
-        val rateSource: ExchangeRateSource
-
-        if (account.currencyCode == "USD") {
-            rateToUsd = 1.0
-            rateSource = prefs.preferredRateSource
-        } else {
-            val rate = exchangeRateRepository.getLatestRateBySource(
-                from = account.currencyCode,
-                to = "USD",
-                source = prefs.preferredRateSource,
-            ) ?: exchangeRateRepository.getLatestRate(account.currencyCode, "USD")
-            rateToUsd = rate?.rate ?: 1.0
-            rateSource = rate?.source ?: ExchangeRateSource.MANUAL
-        }
+        // Recalculate exchange rate via resolver (handles USDT/EURI/cross-rates)
+        val result = resolveExchangeRate.toUsd(account.currencyCode, prefs.preferredRateSource)
+        val rateToUsd = result.rate
+        val rateSource = result.source
 
         val amountInUsd = MoneyCalculator.toUsd(current.evaluatedAmount, account.currencyCode, rateToUsd)
 
