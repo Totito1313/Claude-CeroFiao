@@ -147,7 +147,7 @@ private fun CurrencyStep(
     onCurrencySelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val currencies = listOf("USD", "VES", "USDT")
+    val currencies = listOf("USD", "VES", "USDT", "EUR")
 
     Column(
         modifier = modifier

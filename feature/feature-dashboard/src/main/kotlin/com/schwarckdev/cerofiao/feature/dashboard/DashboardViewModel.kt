@@ -34,6 +34,8 @@ data class DashboardUiState(
     val recentTransactions: List<Transaction> = emptyList(),
     val bcvRate: ExchangeRate? = null,
     val usdtRate: ExchangeRate? = null,
+    val bcvEurRate: ExchangeRate? = null,
+    val euriRate: ExchangeRate? = null,
     val isRefreshing: Boolean = false,
     val monthlyExpenses: Double = 0.0,
     val monthlyIncome: Double = 0.0,
@@ -50,7 +52,14 @@ class DashboardViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
 
-    private val ratesState = MutableStateFlow<Pair<ExchangeRate?, ExchangeRate?>>(null to null)
+    private data class RatesSnapshot(
+        val bcv: ExchangeRate? = null,
+        val usdt: ExchangeRate? = null,
+        val bcvEur: ExchangeRate? = null,
+        val euri: ExchangeRate? = null,
+    )
+
+    private val ratesState = MutableStateFlow(RatesSnapshot())
     private val isRefreshing = MutableStateFlow(false)
 
     private val monthStart = DateUtils.startOfMonth(DateUtils.now())
@@ -88,8 +97,10 @@ class DashboardViewModel @Inject constructor(
         DashboardUiState(
             globalBalance = balance,
             recentTransactions = transactions,
-            bcvRate = rates.first,
-            usdtRate = rates.second,
+            bcvRate = rates.bcv,
+            usdtRate = rates.usdt,
+            bcvEurRate = rates.bcvEur,
+            euriRate = rates.euri,
             isRefreshing = refreshing,
             monthlyExpenses = monthlyExpenses,
             monthlyIncome = monthlyIncome,
@@ -121,6 +132,8 @@ class DashboardViewModel @Inject constructor(
     private suspend fun loadRates() {
         val bcv = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.BCV)
         val usdt = exchangeRateRepository.getLatestRateBySource("USD", "VES", ExchangeRateSource.USDT)
-        ratesState.value = bcv to usdt
+        val bcvEur = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.BCV)
+        val euri = exchangeRateRepository.getLatestRateBySource("EUR", "VES", ExchangeRateSource.EURI)
+        ratesState.value = RatesSnapshot(bcv = bcv, usdt = usdt, bcvEur = bcvEur, euri = euri)
     }
 }

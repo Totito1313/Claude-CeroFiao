@@ -102,12 +102,21 @@ fun DashboardScreen(
                     }
                 }
 
-                // Exchange rate banner
+                // Exchange rate banners
                 if (uiState.bcvRate != null || uiState.usdtRate != null) {
                     item {
                         ExchangeRateBanner(
                             bcvRate = uiState.bcvRate,
                             usdtRate = uiState.usdtRate,
+                        )
+                    }
+                }
+
+                if (uiState.bcvEurRate != null || uiState.euriRate != null) {
+                    item {
+                        EuroRateBanner(
+                            bcvEurRate = uiState.bcvEurRate,
+                            euriRate = uiState.euriRate,
                         )
                     }
                 }
@@ -374,6 +383,71 @@ private fun ExchangeRateBanner(
                     )
                     Text(
                         text = "Bs/USD",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EuroRateBanner(
+    bcvEurRate: ExchangeRate?,
+    euriRate: ExchangeRate?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (bcvEurRate != null) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f),
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "BCV",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                    )
+                    Text(
+                        text = CurrencyFormatter.format(bcvEurRate.rate, "VES"),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                    Text(
+                        text = "Bs/EUR",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+        if (euriRate != null) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "EURI",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    )
+                    Text(
+                        text = CurrencyFormatter.format(euriRate.rate, "VES"),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                    Text(
+                        text = "Bs/EUR",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                     )
