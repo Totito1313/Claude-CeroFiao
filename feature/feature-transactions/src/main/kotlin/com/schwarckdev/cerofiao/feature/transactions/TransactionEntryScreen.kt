@@ -67,7 +67,7 @@ fun TransactionEntryScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Nueva transacción") },
+                title = { Text(if (uiState.isEditMode) "Editar transacción" else "Nueva transacción") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")

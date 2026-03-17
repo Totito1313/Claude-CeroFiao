@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":feature:feature-exchange-rates"))
     implementation(project(":feature:feature-settings"))
     implementation(project(":feature:feature-onboarding"))
+    implementation(project(":feature:feature-budget"))
 
     // AndroidX
     implementation(libs.androidx.core.ktx)

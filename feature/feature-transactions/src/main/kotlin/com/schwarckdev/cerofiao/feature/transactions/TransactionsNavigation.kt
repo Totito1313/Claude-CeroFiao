@@ -9,7 +9,10 @@ import kotlinx.serialization.Serializable
 object TransactionListRoute
 
 @Serializable
-object TransactionEntryRoute
+data class TransactionEntryRoute(val transactionId: String? = null)
+
+@Serializable
+data class TransactionDetailRoute(val transactionId: String)
 
 @Serializable
 object TransferRoute
@@ -38,6 +41,18 @@ fun NavGraphBuilder.transactionEntryScreen(
     }
 }
 
+fun NavGraphBuilder.transactionDetailScreen(
+    onBack: () -> Unit,
+    onEdit: (String) -> Unit,
+) {
+    composable<TransactionDetailRoute> {
+        TransactionDetailScreen(
+            onBack = onBack,
+            onEdit = onEdit,
+        )
+    }
+}
+
 fun NavGraphBuilder.transferScreen(
     onBack: () -> Unit,
     onSaved: () -> Unit,
@@ -54,8 +69,12 @@ fun NavController.navigateToTransactionList() {
     navigate(TransactionListRoute)
 }
 
-fun NavController.navigateToTransactionEntry() {
-    navigate(TransactionEntryRoute)
+fun NavController.navigateToTransactionEntry(transactionId: String? = null) {
+    navigate(TransactionEntryRoute(transactionId))
+}
+
+fun NavController.navigateToTransactionDetail(transactionId: String) {
+    navigate(TransactionDetailRoute(transactionId))
 }
 
 fun NavController.navigateToTransfer() {

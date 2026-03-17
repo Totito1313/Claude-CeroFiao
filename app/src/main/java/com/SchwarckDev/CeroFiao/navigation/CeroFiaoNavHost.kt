@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.schwarckdev.cerofiao.feature.budget.addBudgetScreen
+import com.schwarckdev.cerofiao.feature.budget.budgetListScreen
+import com.schwarckdev.cerofiao.feature.budget.navigateToAddBudget
+import com.schwarckdev.cerofiao.feature.budget.navigateToBudgetList
 import com.schwarckdev.cerofiao.feature.accounts.AccountListRoute
 import com.schwarckdev.cerofiao.feature.accounts.AddAccountRoute
 import com.schwarckdev.cerofiao.feature.accounts.accountDetailScreen
@@ -20,9 +24,11 @@ import com.schwarckdev.cerofiao.feature.exchangerates.navigateToExchangeRates
 import com.schwarckdev.cerofiao.feature.onboarding.OnboardingRoute
 import com.schwarckdev.cerofiao.feature.onboarding.onboardingScreen
 import com.schwarckdev.cerofiao.feature.settings.settingsScreen
+import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionDetail
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionEntry
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionList
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransfer
+import com.schwarckdev.cerofiao.feature.transactions.transactionDetailScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionEntryScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionListScreen
 import com.schwarckdev.cerofiao.feature.transactions.transferScreen
@@ -55,7 +61,16 @@ fun CeroFiaoNavHost(
 
         transactionListScreen(
             onAddTransaction = { navController.navigateToTransactionEntry() },
-            onTransactionClick = { /* TODO: transaction detail */ },
+            onTransactionClick = { transactionId ->
+                navController.navigateToTransactionDetail(transactionId)
+            },
+        )
+
+        transactionDetailScreen(
+            onBack = { navController.popBackStack() },
+            onEdit = { transactionId ->
+                navController.navigateToTransactionEntry(transactionId)
+            },
         )
 
         transactionEntryScreen(
@@ -94,6 +109,18 @@ fun CeroFiaoNavHost(
         settingsScreen(
             onNavigateToCategories = { navController.navigateToCategories() },
             onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
+            onNavigateToBudgets = { navController.navigateToBudgetList() },
+        )
+
+        budgetListScreen(
+            onBack = { navController.popBackStack() },
+            onAddBudget = { navController.navigateToAddBudget() },
+            onEditBudget = { budgetId -> navController.navigateToAddBudget(budgetId) },
+        )
+
+        addBudgetScreen(
+            onBack = { navController.popBackStack() },
+            onSaved = { navController.popBackStack() },
         )
     }
 }

@@ -212,6 +212,7 @@ fun TransactionListScreen(
                                 transaction = transaction,
                                 accountName = uiState.accounts
                                     .find { it.id == transaction.accountId }?.name,
+                                onClick = { onTransactionClick(transaction.id) },
                             )
                         }
                     }
@@ -225,6 +226,7 @@ fun TransactionListScreen(
 private fun TransactionListItem(
     transaction: Transaction,
     accountName: String?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val icon = when (transaction.type) {
@@ -244,6 +246,7 @@ private fun TransactionListItem(
     }
 
     Surface(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,

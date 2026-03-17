@@ -45,7 +45,14 @@ class TransactionRepositoryImpl @Inject constructor(
             list.map { it.categoryId to it.total }
         }
 
+    override suspend fun getTransactionByIdOnce(id: String): Transaction? =
+        transactionDao.getTransactionByIdOnce(id)?.toModel()
+
     override suspend fun insertTransaction(transaction: Transaction) {
+        transactionDao.insert(transaction.toEntity())
+    }
+
+    override suspend fun updateTransaction(transaction: Transaction) {
         transactionDao.insert(transaction.toEntity())
     }
 

@@ -11,11 +11,13 @@ object SettingsRoute
 fun NavGraphBuilder.settingsScreen(
     onNavigateToCategories: () -> Unit = {},
     onNavigateToExchangeRates: () -> Unit = {},
+    onNavigateToBudgets: () -> Unit = {},
 ) {
     composable<SettingsRoute> {
         SettingsScreen(
             onNavigateToCategories = onNavigateToCategories,
             onNavigateToExchangeRates = onNavigateToExchangeRates,
+            onNavigateToBudgets = onNavigateToBudgets,
         )
     }
 }

@@ -40,6 +40,7 @@ import com.schwarckdev.cerofiao.core.model.ThemeMode
 fun SettingsScreen(
     onNavigateToCategories: () -> Unit = {},
     onNavigateToExchangeRates: () -> Unit = {},
+    onNavigateToBudgets: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -125,6 +126,12 @@ fun SettingsScreen(
                 icon = CeroFiaoIcons.Transactions,
                 label = "Categorías",
                 onClick = onNavigateToCategories,
+            )
+
+            NavigationRow(
+                icon = CeroFiaoIcons.Budget,
+                label = "Presupuestos",
+                onClick = onNavigateToBudgets,
             )
         }
     }

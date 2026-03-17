@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.core.database.mapper
 
 import com.schwarckdev.cerofiao.core.database.entity.AccountEntity
+import com.schwarckdev.cerofiao.core.database.entity.BudgetEntity
 import com.schwarckdev.cerofiao.core.database.entity.CategoryEntity
 import com.schwarckdev.cerofiao.core.database.entity.CurrencyEntity
 import com.schwarckdev.cerofiao.core.database.entity.DebtEntity
@@ -10,6 +11,8 @@ import com.schwarckdev.cerofiao.core.database.entity.TransactionEntity
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.AccountType
+import com.schwarckdev.cerofiao.core.model.Budget
+import com.schwarckdev.cerofiao.core.model.BudgetPeriod
 import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.CategoryType
 import com.schwarckdev.cerofiao.core.model.Currency
@@ -202,6 +205,37 @@ fun Debt.toEntity(syncId: String? = null, isDeleted: Boolean = false) = DebtEnti
     updatedAt = updatedAt,
     isSettled = isSettled,
     settledAt = settledAt,
+    syncId = syncId,
+    isDeleted = isDeleted,
+)
+
+// Budget
+fun BudgetEntity.toModel() = Budget(
+    id = id,
+    name = name,
+    limitAmount = limitAmount,
+    anchorCurrencyCode = anchorCurrencyCode,
+    period = try { BudgetPeriod.valueOf(period) } catch (_: Exception) { BudgetPeriod.MONTHLY },
+    categoryId = categoryId,
+    startDate = startDate,
+    isRecurring = isRecurring,
+    isActive = isActive,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+)
+
+fun Budget.toEntity(syncId: String? = null, isDeleted: Boolean = false) = BudgetEntity(
+    id = id,
+    name = name,
+    limitAmount = limitAmount,
+    anchorCurrencyCode = anchorCurrencyCode,
+    period = period.name,
+    categoryId = categoryId,
+    startDate = startDate,
+    isRecurring = isRecurring,
+    isActive = isActive,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
     syncId = syncId,
     isDeleted = isDeleted,
 )
