@@ -4,10 +4,8 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.common.UuidGenerator
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
-import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
-import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import kotlinx.coroutines.flow.first
@@ -16,7 +14,7 @@ import javax.inject.Inject
 class RecordTransferUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
-    private val exchangeRateRepository: ExchangeRateRepository,
+    private val resolveExchangeRate: ResolveExchangeRateUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) {
     suspend operator fun invoke(
@@ -40,23 +38,14 @@ class RecordTransferUseCase @Inject constructor(
             MoneyCalculator.calculateCommission(amount, it)
         }
 
-        // Get exchange rate for outgoing currency
-        val outRate = if (fromAccount.currencyCode == "USD") 1.0 else {
-            exchangeRateRepository.getLatestRateBySource(
-                fromAccount.currencyCode, "USD", prefs.preferredRateSource,
-            )?.rate ?: 1.0
-        }
-
-        val outAmountInUsd = MoneyCalculator.toUsd(amount, fromAccount.currencyCode, outRate)
+        // Get exchange rates via resolver (handles USDT/EURI/cross-rates)
+        val outResult = resolveExchangeRate.toUsd(fromAccount.currencyCode, prefs.preferredRateSource)
+        val outAmountInUsd = MoneyCalculator.toUsd(amount, fromAccount.currencyCode, outResult.rate)
 
         // Received amount (handles cross-currency transfers)
         val actualReceived = receivedAmount ?: (amount - (commission ?: 0.0))
 
-        val inRate = if (toAccount.currencyCode == "USD") 1.0 else {
-            exchangeRateRepository.getLatestRateBySource(
-                toAccount.currencyCode, "USD", prefs.preferredRateSource,
-            )?.rate ?: 1.0
-        }
+        val inResult = resolveExchangeRate.toUsd(toAccount.currencyCode, prefs.preferredRateSource)
 
         val outgoing = Transaction(
             id = outgoingId,
@@ -69,8 +58,8 @@ class RecordTransferUseCase @Inject constructor(
             date = now,
             createdAt = now,
             updatedAt = now,
-            exchangeRateToUsd = outRate,
-            exchangeRateSource = ExchangeRateSource.valueOf(prefs.preferredRateSource.name),
+            exchangeRateToUsd = outResult.rate,
+            exchangeRateSource = outResult.source,
             amountInUsd = outAmountInUsd,
             transferLinkedId = incomingId,
             transferToAccountId = toAccountId,
@@ -89,9 +78,9 @@ class RecordTransferUseCase @Inject constructor(
             date = now,
             createdAt = now,
             updatedAt = now,
-            exchangeRateToUsd = inRate,
-            exchangeRateSource = ExchangeRateSource.valueOf(prefs.preferredRateSource.name),
-            amountInUsd = MoneyCalculator.toUsd(actualReceived, toAccount.currencyCode, inRate),
+            exchangeRateToUsd = inResult.rate,
+            exchangeRateSource = inResult.source,
+            amountInUsd = MoneyCalculator.toUsd(actualReceived, toAccount.currencyCode, inResult.rate),
             transferLinkedId = outgoingId,
             transferToAccountId = fromAccountId,
         )
