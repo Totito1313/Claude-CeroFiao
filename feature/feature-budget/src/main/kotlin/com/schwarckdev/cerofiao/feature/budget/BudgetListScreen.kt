@@ -219,12 +219,12 @@ private fun BudgetCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Gastado: ${CurrencyFormatter.format(budgetWithProgress.spentInUsd, "USD")}",
+                    text = "Gastado: ${CurrencyFormatter.format(budgetWithProgress.spentAmount, budgetWithProgress.currencyCode)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isOverBudget) Color(0xFFF44336) else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Límite: ${CurrencyFormatter.format(budget.limitAmount, budget.anchorCurrencyCode)}",
+                    text = "Límite: ${CurrencyFormatter.format(budgetWithProgress.limitAmount, budgetWithProgress.currencyCode)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -233,7 +233,7 @@ private fun BudgetCard(
             if (isOverBudget) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Excedido por ${CurrencyFormatter.format(budgetWithProgress.spentInUsd - budgetWithProgress.limitInUsd, "USD")}",
+                    text = "Excedido por ${CurrencyFormatter.format(budgetWithProgress.spentAmount - budgetWithProgress.limitAmount, budgetWithProgress.currencyCode)}",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFFF44336),
                     fontWeight = FontWeight.Medium,

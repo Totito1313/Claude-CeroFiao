@@ -3,9 +3,12 @@ package com.schwarckdev.cerofiao.feature.budget
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.BudgetRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
+import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
+import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.Budget
 import com.schwarckdev.cerofiao.core.model.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,8 +22,9 @@ import javax.inject.Inject
 data class BudgetWithProgress(
     val budget: Budget,
     val category: Category? = null,
-    val spentInUsd: Double = 0.0,
-    val limitInUsd: Double = 0.0,
+    val spentAmount: Double = 0.0,
+    val limitAmount: Double = 0.0,
+    val currencyCode: String = "USD",
     val progress: Float = 0f,
 )
 
@@ -34,6 +38,8 @@ class BudgetListViewModel @Inject constructor(
     budgetRepository: BudgetRepository,
     categoryRepository: CategoryRepository,
     transactionRepository: TransactionRepository,
+    private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val budgetRepo: BudgetRepository,
 ) : ViewModel() {
 
@@ -45,27 +51,37 @@ class BudgetListViewModel @Inject constructor(
         budgetRepository.getActiveBudgets(),
         categoryRepository.getActiveCategories(),
         transactionRepository.getExpensesByCategoryForPeriod(startOfMonth, endOfMonth),
-    ) { budgets, categories, categoryExpenses ->
+        userPreferencesRepository.userPreferences,
+    ) { budgets, categories, categoryExpenses, prefs ->
         val expenseMap = categoryExpenses.toMap()
         val categoryMap = categories.associateBy { it.id }
 
         val budgetsWithProgress = budgets.map { budget ->
             val category = budget.categoryId?.let { categoryMap[it] }
-            val spent = if (budget.categoryId != null) {
+            val spentInUsd = if (budget.categoryId != null) {
                 expenseMap[budget.categoryId] ?: 0.0
             } else {
-                // General budget: sum all expenses
                 categoryExpenses.sumOf { it.second }
             }
 
+            // Convert spent from USD to budget's anchor currency
+            val budgetCurrency = budget.anchorCurrencyCode
+            val spentInBudgetCurrency = if (budgetCurrency == "USD") {
+                spentInUsd
+            } else {
+                val rate = resolveExchangeRate.fromUsd(budgetCurrency, prefs.preferredRateSource)
+                MoneyCalculator.convert(spentInUsd, rate.rate)
+            }
+
             val limit = budget.limitAmount
-            val progress = if (limit > 0) (spent / limit).toFloat().coerceIn(0f, 1.5f) else 0f
+            val progress = if (limit > 0) (spentInBudgetCurrency / limit).toFloat().coerceIn(0f, 1.5f) else 0f
 
             BudgetWithProgress(
                 budget = budget,
                 category = category,
-                spentInUsd = spent,
-                limitInUsd = limit,
+                spentAmount = spentInBudgetCurrency,
+                limitAmount = limit,
+                currencyCode = budgetCurrency,
                 progress = progress,
             )
         }

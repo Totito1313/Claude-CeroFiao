@@ -141,13 +141,14 @@ private fun WelcomeStep(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CurrencyStep(
     selectedCurrency: String,
     onCurrencySelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val currencies = listOf("USD", "VES", "USDT", "EUR")
+    val currencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
 
     Column(
         modifier = modifier
@@ -163,7 +164,7 @@ private fun CurrencyStep(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             currencies.forEach { currency ->
@@ -208,9 +209,18 @@ private fun RateSourceStep(
 
         RateSourceCard(
             title = "USDT",
-            description = "Tasa del mercado",
+            description = "Tasa del mercado (USD)",
             isSelected = selectedSource == ExchangeRateSource.USDT,
             onClick = { onSourceSelected(ExchangeRateSource.USDT) },
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        RateSourceCard(
+            title = "EURI",
+            description = "Tasa del mercado (EUR)",
+            isSelected = selectedSource == ExchangeRateSource.EURI,
+            onClick = { onSourceSelected(ExchangeRateSource.EURI) },
         )
     }
 }

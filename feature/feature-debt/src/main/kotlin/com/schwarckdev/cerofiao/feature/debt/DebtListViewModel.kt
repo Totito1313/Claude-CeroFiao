@@ -15,11 +15,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class CurrencyTotal(
+    val currencyCode: String,
+    val amount: Double,
+)
+
 data class DebtListUiState(
     val debts: List<Debt> = emptyList(),
     val selectedFilter: DebtFilter = DebtFilter.ALL,
-    val totalTheyOwe: Double = 0.0,
-    val totalIOwe: Double = 0.0,
+    val theyOweTotals: List<CurrencyTotal> = emptyList(),
+    val iOweTotals: List<CurrencyTotal> = emptyList(),
     val isLoading: Boolean = true,
 )
 
@@ -42,13 +47,15 @@ class DebtListViewModel @Inject constructor(
     ) { allDebts, filter ->
         val activeDebts = allDebts.filter { !it.isSettled }
 
-        val totalTheyOwe = activeDebts
+        val theyOweTotals = activeDebts
             .filter { it.type == DebtType.THEY_OWE }
-            .sumOf { it.remainingAmount }
+            .groupBy { it.currencyCode }
+            .map { (currency, debts) -> CurrencyTotal(currency, debts.sumOf { it.remainingAmount }) }
 
-        val totalIOwe = activeDebts
+        val iOweTotals = activeDebts
             .filter { it.type == DebtType.I_OWE }
-            .sumOf { it.remainingAmount }
+            .groupBy { it.currencyCode }
+            .map { (currency, debts) -> CurrencyTotal(currency, debts.sumOf { it.remainingAmount }) }
 
         val filteredDebts = when (filter) {
             DebtFilter.ALL -> allDebts
@@ -59,8 +66,8 @@ class DebtListViewModel @Inject constructor(
         DebtListUiState(
             debts = filteredDebts,
             selectedFilter = filter,
-            totalTheyOwe = totalTheyOwe,
-            totalIOwe = totalIOwe,
+            theyOweTotals = theyOweTotals,
+            iOweTotals = iOweTotals,
             isLoading = false,
         )
     }.stateIn(
