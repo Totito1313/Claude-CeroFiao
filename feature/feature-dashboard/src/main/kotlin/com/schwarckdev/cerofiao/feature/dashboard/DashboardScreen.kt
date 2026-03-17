@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,7 @@ import com.schwarckdev.cerofiao.core.ui.MoneyText
 fun DashboardScreen(
     onAddTransaction: () -> Unit,
     onViewAllTransactions: () -> Unit,
+    onTransactionClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
@@ -109,6 +112,25 @@ fun DashboardScreen(
                     }
                 }
 
+                // Monthly summary
+                if (uiState.monthlyExpenses > 0.0 || uiState.monthlyIncome > 0.0) {
+                    item {
+                        MonthlySummaryCard(
+                            monthlyExpenses = uiState.monthlyExpenses,
+                            monthlyIncome = uiState.monthlyIncome,
+                        )
+                    }
+                }
+
+                // Top category expenses
+                if (uiState.topCategoryExpenses.isNotEmpty()) {
+                    item {
+                        TopCategoriesSection(
+                            categoryExpenses = uiState.topCategoryExpenses,
+                        )
+                    }
+                }
+
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -149,7 +171,10 @@ fun DashboardScreen(
                         items = uiState.recentTransactions,
                         key = { it.id },
                     ) { transaction ->
-                        TransactionRow(transaction = transaction)
+                        TransactionRow(
+                            transaction = transaction,
+                            onClick = { onTransactionClick(transaction.id) },
+                        )
                     }
                 }
             }
@@ -226,6 +251,7 @@ private fun CurrencyBreakdownSection(
 @Composable
 private fun TransactionRow(
     transaction: Transaction,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val icon = when (transaction.type) {
@@ -245,6 +271,7 @@ private fun TransactionRow(
     }
 
     Surface(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -352,6 +379,154 @@ private fun ExchangeRateBanner(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun MonthlySummaryCard(
+    monthlyExpenses: Double,
+    monthlyIncome: Double,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        tonalElevation = 1.dp,
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Resumen del mes",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                // Expenses
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFF44336).copy(alpha = 0.08f),
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "Gastos del mes",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = CurrencyFormatter.format(monthlyExpenses, "USD"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFF44336),
+                        )
+                    }
+                }
+                // Income
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF4CAF50).copy(alpha = 0.08f),
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "Ingresos del mes",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = CurrencyFormatter.format(monthlyIncome, "USD"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4CAF50),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopCategoriesSection(
+    categoryExpenses: List<CategoryExpense>,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        tonalElevation = 1.dp,
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Top categorías",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            categoryExpenses.forEach { expense ->
+                CategoryExpenseRow(expense = expense)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryExpenseRow(
+    expense: CategoryExpense,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            modifier = Modifier.size(32.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+        ) {
+            Icon(
+                imageVector = CeroFiaoIcons.getCategoryIcon(expense.iconName),
+                contentDescription = expense.categoryName,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(6.dp),
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = expense.categoryName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                )
+                Text(
+                    text = CurrencyFormatter.format(expense.amount, "USD"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { expense.percentage.coerceAtMost(1f) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
         }
     }
 }

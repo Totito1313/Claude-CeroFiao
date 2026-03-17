@@ -62,6 +62,20 @@ object DateUtils {
         return firstOfMonth.atStartOfDayIn(tz).toEpochMilliseconds()
     }
 
+    fun parseDdMmYyyy(dateStr: String): Long? {
+        return try {
+            val parts = dateStr.split("/")
+            if (parts.size != 3) return null
+            val day = parts[0].toInt()
+            val month = parts[1].toInt()
+            val year = parts[2].toInt()
+            val localDate = LocalDate(year, month, day)
+            localDate.atStartOfDayIn(tz).toEpochMilliseconds()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun endOfMonth(epochMillis: Long): Long {
         val date = toLocalDate(epochMillis)
         val lastDay = when (date.monthNumber) {

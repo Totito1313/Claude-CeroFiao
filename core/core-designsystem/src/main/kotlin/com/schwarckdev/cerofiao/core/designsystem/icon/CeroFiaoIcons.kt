@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Restaurant
@@ -58,6 +59,7 @@ object CeroFiaoIcons {
     val ExchangeRate = Icons.AutoMirrored.Filled.TrendingUp
     val Savings = Icons.Default.Savings
     val Budget = Icons.Default.Payments
+    val Debt = Icons.Default.People
 
     // Theme
     val DarkMode = Icons.Default.DarkMode

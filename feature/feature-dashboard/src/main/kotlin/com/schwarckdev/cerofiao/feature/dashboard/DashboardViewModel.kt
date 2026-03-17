@@ -2,7 +2,10 @@ package com.schwarckdev.cerofiao.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
+import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetGlobalBalanceUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RefreshExchangeRatesUseCase
@@ -19,12 +22,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class CategoryExpense(
+    val categoryName: String,
+    val iconName: String,
+    val amount: Double,
+    val percentage: Float,
+)
+
 data class DashboardUiState(
     val globalBalance: GlobalBalance? = null,
     val recentTransactions: List<Transaction> = emptyList(),
     val bcvRate: ExchangeRate? = null,
     val usdtRate: ExchangeRate? = null,
     val isRefreshing: Boolean = false,
+    val monthlyExpenses: Double = 0.0,
+    val monthlyIncome: Double = 0.0,
+    val topCategoryExpenses: List<CategoryExpense> = emptyList(),
 )
 
 @HiltViewModel
@@ -33,23 +46,54 @@ class DashboardViewModel @Inject constructor(
     getTransactionsUseCase: GetTransactionsUseCase,
     private val refreshExchangeRatesUseCase: RefreshExchangeRatesUseCase,
     private val exchangeRateRepository: ExchangeRateRepository,
+    private val transactionRepository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
 
     private val ratesState = MutableStateFlow<Pair<ExchangeRate?, ExchangeRate?>>(null to null)
     private val isRefreshing = MutableStateFlow(false)
+
+    private val monthStart = DateUtils.startOfMonth(DateUtils.now())
+    private val monthEnd = DateUtils.endOfMonth(DateUtils.now())
+
+    private val monthlySummaryFlow = combine(
+        transactionRepository.getTotalExpensesInUsdForPeriod(monthStart, monthEnd),
+        transactionRepository.getTotalIncomeInUsdForPeriod(monthStart, monthEnd),
+        transactionRepository.getExpensesByCategoryForPeriod(monthStart, monthEnd),
+    ) { expenses, income, categoryExpenses ->
+        Triple(expenses ?: 0.0, income ?: 0.0, categoryExpenses)
+    }
 
     val uiState: StateFlow<DashboardUiState> = combine(
         getGlobalBalanceUseCase(),
         getTransactionsUseCase.recent(5),
         ratesState,
         isRefreshing,
-    ) { balance, transactions, rates, refreshing ->
+        monthlySummaryFlow,
+    ) { balance, transactions, rates, refreshing, monthlySummary ->
+        val (monthlyExpenses, monthlyIncome, categoryExpenses) = monthlySummary
+        val totalExpenses = if (monthlyExpenses > 0.0) monthlyExpenses else 1.0
+        val topCategories = categoryExpenses
+            .sortedByDescending { it.second }
+            .take(5)
+            .map { (categoryId, amount) ->
+                val category = categoryRepository.getCategoryById(categoryId)
+                CategoryExpense(
+                    categoryName = category?.name ?: "Sin categoría",
+                    iconName = category?.iconName ?: "Category",
+                    amount = amount,
+                    percentage = (amount / totalExpenses).toFloat(),
+                )
+            }
         DashboardUiState(
             globalBalance = balance,
             recentTransactions = transactions,
             bcvRate = rates.first,
             usdtRate = rates.second,
             isRefreshing = refreshing,
+            monthlyExpenses = monthlyExpenses,
+            monthlyIncome = monthlyIncome,
+            topCategoryExpenses = topCategories,
         )
     }.stateIn(
         scope = viewModelScope,

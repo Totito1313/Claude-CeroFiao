@@ -41,6 +41,7 @@ fun SettingsScreen(
     onNavigateToCategories: () -> Unit = {},
     onNavigateToExchangeRates: () -> Unit = {},
     onNavigateToBudgets: () -> Unit = {},
+    onNavigateToDebts: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -132,6 +133,12 @@ fun SettingsScreen(
                 icon = CeroFiaoIcons.Budget,
                 label = "Presupuestos",
                 onClick = onNavigateToBudgets,
+            )
+
+            NavigationRow(
+                icon = CeroFiaoIcons.Debt,
+                label = "Deudas",
+                onClick = onNavigateToDebts,
             )
         }
     }

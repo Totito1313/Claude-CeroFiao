@@ -3,12 +3,14 @@ package com.schwarckdev.cerofiao.core.data.di
 import com.schwarckdev.cerofiao.core.data.repository.AccountRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.BudgetRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.CategoryRepositoryImpl
+import com.schwarckdev.cerofiao.core.data.repository.DebtRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.ExchangeRateRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.UserPreferencesRepositoryImpl
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.BudgetRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
+import com.schwarckdev.cerofiao.core.domain.repository.DebtRepository
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
@@ -45,4 +47,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDebtRepository(impl: DebtRepositoryImpl): DebtRepository
 }

@@ -8,6 +8,12 @@ import com.schwarckdev.cerofiao.feature.budget.addBudgetScreen
 import com.schwarckdev.cerofiao.feature.budget.budgetListScreen
 import com.schwarckdev.cerofiao.feature.budget.navigateToAddBudget
 import com.schwarckdev.cerofiao.feature.budget.navigateToBudgetList
+import com.schwarckdev.cerofiao.feature.debt.addDebtScreen
+import com.schwarckdev.cerofiao.feature.debt.debtDetailScreen
+import com.schwarckdev.cerofiao.feature.debt.debtListScreen
+import com.schwarckdev.cerofiao.feature.debt.navigateToAddDebt
+import com.schwarckdev.cerofiao.feature.debt.navigateToDebtDetail
+import com.schwarckdev.cerofiao.feature.debt.navigateToDebtList
 import com.schwarckdev.cerofiao.feature.accounts.AccountListRoute
 import com.schwarckdev.cerofiao.feature.accounts.AddAccountRoute
 import com.schwarckdev.cerofiao.feature.accounts.accountDetailScreen
@@ -57,6 +63,9 @@ fun CeroFiaoNavHost(
         dashboardScreen(
             onAddTransaction = { navController.navigateToTransactionEntry() },
             onViewAllTransactions = { navController.navigateToTransactionList() },
+            onTransactionClick = { transactionId ->
+                navController.navigateToTransactionDetail(transactionId)
+            },
         )
 
         transactionListScreen(
@@ -110,6 +119,7 @@ fun CeroFiaoNavHost(
             onNavigateToCategories = { navController.navigateToCategories() },
             onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
             onNavigateToBudgets = { navController.navigateToBudgetList() },
+            onNavigateToDebts = { navController.navigateToDebtList() },
         )
 
         budgetListScreen(
@@ -121,6 +131,21 @@ fun CeroFiaoNavHost(
         addBudgetScreen(
             onBack = { navController.popBackStack() },
             onSaved = { navController.popBackStack() },
+        )
+
+        debtListScreen(
+            onBack = { navController.popBackStack() },
+            onAddDebt = { navController.navigateToAddDebt() },
+            onDebtClick = { debtId -> navController.navigateToDebtDetail(debtId) },
+        )
+
+        addDebtScreen(
+            onBack = { navController.popBackStack() },
+            onSaved = { navController.popBackStack() },
+        )
+
+        debtDetailScreen(
+            onBack = { navController.popBackStack() },
         )
     }
 }
