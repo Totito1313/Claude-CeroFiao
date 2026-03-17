@@ -121,12 +121,13 @@ fun DashboardScreen(
                     }
                 }
 
-                // Monthly summary
+                // Monthly summary (amounts are aggregated in USD)
                 if (uiState.monthlyExpenses > 0.0 || uiState.monthlyIncome > 0.0) {
                     item {
                         MonthlySummaryCard(
                             monthlyExpenses = uiState.monthlyExpenses,
                             monthlyIncome = uiState.monthlyIncome,
+                            currencyCode = "USD",
                         )
                     }
                 }
@@ -461,6 +462,7 @@ private fun EuroRateBanner(
 private fun MonthlySummaryCard(
     monthlyExpenses: Double,
     monthlyIncome: Double,
+    currencyCode: String = "USD",
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -494,7 +496,7 @@ private fun MonthlySummaryCard(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = CurrencyFormatter.format(monthlyExpenses, "USD"),
+                            text = CurrencyFormatter.format(monthlyExpenses, currencyCode),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFF44336),
@@ -515,7 +517,7 @@ private fun MonthlySummaryCard(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = CurrencyFormatter.format(monthlyIncome, "USD"),
+                            text = CurrencyFormatter.format(monthlyIncome, currencyCode),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF4CAF50),

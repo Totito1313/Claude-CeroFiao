@@ -27,6 +27,7 @@ class DatabasePrepopulate(
             CurrencyEntity(code = "VES", name = "Bolívar", symbol = "Bs", decimalPlaces = 2, isActive = true, sortOrder = 1),
             CurrencyEntity(code = "USDT", name = "Tether", symbol = "₮", decimalPlaces = 2, isActive = true, sortOrder = 2),
             CurrencyEntity(code = "EUR", name = "Euro", symbol = "€", decimalPlaces = 2, isActive = true, sortOrder = 3),
+            CurrencyEntity(code = "EURI", name = "Euro Informal", symbol = "€", decimalPlaces = 2, isActive = true, sortOrder = 4),
         )
 
         val defaultCategories = listOf(

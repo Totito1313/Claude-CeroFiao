@@ -91,6 +91,8 @@ fun AddAccountScreen(
     var currencyCode by remember { mutableStateOf(AccountPlatform.NONE.defaultCurrencyCode) }
     var initialBalanceText by remember { mutableStateOf("") }
     var platformDropdownExpanded by remember { mutableStateOf(false) }
+    var currencyDropdownExpanded by remember { mutableStateOf(false) }
+    val supportedCurrencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
 
     val isFormValid = name.isNotBlank()
 
@@ -173,13 +175,38 @@ fun AddAccountScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            OutlinedTextField(
-                value = currencyCode,
-                onValueChange = { currencyCode = it },
-                label = { Text(text = "Moneda") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            ExposedDropdownMenuBox(
+                expanded = currencyDropdownExpanded,
+                onExpandedChange = { currencyDropdownExpanded = it },
+            ) {
+                OutlinedTextField(
+                    value = currencyCode,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(text = "Moneda") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyDropdownExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                )
+
+                ExposedDropdownMenu(
+                    expanded = currencyDropdownExpanded,
+                    onDismissRequest = { currencyDropdownExpanded = false },
+                ) {
+                    supportedCurrencies.forEach { code ->
+                        DropdownMenuItem(
+                            text = { Text(text = code) },
+                            onClick = {
+                                currencyCode = code
+                                currencyDropdownExpanded = false
+                            },
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = initialBalanceText,

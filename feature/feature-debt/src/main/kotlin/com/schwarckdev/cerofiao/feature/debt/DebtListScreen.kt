@@ -84,10 +84,10 @@ fun DebtListScreen(
                 .padding(innerPadding),
         ) {
             // Summary card
-            if (!uiState.isLoading && (uiState.totalTheyOwe > 0 || uiState.totalIOwe > 0)) {
+            if (!uiState.isLoading && (uiState.theyOweTotals.isNotEmpty() || uiState.iOweTotals.isNotEmpty())) {
                 DebtSummaryCard(
-                    totalTheyOwe = uiState.totalTheyOwe,
-                    totalIOwe = uiState.totalIOwe,
+                    theyOweTotals = uiState.theyOweTotals,
+                    iOweTotals = uiState.iOweTotals,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
@@ -185,8 +185,8 @@ fun DebtListScreen(
 
 @Composable
 private fun DebtSummaryCard(
-    totalTheyOwe: Double,
-    totalIOwe: Double,
+    theyOweTotals: List<CurrencyTotal>,
+    iOweTotals: List<CurrencyTotal>,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -207,12 +207,23 @@ private fun DebtSummaryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = CurrencyFormatter.format(totalTheyOwe, "USD"),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4CAF50),
-                )
+                if (theyOweTotals.isEmpty()) {
+                    Text(
+                        text = "$0.00",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4CAF50),
+                    )
+                } else {
+                    theyOweTotals.forEach { total ->
+                        Text(
+                            text = CurrencyFormatter.format(total.amount, total.currencyCode),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4CAF50),
+                        )
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -221,12 +232,23 @@ private fun DebtSummaryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = CurrencyFormatter.format(totalIOwe, "USD"),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFF44336),
-                )
+                if (iOweTotals.isEmpty()) {
+                    Text(
+                        text = "$0.00",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF44336),
+                    )
+                } else {
+                    iOweTotals.forEach { total ->
+                        Text(
+                            text = CurrencyFormatter.format(total.amount, total.currencyCode),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFF44336),
+                        )
+                    }
+                }
             }
         }
     }
