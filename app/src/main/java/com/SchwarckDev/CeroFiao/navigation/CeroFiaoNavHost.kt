@@ -21,7 +21,9 @@ import com.schwarckdev.cerofiao.feature.accounts.accountListScreen
 import com.schwarckdev.cerofiao.feature.accounts.addAccountScreen
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAccountDetail
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAddAccount
+import com.schwarckdev.cerofiao.feature.categories.addEditCategoryScreen
 import com.schwarckdev.cerofiao.feature.categories.categoryListScreen
+import com.schwarckdev.cerofiao.feature.categories.navigateToAddEditCategory
 import com.schwarckdev.cerofiao.feature.categories.navigateToCategories
 import com.schwarckdev.cerofiao.feature.dashboard.DashboardRoute
 import com.schwarckdev.cerofiao.feature.dashboard.dashboardScreen
@@ -120,6 +122,13 @@ fun CeroFiaoNavHost(
 
         categoryListScreen(
             onBack = { navController.popBackStack() },
+            onAddCategory = { navController.navigateToAddEditCategory() },
+            onEditCategory = { categoryId -> navController.navigateToAddEditCategory(categoryId) },
+        )
+
+        addEditCategoryScreen(
+            onBack = { navController.popBackStack() },
+            onSaved = { navController.popBackStack() },
         )
 
         exchangeRateScreen(

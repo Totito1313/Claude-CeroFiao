@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.feature.dashboard
 
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -570,7 +571,7 @@ private fun CategoryExpenseRow(
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
         ) {
             Icon(
-                imageVector = CeroFiaoIcons.getCategoryIcon(expense.iconName),
+                painter = painterResource(CeroFiaoIcons.getCategoryIconRes(expense.iconName)),
                 contentDescription = expense.categoryName,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.padding(6.dp),

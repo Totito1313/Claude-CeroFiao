@@ -16,9 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -68,7 +65,7 @@ fun TransactionListScreen(
                 title = { Text("Transacciones") },
                 actions = {
                     IconButton(onClick = onActivityClick) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Actividad reciente")
+                        Icon(CeroFiaoIcons.More, contentDescription = "Actividad reciente")
                     }
                 },
             )
@@ -210,7 +207,7 @@ fun TransactionListScreen(
                                     contentAlignment = Alignment.CenterEnd,
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Delete,
+                                        imageVector = CeroFiaoIcons.Delete,
                                         contentDescription = "Eliminar",
                                         tint = MaterialTheme.colorScheme.onErrorContainer,
                                         modifier = Modifier.padding(end = 16.dp),

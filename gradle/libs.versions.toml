@@ -51,6 +51,12 @@ espressoCore = "3.5.1"
 # Material Icons Extended
 materialIconsExtended = "1.7.6"
 
+# OneUI Icons
+oneuiIcons = "1.1.0"
+
+# Lucide Icons
+lucideIcons = "1.0.0"
+
 # CSV
 opencsv = "5.9"
 
@@ -114,6 +120,12 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 # Image Loading
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+
+# OneUI Icons
+oneui-icons = { group = "io.github.oneuiproject", name = "icons", version.ref = "oneuiIcons" }
+
+# Lucide Icons (Compose Multiplatform variant - ImageVector)
+lucide-icons = { group = "com.composables", name = "icons-lucide", version.ref = "lucideIcons" }
 
 # CSV
 opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }

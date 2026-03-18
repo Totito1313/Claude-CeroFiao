@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,14 +51,14 @@ fun RecurringListScreen(
                 title = { Text("Transacciones recurrentes") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddRecurring) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar recurrente")
+                Icon(CeroFiaoIcons.Add, contentDescription = "Agregar recurrente")
             }
         },
     ) { innerPadding ->
@@ -190,7 +186,7 @@ private fun RecurringCard(
             }
             Switch(checked = recurring.isActive, onCheckedChange = { onToggleActive() })
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+                Icon(CeroFiaoIcons.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

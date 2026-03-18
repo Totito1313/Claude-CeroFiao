@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,10 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -91,20 +88,20 @@ fun TransactionDetailScreen(
                 title = { Text("Detalle") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
                 actions = {
                     val tx = uiState.transaction
                     if (tx != null && tx.type != TransactionType.TRANSFER) {
                         IconButton(onClick = { onEdit(tx.id) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                            Icon(CeroFiaoIcons.Edit, contentDescription = "Editar")
                         }
                     }
                     if (tx != null) {
                         IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(
-                                Icons.Default.Delete,
+                                CeroFiaoIcons.Delete,
                                 contentDescription = "Eliminar",
                                 tint = MaterialTheme.colorScheme.error,
                             )
@@ -195,7 +192,7 @@ fun TransactionDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
                                     Icon(
-                                        imageVector = CeroFiaoIcons.getCategoryIcon(uiState.category!!.iconName),
+                                        painter = painterResource(CeroFiaoIcons.getCategoryIconRes(uiState.category!!.iconName)),
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
                                         tint = MaterialTheme.colorScheme.onSurface,

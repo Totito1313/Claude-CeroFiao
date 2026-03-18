@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,7 +75,7 @@ private fun CategoryGridItem(
             tonalElevation = if (isSelected) 2.dp else 0.dp,
         ) {
             Icon(
-                imageVector = CeroFiaoIcons.getCategoryIcon(category.iconName),
+                painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                 contentDescription = category.name,
                 tint = if (isSelected) Color.White else categoryColor,
                 modifier = Modifier.padding(12.dp),

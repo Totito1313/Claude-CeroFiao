@@ -1,9 +1,7 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -14,12 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -38,16 +37,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.model.TransactionType
-import com.schwarckdev.cerofiao.core.ui.NumpadComponent
-import com.schwarckdev.cerofiao.core.ui.NumpadKey
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -70,7 +68,7 @@ fun TransactionEntryScreen(
                 title = { Text(if (uiState.isEditMode) "Editar transacción" else "Nueva transacción") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
@@ -80,48 +78,13 @@ fun TransactionEntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Amount display
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                val selectedAccount = uiState.accounts.find { it.id == uiState.selectedAccountId }
-                Text(
-                    text = CurrencyFormatter.format(
-                        uiState.evaluatedAmount,
-                        selectedAccount?.currencyCode ?: "USD",
-                    ),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            // Expression
-            if (uiState.expression != uiState.evaluatedAmount.toString()) {
-                Text(
-                    text = uiState.expression,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // Transaction type selector
             SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 val types = listOf(
                     TransactionType.EXPENSE to "Gasto",
@@ -141,44 +104,88 @@ fun TransactionEntryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            // Amount (system keyboard)
+            OutlinedTextField(
+                value = uiState.amountText,
+                onValueChange = viewModel::setAmount,
+                label = { Text("Monto") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+            )
+
+            // Currency selector
+            Text(
+                text = "Moneda",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf("USD", "VES", "USDT", "EUR").forEach { code ->
+                    FilterChip(
+                        selected = uiState.selectedCurrencyCode == code,
+                        onClick = { viewModel.selectCurrency(code) },
+                        label = { Text(code) },
+                    )
+                }
+            }
+
+            // Multi-currency reference card
+            if (uiState.currencyEquivalents.isNotEmpty() && uiState.amount > 0) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "Equivalentes",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        uiState.currencyEquivalents.forEach { (currency, amount) ->
+                            Text(
+                                text = CurrencyFormatter.format(amount, currency),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
 
             // Account selector
             Text(
                 text = "Cuenta",
                 style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 16.dp),
             )
-            Spacer(modifier = Modifier.height(4.dp))
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 uiState.accounts.forEach { account ->
                     FilterChip(
                         selected = account.id == uiState.selectedAccountId,
                         onClick = { viewModel.selectAccount(account.id) },
-                        label = { Text(account.name) },
+                        label = { Text("${account.name} (${account.currencyCode})") },
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             // Category selector
             if (uiState.categories.isNotEmpty()) {
                 Text(
                     text = "Categoría",
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp),
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     uiState.categories.forEach { category ->
@@ -188,7 +195,7 @@ fun TransactionEntryScreen(
                             label = { Text(category.name) },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = CeroFiaoIcons.getCategoryIcon(category.iconName),
+                                    painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
                                 )
@@ -196,7 +203,6 @@ fun TransactionEntryScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
             // Note
@@ -204,9 +210,7 @@ fun TransactionEntryScreen(
                 value = uiState.note,
                 onValueChange = viewModel::setNote,
                 label = { Text("Nota (opcional)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
 
@@ -216,9 +220,7 @@ fun TransactionEntryScreen(
                 val suggestedCategory = uiState.categories.find { it.id == suggestedCategoryId }
                 if (suggestedCategory != null) {
                     Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         tonalElevation = 1.dp,
@@ -232,7 +234,7 @@ fun TransactionEntryScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
-                                imageVector = CeroFiaoIcons.getCategoryIcon(suggestedCategory.iconName),
+                                painter = painterResource(CeroFiaoIcons.getCategoryIconRes(suggestedCategory.iconName)),
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -254,22 +256,16 @@ fun TransactionEntryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            // Save button
+            Button(
+                onClick = viewModel::save,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isSaving && uiState.amount > 0,
+            ) {
+                Text("Guardar")
+            }
 
-            // Numpad
-            NumpadComponent(
-                onKeyPress = { key ->
-                    when (key) {
-                        is NumpadKey.Digit -> viewModel.onNumpadInput(key.value)
-                        is NumpadKey.Operator -> viewModel.onNumpadInput(key.symbol)
-                        is NumpadKey.Decimal -> viewModel.onNumpadInput(".")
-                        is NumpadKey.Backspace -> viewModel.onBackspace()
-                        is NumpadKey.Clear -> viewModel.onClear()
-                        is NumpadKey.Equals -> viewModel.save()
-                    }
-                },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

@@ -37,6 +37,8 @@ data class RecurringFormUiState(
     val categories: List<Category> = emptyList(),
     val selectedAccountId: String? = null,
     val selectedCategoryId: String? = null,
+    val selectedCurrencyCode: String? = null,
+    val startDate: Long = DateUtils.now(),
     val note: String = "",
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
@@ -91,10 +93,14 @@ class RecurringFormViewModel @Inject constructor(
                 TransactionType.TRANSFER -> false
             }
         }
+        val resolvedAccountId = form.selectedAccountId ?: accounts.firstOrNull()?.id
+        val resolvedCurrency = form.selectedCurrencyCode
+            ?: accounts.find { it.id == resolvedAccountId }?.currencyCode
         form.copy(
             accounts = accounts,
             categories = filteredCategories,
-            selectedAccountId = form.selectedAccountId ?: accounts.firstOrNull()?.id,
+            selectedAccountId = resolvedAccountId,
+            selectedCurrencyCode = resolvedCurrency,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecurringFormUiState())
 
@@ -104,6 +110,8 @@ class RecurringFormViewModel @Inject constructor(
     fun setRecurrence(recurrence: RecurrenceType) { formState.update { it.copy(recurrence = recurrence) } }
     fun selectAccount(id: String) { formState.update { it.copy(selectedAccountId = id) } }
     fun selectCategory(id: String) { formState.update { it.copy(selectedCategoryId = id) } }
+    fun selectCurrency(code: String) { formState.update { it.copy(selectedCurrencyCode = code) } }
+    fun setStartDate(date: Long) { formState.update { it.copy(startDate = date) } }
     fun setNote(note: String) { formState.update { it.copy(note = note) } }
 
     fun save() {
@@ -115,18 +123,22 @@ class RecurringFormViewModel @Inject constructor(
         viewModelScope.launch {
             formState.update { it.copy(isSaving = true) }
             val now = DateUtils.now()
+            val currencyCode = uiState.value.selectedCurrencyCode
+                ?: uiState.value.accounts.find { it.id == accountId }?.currencyCode
+                ?: "USD"
+            val startDate = form.startDate
             val recurring = RecurringTransaction(
                 id = UuidGenerator.generate(),
                 title = form.title.trim(),
                 amount = amount,
-                currencyCode = uiState.value.accounts.find { it.id == accountId }?.currencyCode ?: "USD",
+                currencyCode = currencyCode,
                 categoryId = form.selectedCategoryId,
                 accountId = accountId,
                 type = form.transactionType,
                 recurrence = form.recurrence,
                 periodLength = form.periodLength,
-                startDate = now,
-                nextDueDate = now,
+                startDate = startDate,
+                nextDueDate = startDate,
                 note = form.note.ifBlank { null },
                 createdAt = now,
                 updatedAt = now,

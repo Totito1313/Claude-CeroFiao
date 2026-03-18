@@ -76,6 +76,11 @@ object DateUtils {
         }
     }
 
+    fun getCurrentMonthRange(): Pair<Long, Long> {
+        val now = now()
+        return startOfMonth(now) to endOfMonth(now)
+    }
+
     fun endOfMonth(epochMillis: Long): Long {
         val date = toLocalDate(epochMillis)
         val lastDay = when (date.monthNumber) {
