@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">CeroFiao</string>
+
+    <!-- Shortcuts -->
+    <string name="shortcut_add_transaction">Agregar Transacción</string>
+    <string name="shortcut_add_transaction_short">Transacción</string>
+    <string name="shortcut_view_balance">Ver Balance</string>
+    <string name="shortcut_view_balance_short">Balance</string>
+    <string name="shortcut_add_debt">Agregar Deuda</string>
+    <string name="shortcut_add_debt_short">Deuda</string>
 </resources>

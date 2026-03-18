@@ -8,6 +8,7 @@ import com.schwarckdev.cerofiao.core.database.entity.DebtEntity
 import com.schwarckdev.cerofiao.core.database.entity.DebtPaymentEntity
 import com.schwarckdev.cerofiao.core.database.entity.ExchangeRateEntity
 import com.schwarckdev.cerofiao.core.database.entity.TransactionEntity
+import com.schwarckdev.cerofiao.core.database.entity.TransactionLogEntity
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.AccountType
@@ -22,6 +23,8 @@ import com.schwarckdev.cerofiao.core.model.DebtType
 import com.schwarckdev.cerofiao.core.model.ExchangeRate
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
 import com.schwarckdev.cerofiao.core.model.Transaction
+import com.schwarckdev.cerofiao.core.model.TransactionLog
+import com.schwarckdev.cerofiao.core.model.TransactionLogAction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
 // Currency
@@ -250,4 +253,21 @@ fun DebtPaymentEntity.toModel() = DebtPayment(
     exchangeRateToUsd = exchangeRateToUsd,
     paidAt = paidAt,
     note = note,
+)
+
+// TransactionLog
+fun TransactionLogEntity.toModel() = TransactionLog(
+    id = id,
+    transactionId = transactionId,
+    action = try { TransactionLogAction.valueOf(action) } catch (_: Exception) { TransactionLogAction.CREATED },
+    timestamp = timestamp,
+    snapshotJson = snapshotJson,
+)
+
+fun TransactionLog.toEntity() = TransactionLogEntity(
+    id = id,
+    transactionId = transactionId,
+    action = action.name,
+    timestamp = timestamp,
+    snapshotJson = snapshotJson,
 )

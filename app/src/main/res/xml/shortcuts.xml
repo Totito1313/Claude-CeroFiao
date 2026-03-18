@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_transaction"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_add_transaction_short"
+        android:shortcutLongLabel="@string/shortcut_add_transaction">
+        <intent
+            android:action="com.SchwarckDev.CeroFiao.ACTION_ADD_TRANSACTION"
+            android:targetPackage="com.SchwarckDev.CeroFiao"
+            android:targetClass="com.SchwarckDev.CeroFiao.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="view_balance"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_balance"
+        android:shortcutShortLabel="@string/shortcut_view_balance_short"
+        android:shortcutLongLabel="@string/shortcut_view_balance">
+        <intent
+            android:action="com.SchwarckDev.CeroFiao.ACTION_VIEW_BALANCE"
+            android:targetPackage="com.SchwarckDev.CeroFiao"
+            android:targetClass="com.SchwarckDev.CeroFiao.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="add_debt"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_debt"
+        android:shortcutShortLabel="@string/shortcut_add_debt_short"
+        android:shortcutLongLabel="@string/shortcut_add_debt">
+        <intent
+            android:action="com.SchwarckDev.CeroFiao.ACTION_ADD_DEBT"
+            android:targetPackage="com.SchwarckDev.CeroFiao"
+            android:targetClass="com.SchwarckDev.CeroFiao.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -50,6 +50,9 @@ espressoCore = "3.5.1"
 # Material Icons Extended
 materialIconsExtended = "1.7.6"
 
+# CSV
+opencsv = "5.9"
+
 [libraries]
 # AndroidX Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -108,6 +111,9 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 # Image Loading
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+
+# CSV
+opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

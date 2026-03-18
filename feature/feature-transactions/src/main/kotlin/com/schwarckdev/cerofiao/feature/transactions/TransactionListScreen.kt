@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -53,6 +55,7 @@ import com.schwarckdev.cerofiao.core.ui.EmptyState
 fun TransactionListScreen(
     onAddTransaction: () -> Unit,
     onTransactionClick: (String) -> Unit,
+    onActivityClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: TransactionListViewModel = hiltViewModel(),
 ) {
@@ -61,7 +64,14 @@ fun TransactionListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(title = { Text("Transacciones") })
+            TopAppBar(
+                title = { Text("Transacciones") },
+                actions = {
+                    IconButton(onClick = onActivityClick) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Actividad reciente")
+                    }
+                },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTransaction) {

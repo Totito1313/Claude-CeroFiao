@@ -1,5 +1,6 @@
 package com.SchwarckDev.CeroFiao
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,6 +26,8 @@ import com.SchwarckDev.CeroFiao.navigation.TopLevelDestination
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.ThemeMode
+import com.schwarckdev.cerofiao.feature.debt.navigateToAddDebt
+import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionEntry
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,6 +35,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val shortcutAction = intent?.action?.let { ShortcutAction.fromIntent(it) }
+
         setContent {
             val viewModel: MainViewModel = hiltViewModel()
             val preferences by viewModel.preferences.collectAsStateWithLifecycle()
@@ -47,15 +53,41 @@ class MainActivity : ComponentActivity() {
             ) {
                 CeroFiaoApp(
                     hasCompletedOnboarding = preferences.hasCompletedOnboarding,
+                    shortcutAction = shortcutAction,
                 )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+}
+
+enum class ShortcutAction {
+    ADD_TRANSACTION,
+    VIEW_BALANCE,
+    ADD_DEBT;
+
+    companion object {
+        fun fromIntent(action: String): ShortcutAction? = when (action) {
+            ACTION_ADD_TRANSACTION -> ADD_TRANSACTION
+            ACTION_VIEW_BALANCE -> VIEW_BALANCE
+            ACTION_ADD_DEBT -> ADD_DEBT
+            else -> null
+        }
+
+        private const val ACTION_ADD_TRANSACTION = "com.SchwarckDev.CeroFiao.ACTION_ADD_TRANSACTION"
+        private const val ACTION_VIEW_BALANCE = "com.SchwarckDev.CeroFiao.ACTION_VIEW_BALANCE"
+        private const val ACTION_ADD_DEBT = "com.SchwarckDev.CeroFiao.ACTION_ADD_DEBT"
     }
 }
 
 @Composable
 fun CeroFiaoApp(
     hasCompletedOnboarding: Boolean,
+    shortcutAction: ShortcutAction? = null,
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -63,6 +95,23 @@ fun CeroFiaoApp(
 
     val showBottomBar = TopLevelDestination.entries.any { dest ->
         currentDestination?.hasRoute(dest.route::class) == true
+    }
+
+    // Handle shortcut actions after NavHost is ready
+    androidx.compose.runtime.LaunchedEffect(shortcutAction) {
+        if (shortcutAction != null && hasCompletedOnboarding) {
+            when (shortcutAction) {
+                ShortcutAction.ADD_TRANSACTION -> {
+                    navController.navigateToTransactionEntry()
+                }
+                ShortcutAction.VIEW_BALANCE -> {
+                    // Dashboard is start destination, no navigation needed
+                }
+                ShortcutAction.ADD_DEBT -> {
+                    navController.navigateToAddDebt()
+                }
+            }
+        }
     }
 
     Scaffold(

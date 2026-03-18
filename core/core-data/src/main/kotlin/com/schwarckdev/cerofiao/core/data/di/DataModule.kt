@@ -5,6 +5,7 @@ import com.schwarckdev.cerofiao.core.data.repository.BudgetRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.CategoryRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.DebtRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.ExchangeRateRepositoryImpl
+import com.schwarckdev.cerofiao.core.data.repository.TransactionLogRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.UserPreferencesRepositoryImpl
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
@@ -12,6 +13,7 @@ import com.schwarckdev.cerofiao.core.domain.repository.BudgetRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.DebtRepository
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
+import com.schwarckdev.cerofiao.core.domain.repository.TransactionLogRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import dagger.Binds
@@ -51,4 +53,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindDebtRepository(impl: DebtRepositoryImpl): DebtRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionLogRepository(impl: TransactionLogRepositoryImpl): TransactionLogRepository
 }

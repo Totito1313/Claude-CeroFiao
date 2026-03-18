@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,6 +43,7 @@ fun SettingsScreen(
     onNavigateToExchangeRates: () -> Unit = {},
     onNavigateToBudgets: () -> Unit = {},
     onNavigateToDebts: () -> Unit = {},
+    onNavigateToCsvExport: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -140,6 +142,17 @@ fun SettingsScreen(
                 icon = CeroFiaoIcons.Debt,
                 label = "Deudas",
                 onClick = onNavigateToDebts,
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Data section
+            SectionHeader("Datos")
+
+            NavigationRow(
+                icon = Icons.Default.Share,
+                label = "Exportar CSV",
+                onClick = onNavigateToCsvExport,
             )
         }
     }

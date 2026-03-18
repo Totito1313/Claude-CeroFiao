@@ -29,11 +29,15 @@ import com.schwarckdev.cerofiao.feature.exchangerates.exchangeRateScreen
 import com.schwarckdev.cerofiao.feature.exchangerates.navigateToExchangeRates
 import com.schwarckdev.cerofiao.feature.onboarding.OnboardingRoute
 import com.schwarckdev.cerofiao.feature.onboarding.onboardingScreen
+import com.schwarckdev.cerofiao.feature.settings.csvExportScreen
+import com.schwarckdev.cerofiao.feature.settings.navigateToCsvExport
 import com.schwarckdev.cerofiao.feature.settings.settingsScreen
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionDetail
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionEntry
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionList
+import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionActivity
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransfer
+import com.schwarckdev.cerofiao.feature.transactions.transactionActivityScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionDetailScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionEntryScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionListScreen
@@ -73,6 +77,7 @@ fun CeroFiaoNavHost(
             onTransactionClick = { transactionId ->
                 navController.navigateToTransactionDetail(transactionId)
             },
+            onActivityClick = { navController.navigateToTransactionActivity() },
         )
 
         transactionDetailScreen(
@@ -120,6 +125,15 @@ fun CeroFiaoNavHost(
             onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
             onNavigateToBudgets = { navController.navigateToBudgetList() },
             onNavigateToDebts = { navController.navigateToDebtList() },
+            onNavigateToCsvExport = { navController.navigateToCsvExport() },
+        )
+
+        csvExportScreen(
+            onBack = { navController.popBackStack() },
+        )
+
+        transactionActivityScreen(
+            onBack = { navController.popBackStack() },
         )
 
         budgetListScreen(

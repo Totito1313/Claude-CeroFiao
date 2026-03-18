@@ -17,14 +17,19 @@ data class TransactionDetailRoute(val transactionId: String)
 @Serializable
 object TransferRoute
 
+@Serializable
+object TransactionActivityRoute
+
 fun NavGraphBuilder.transactionListScreen(
     onAddTransaction: () -> Unit,
     onTransactionClick: (String) -> Unit,
+    onActivityClick: () -> Unit = {},
 ) {
     composable<TransactionListRoute> {
         TransactionListScreen(
             onAddTransaction = onAddTransaction,
             onTransactionClick = onTransactionClick,
+            onActivityClick = onActivityClick,
         )
     }
 }
@@ -79,4 +84,16 @@ fun NavController.navigateToTransactionDetail(transactionId: String) {
 
 fun NavController.navigateToTransfer() {
     navigate(TransferRoute)
+}
+
+fun NavGraphBuilder.transactionActivityScreen(
+    onBack: () -> Unit,
+) {
+    composable<TransactionActivityRoute> {
+        TransactionActivityScreen(onBack = onBack)
+    }
+}
+
+fun NavController.navigateToTransactionActivity() {
+    navigate(TransactionActivityRoute)
 }

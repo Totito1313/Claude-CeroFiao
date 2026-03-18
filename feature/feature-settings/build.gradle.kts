@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.schwarckdev.cerofiao.feature.settings"
 }
+
+dependencies {
+    implementation(libs.opencsv)
+}

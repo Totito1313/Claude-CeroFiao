@@ -1,19 +1,26 @@
 package com.schwarckdev.cerofiao.core.data.repository
 
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.common.UuidGenerator
 import com.schwarckdev.cerofiao.core.database.dao.TransactionDao
+import com.schwarckdev.cerofiao.core.database.dao.TransactionLogDao
+import com.schwarckdev.cerofiao.core.database.entity.TransactionLogEntity
 import com.schwarckdev.cerofiao.core.database.mapper.toEntity
 import com.schwarckdev.cerofiao.core.database.mapper.toModel
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.model.Transaction
+import com.schwarckdev.cerofiao.core.model.TransactionLogAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TransactionRepositoryImpl @Inject constructor(
     private val transactionDao: TransactionDao,
+    private val transactionLogDao: TransactionLogDao,
 ) : TransactionRepository {
 
     override fun getAllTransactions(): Flow<List<Transaction>> =
@@ -50,17 +57,38 @@ class TransactionRepositoryImpl @Inject constructor(
 
     override suspend fun insertTransaction(transaction: Transaction) {
         transactionDao.insert(transaction.toEntity())
+        logTransaction(transaction, TransactionLogAction.CREATED)
     }
 
     override suspend fun updateTransaction(transaction: Transaction) {
         transactionDao.insert(transaction.toEntity())
+        logTransaction(transaction, TransactionLogAction.EDITED)
     }
 
     override suspend fun insertTransferPair(outgoing: Transaction, incoming: Transaction) {
         transactionDao.insertTransferPair(outgoing.toEntity(), incoming.toEntity())
+        logTransaction(outgoing, TransactionLogAction.CREATED)
+        logTransaction(incoming, TransactionLogAction.CREATED)
     }
 
     override suspend fun deleteTransaction(id: String) {
+        val existing = transactionDao.getTransactionByIdOnce(id)?.toModel()
         transactionDao.softDelete(id, DateUtils.now())
+        if (existing != null) {
+            logTransaction(existing, TransactionLogAction.DELETED)
+        }
+    }
+
+    private suspend fun logTransaction(transaction: Transaction, action: TransactionLogAction) {
+        val snapshot = Json.encodeToString(transaction)
+        transactionLogDao.insert(
+            TransactionLogEntity(
+                id = UuidGenerator.generate(),
+                transactionId = transaction.id,
+                action = action.name,
+                timestamp = DateUtils.now(),
+                snapshotJson = snapshot,
+            ),
+        )
     }
 }

@@ -8,11 +8,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 object SettingsRoute
 
+@Serializable
+object CsvExportRoute
+
 fun NavGraphBuilder.settingsScreen(
     onNavigateToCategories: () -> Unit = {},
     onNavigateToExchangeRates: () -> Unit = {},
     onNavigateToBudgets: () -> Unit = {},
     onNavigateToDebts: () -> Unit = {},
+    onNavigateToCsvExport: () -> Unit = {},
 ) {
     composable<SettingsRoute> {
         SettingsScreen(
@@ -20,10 +24,23 @@ fun NavGraphBuilder.settingsScreen(
             onNavigateToExchangeRates = onNavigateToExchangeRates,
             onNavigateToBudgets = onNavigateToBudgets,
             onNavigateToDebts = onNavigateToDebts,
+            onNavigateToCsvExport = onNavigateToCsvExport,
         )
+    }
+}
+
+fun NavGraphBuilder.csvExportScreen(
+    onBack: () -> Unit,
+) {
+    composable<CsvExportRoute> {
+        CsvExportScreen(onBack = onBack)
     }
 }
 
 fun NavController.navigateToSettings() {
     navigate(SettingsRoute)
+}
+
+fun NavController.navigateToCsvExport() {
+    navigate(CsvExportRoute)
 }
