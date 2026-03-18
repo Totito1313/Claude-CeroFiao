@@ -33,7 +33,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.model.RecurrenceType
 import com.schwarckdev.cerofiao.core.model.RecurringTransaction
+import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.core.ui.EmptyState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +79,27 @@ fun RecurringListScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             ) {
+                if (uiState.upcomingTransactions.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Próximas (30 días)",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                    }
+                    items(uiState.upcomingTransactions, key = { "upcoming_${it.id}" }) { recurring ->
+                        UpcomingCard(recurring = recurring)
+                    }
+                    item {
+                        Text(
+                            text = "Todas las recurrentes",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                        )
+                    }
+                }
                 items(uiState.recurringTransactions, key = { it.id }) { recurring ->
                     RecurringCard(
                         recurring = recurring,
@@ -90,6 +113,44 @@ fun RecurringListScreen(
 }
 
 @Composable
+private fun UpcomingCard(
+    recurring: RecurringTransaction,
+    modifier: Modifier = Modifier,
+) {
+    val typeLabel = when (recurring.type) {
+        TransactionType.EXPENSE -> "Gasto"
+        TransactionType.INCOME -> "Ingreso"
+        TransactionType.TRANSFER -> "Transferencia"
+    }
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(recurring.title, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    "$typeLabel · ${CurrencyFormatter.format(recurring.amount, recurring.currencyCode)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            Text(
+                text = DateUtils.formatDisplayDate(recurring.nextDueDate),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
 private fun RecurringCard(
     recurring: RecurringTransaction,
     onToggleActive: () -> Unit,
@@ -97,10 +158,10 @@ private fun RecurringCard(
     modifier: Modifier = Modifier,
 ) {
     val recurrenceLabel = when (recurring.recurrence) {
-        com.schwarckdev.cerofiao.core.model.RecurrenceType.DAILY -> "Diario"
-        com.schwarckdev.cerofiao.core.model.RecurrenceType.WEEKLY -> "Semanal"
-        com.schwarckdev.cerofiao.core.model.RecurrenceType.MONTHLY -> "Mensual"
-        com.schwarckdev.cerofiao.core.model.RecurrenceType.YEARLY -> "Anual"
+        RecurrenceType.DAILY -> "Diario"
+        RecurrenceType.WEEKLY -> "Semanal"
+        RecurrenceType.MONTHLY -> "Mensual"
+        RecurrenceType.YEARLY -> "Anual"
     }
 
     Card(

@@ -29,7 +29,9 @@ import com.schwarckdev.cerofiao.feature.exchangerates.exchangeRateScreen
 import com.schwarckdev.cerofiao.feature.exchangerates.navigateToExchangeRates
 import com.schwarckdev.cerofiao.feature.onboarding.OnboardingRoute
 import com.schwarckdev.cerofiao.feature.onboarding.onboardingScreen
+import com.schwarckdev.cerofiao.feature.settings.associatedTitlesScreen
 import com.schwarckdev.cerofiao.feature.settings.csvExportScreen
+import com.schwarckdev.cerofiao.feature.settings.navigateToAssociatedTitles
 import com.schwarckdev.cerofiao.feature.settings.navigateToCsvExport
 import com.schwarckdev.cerofiao.feature.settings.settingsScreen
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionDetail
@@ -131,9 +133,14 @@ fun CeroFiaoNavHost(
             onNavigateToDebts = { navController.navigateToDebtList() },
             onNavigateToCsvExport = { navController.navigateToCsvExport() },
             onNavigateToRecurring = { navController.navigateToRecurringList() },
+            onNavigateToAssociatedTitles = { navController.navigateToAssociatedTitles() },
         )
 
         csvExportScreen(
+            onBack = { navController.popBackStack() },
+        )
+
+        associatedTitlesScreen(
             onBack = { navController.popBackStack() },
         )
 

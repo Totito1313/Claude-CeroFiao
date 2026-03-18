@@ -24,6 +24,7 @@ import javax.inject.Inject
 
 data class RecurringListUiState(
     val recurringTransactions: List<RecurringTransaction> = emptyList(),
+    val upcomingTransactions: List<RecurringTransaction> = emptyList(),
 )
 
 data class RecurringFormUiState(
@@ -47,7 +48,17 @@ class RecurringListViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<RecurringListUiState> = recurringTransactionRepository.getAllActive()
-        .combine(MutableStateFlow(Unit)) { list, _ -> RecurringListUiState(list) }
+        .combine(MutableStateFlow(Unit)) { list, _ ->
+            val now = DateUtils.now()
+            // Next 30 days
+            val thirtyDaysLater = now + 30L * 24 * 60 * 60 * 1000
+            val upcoming = list.filter { it.isActive && it.nextDueDate <= thirtyDaysLater }
+                .sortedBy { it.nextDueDate }
+            RecurringListUiState(
+                recurringTransactions = list,
+                upcomingTransactions = upcoming,
+            )
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecurringListUiState())
 
     fun delete(id: String) {

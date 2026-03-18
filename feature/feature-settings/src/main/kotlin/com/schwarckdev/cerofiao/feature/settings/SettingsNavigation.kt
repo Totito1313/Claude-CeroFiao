@@ -11,6 +11,9 @@ object SettingsRoute
 @Serializable
 object CsvExportRoute
 
+@Serializable
+object AssociatedTitlesRoute
+
 fun NavGraphBuilder.settingsScreen(
     onNavigateToCategories: () -> Unit = {},
     onNavigateToExchangeRates: () -> Unit = {},
@@ -18,6 +21,7 @@ fun NavGraphBuilder.settingsScreen(
     onNavigateToDebts: () -> Unit = {},
     onNavigateToCsvExport: () -> Unit = {},
     onNavigateToRecurring: () -> Unit = {},
+    onNavigateToAssociatedTitles: () -> Unit = {},
 ) {
     composable<SettingsRoute> {
         SettingsScreen(
@@ -27,6 +31,7 @@ fun NavGraphBuilder.settingsScreen(
             onNavigateToDebts = onNavigateToDebts,
             onNavigateToCsvExport = onNavigateToCsvExport,
             onNavigateToRecurring = onNavigateToRecurring,
+            onNavigateToAssociatedTitles = onNavigateToAssociatedTitles,
         )
     }
 }
@@ -45,4 +50,16 @@ fun NavController.navigateToSettings() {
 
 fun NavController.navigateToCsvExport() {
     navigate(CsvExportRoute)
+}
+
+fun NavGraphBuilder.associatedTitlesScreen(
+    onBack: () -> Unit,
+) {
+    composable<AssociatedTitlesRoute> {
+        AssociatedTitlesScreen(onBack = onBack)
+    }
+}
+
+fun NavController.navigateToAssociatedTitles() {
+    navigate(AssociatedTitlesRoute)
 }

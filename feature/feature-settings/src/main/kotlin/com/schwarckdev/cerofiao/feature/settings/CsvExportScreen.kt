@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -62,10 +64,28 @@ fun CsvExportScreen(
         }
     }
 
+    val openFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            viewModel.importFromUri(context, uri)
+        }
+    }
+
     LaunchedEffect(uiState.exportedCount) {
         val count = uiState.exportedCount
         if (count != null) {
             Toast.makeText(context, "$count transacciones exportadas", Toast.LENGTH_SHORT).show()
+            viewModel.clearResult()
+        }
+    }
+
+    LaunchedEffect(uiState.importedCount) {
+        val count = uiState.importedCount
+        if (count != null) {
+            val skipped = uiState.importSkipped ?: 0
+            val msg = "$count importadas" + if (skipped > 0) ", $skipped omitidas" else ""
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             viewModel.clearResult()
         }
     }
@@ -82,7 +102,7 @@ fun CsvExportScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Exportar CSV") },
+                title = { Text("Importar / Exportar CSV") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
@@ -95,21 +115,26 @@ fun CsvExportScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // --- EXPORT SECTION ---
+            Text(
+                text = "Exportar",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
             Text(
                 text = "Exporta tus transacciones a un archivo CSV con tasas de cambio incluidas.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = "Rango de fechas (opcional)",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge,
             )
 
             Row(
@@ -150,8 +175,6 @@ fun CsvExportScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
             Button(
                 onClick = { createFileLauncher.launch(CsvExportViewModel.defaultFileName()) },
                 modifier = Modifier.fillMaxWidth(),
@@ -171,6 +194,35 @@ fun CsvExportScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- IMPORT SECTION ---
+            Text(
+                text = "Importar",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Text(
+                text = "Importa transacciones desde un CSV con el mismo formato de exportación. Las cuentas deben existir con el mismo nombre.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            OutlinedButton(
+                onClick = { openFileLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "*/*")) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isImporting,
+            ) {
+                if (uiState.isImporting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                    )
+                } else {
+                    Text("Importar desde CSV")
+                }
+            }
         }
     }
 

@@ -45,6 +45,7 @@ fun SettingsScreen(
     onNavigateToDebts: () -> Unit = {},
     onNavigateToCsvExport: () -> Unit = {},
     onNavigateToRecurring: () -> Unit = {},
+    onNavigateToAssociatedTitles: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -151,6 +152,12 @@ fun SettingsScreen(
                 onClick = onNavigateToRecurring,
             )
 
+            NavigationRow(
+                icon = CeroFiaoIcons.Transactions,
+                label = "Títulos asociados",
+                onClick = onNavigateToAssociatedTitles,
+            )
+
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Data section
@@ -158,7 +165,7 @@ fun SettingsScreen(
 
             NavigationRow(
                 icon = Icons.Default.Share,
-                label = "Exportar CSV",
+                label = "Importar / Exportar CSV",
                 onClick = onNavigateToCsvExport,
             )
         }

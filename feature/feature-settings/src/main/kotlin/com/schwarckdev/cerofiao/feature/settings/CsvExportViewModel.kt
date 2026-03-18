@@ -6,13 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.opencsv.CSVWriter
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.opencsv.CSVReader
 import com.schwarckdev.cerofiao.core.domain.usecase.ExportTransactionsCsvUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.ImportTransactionsCsvUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import javax.inject.Inject
 
@@ -20,13 +23,17 @@ data class CsvExportUiState(
     val startDate: Long? = null,
     val endDate: Long? = null,
     val isExporting: Boolean = false,
+    val isImporting: Boolean = false,
     val exportedCount: Int? = null,
+    val importedCount: Int? = null,
+    val importSkipped: Int? = null,
     val error: String? = null,
 )
 
 @HiltViewModel
 class CsvExportViewModel @Inject constructor(
     private val exportTransactionsCsvUseCase: ExportTransactionsCsvUseCase,
+    private val importTransactionsCsvUseCase: ImportTransactionsCsvUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CsvExportUiState())
@@ -79,8 +86,42 @@ class CsvExportViewModel @Inject constructor(
         }
     }
 
+    fun importFromUri(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isImporting = true, error = null, importedCount = null, importSkipped = null) }
+            try {
+                val rows = mutableListOf<Array<String>>()
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val reader = CSVReader(InputStreamReader(inputStream, Charsets.UTF_8))
+                    reader.use { csv ->
+                        val allRows = csv.readAll()
+                        // Skip header row if it matches our format
+                        val dataRows = if (allRows.isNotEmpty() && allRows[0].firstOrNull()?.lowercase() == "fecha") {
+                            allRows.drop(1)
+                        } else {
+                            allRows
+                        }
+                        rows.addAll(dataRows)
+                    }
+                }
+
+                val result = importTransactionsCsvUseCase(rows)
+                _uiState.update {
+                    it.copy(
+                        isImporting = false,
+                        importedCount = result.imported,
+                        importSkipped = result.skipped,
+                        error = if (result.errors.isNotEmpty()) result.errors.take(3).joinToString("\n") else null,
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isImporting = false, error = e.message ?: "Error al importar") }
+            }
+        }
+    }
+
     fun clearResult() {
-        _uiState.update { it.copy(exportedCount = null, error = null) }
+        _uiState.update { it.copy(exportedCount = null, importedCount = null, importSkipped = null, error = null) }
     }
 
     companion object {
