@@ -8,9 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Refresh
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.RefreshCw
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +50,7 @@ fun TransactionActivityScreen(
                 title = { Text("Actividad reciente") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
@@ -162,7 +161,7 @@ private fun TransactionLogCard(
             if (onRestore != null) {
                 IconButton(onClick = onRestore) {
                     Icon(
-                        imageVector = Icons.Default.Refresh,
+                        imageVector = Lucide.RefreshCw,
                         contentDescription = "Restaurar",
                         tint = MaterialTheme.colorScheme.primary,
                     )

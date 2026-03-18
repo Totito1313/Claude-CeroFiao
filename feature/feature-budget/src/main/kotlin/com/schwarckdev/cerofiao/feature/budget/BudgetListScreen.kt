@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.feature.budget
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -66,7 +64,7 @@ fun BudgetListScreen(
                 title = { Text("Presupuestos") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
@@ -124,7 +122,7 @@ fun BudgetListScreen(
                                 contentAlignment = Alignment.CenterEnd,
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Delete,
+                                    imageVector = CeroFiaoIcons.Delete,
                                     contentDescription = "Eliminar",
                                     tint = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.padding(end = 16.dp),
@@ -176,7 +174,7 @@ private fun BudgetCard(
                     val category = budgetWithProgress.category
                     if (category != null) {
                         Icon(
-                            imageVector = CeroFiaoIcons.getCategoryIcon(category.iconName),
+                            painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onSurface,

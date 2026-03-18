@@ -52,6 +52,16 @@ class TransactionRepositoryImpl @Inject constructor(
             list.map { it.categoryId to it.total }
         }
 
+    override fun getCategoryTotalsForPeriod(startDate: Long, endDate: Long): Flow<Map<String, Double>> =
+        transactionDao.getCategoryTotalsForPeriod(startDate, endDate).map { list ->
+            val result = mutableMapOf<String, Double>()
+            for (item in list) {
+                val sign = if (item.type == "EXPENSE") -1.0 else 1.0
+                result[item.categoryId] = (result[item.categoryId] ?: 0.0) + (item.total * sign)
+            }
+            result
+        }
+
     override suspend fun getTransactionByIdOnce(id: String): Transaction? =
         transactionDao.getTransactionByIdOnce(id)?.toModel()
 

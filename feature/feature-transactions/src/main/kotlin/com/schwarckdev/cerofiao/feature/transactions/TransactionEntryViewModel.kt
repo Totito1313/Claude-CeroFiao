@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.schwarckdev.cerofiao.core.common.DateUtils
-import com.schwarckdev.cerofiao.core.common.ExpressionEvaluator
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
@@ -33,18 +32,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TransactionEntryUiState(
-    val expression: String = "0",
-    val evaluatedAmount: Double = 0.0,
+    val amountText: String = "",
+    val amount: Double = 0.0,
     val transactionType: TransactionType = TransactionType.EXPENSE,
     val accounts: List<Account> = emptyList(),
     val categories: List<Category> = emptyList(),
     val selectedAccountId: String? = null,
     val selectedCategoryId: String? = null,
+    val selectedCurrencyCode: String? = null,
     val note: String = "",
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val isEditMode: Boolean = false,
     val suggestedCategoryId: String? = null,
+    val currencyEquivalents: Map<String, Double> = emptyMap(),
 )
 
 @HiltViewModel
@@ -80,19 +81,25 @@ class TransactionEntryViewModel @Inject constructor(
             }
         }
 
+        val resolvedAccountId = form.selectedAccountId ?: accounts.firstOrNull()?.id
+        val resolvedCurrency = form.selectedCurrencyCode
+            ?: accounts.find { it.id == resolvedAccountId }?.currencyCode
+
         TransactionEntryUiState(
-            expression = form.expression,
-            evaluatedAmount = form.evaluatedAmount,
+            amountText = form.amountText,
+            amount = form.amountText.toDoubleOrNull() ?: 0.0,
             transactionType = form.transactionType,
             accounts = accounts,
             categories = filteredCategories,
-            selectedAccountId = form.selectedAccountId ?: accounts.firstOrNull()?.id,
+            selectedAccountId = resolvedAccountId,
             selectedCategoryId = form.selectedCategoryId,
+            selectedCurrencyCode = resolvedCurrency,
             note = form.note,
             isSaving = form.isSaving,
             isSaved = form.isSaved,
             isEditMode = editTransactionId != null,
             suggestedCategoryId = form.suggestedCategoryId,
+            currencyEquivalents = form.currencyEquivalents,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -106,6 +113,8 @@ class TransactionEntryViewModel @Inject constructor(
         }
     }
 
+    private var equivalentsJob: Job? = null
+
     private fun loadTransaction(id: String) {
         viewModelScope.launch {
             val transaction = transactionRepository.getTransactionByIdOnce(id) ?: return@launch
@@ -117,57 +126,61 @@ class TransactionEntryViewModel @Inject constructor(
                     transaction.amount.toString()
                 }
                 it.copy(
-                    expression = amountStr,
-                    evaluatedAmount = transaction.amount,
+                    amountText = amountStr,
                     transactionType = transaction.type,
                     selectedAccountId = transaction.accountId,
                     selectedCategoryId = transaction.categoryId,
+                    selectedCurrencyCode = transaction.currencyCode,
                     note = transaction.note ?: "",
                 )
             }
         }
     }
 
-    fun onNumpadInput(char: String) {
-        formState.update { state ->
-            val newExpr = if (state.expression == "0" && char.first().isDigit()) {
-                char
-            } else {
-                state.expression + char
-            }
-            val evaluated = try {
-                ExpressionEvaluator.evaluate(newExpr) ?: state.evaluatedAmount
-            } catch (_: Exception) {
-                state.evaluatedAmount
-            }
-            state.copy(expression = newExpr, evaluatedAmount = evaluated)
-        }
+    fun setAmount(text: String) {
+        formState.update { it.copy(amountText = text) }
+        updateCurrencyEquivalents()
     }
 
-    fun onBackspace() {
-        formState.update { state ->
-            val newExpr = if (state.expression.length <= 1) "0" else state.expression.dropLast(1)
-            val evaluated = try {
-                ExpressionEvaluator.evaluate(newExpr) ?: 0.0
-            } catch (_: Exception) {
-                0.0
-            }
-            state.copy(expression = newExpr, evaluatedAmount = evaluated)
-        }
+    fun selectCurrency(code: String) {
+        formState.update { it.copy(selectedCurrencyCode = code) }
+        updateCurrencyEquivalents()
     }
 
-    fun onClear() {
-        formState.update { it.copy(expression = "0", evaluatedAmount = 0.0) }
-    }
-
-    fun onEquals() {
-        formState.update { state ->
-            val result = try {
-                ExpressionEvaluator.evaluate(state.expression) ?: state.evaluatedAmount
-            } catch (_: Exception) {
-                state.evaluatedAmount
+    private fun updateCurrencyEquivalents() {
+        equivalentsJob?.cancel()
+        equivalentsJob = viewModelScope.launch {
+            delay(400)
+            val amount = formState.value.amountText.toDoubleOrNull() ?: return@launch
+            if (amount <= 0) {
+                formState.update { it.copy(currencyEquivalents = emptyMap()) }
+                return@launch
             }
-            state.copy(expression = result.toString(), evaluatedAmount = result)
+            val selectedCurrency = uiState.value.selectedCurrencyCode ?: return@launch
+            val allCurrencies = listOf("USD", "VES", "USDT", "EUR")
+            val equivalents = mutableMapOf<String, Double>()
+            val prefs = userPreferencesRepository.userPreferences.first()
+
+            for (targetCurrency in allCurrencies) {
+                if (targetCurrency == selectedCurrency) continue
+                try {
+                    // Convert to USD first, then to target
+                    val toUsdResult = resolveExchangeRate.toUsd(selectedCurrency, prefs.preferredRateSource)
+                    val amountUsd = MoneyCalculator.toUsd(amount, selectedCurrency, toUsdResult.rate)
+                    if (targetCurrency == "USD") {
+                        equivalents[targetCurrency] = amountUsd
+                    } else {
+                        val fromUsdResult = resolveExchangeRate.toUsd(targetCurrency, prefs.preferredRateSource)
+                        if (fromUsdResult.rate > 0) {
+                            equivalents[targetCurrency] = MoneyCalculator.fromUsd(amountUsd, targetCurrency, fromUsdResult.rate)
+                        }
+                    }
+                } catch (_: Exception) {
+                    // Skip currencies we can't convert
+                }
+            }
+
+            formState.update { it.copy(currencyEquivalents = equivalents) }
         }
     }
 
@@ -207,20 +220,21 @@ class TransactionEntryViewModel @Inject constructor(
     fun save() {
         val current = formState.value
         val accountId = uiState.value.selectedAccountId ?: return
-        val amount = current.evaluatedAmount
+        val amount = current.amountText.toDoubleOrNull() ?: return
         if (amount <= 0) return
 
         val account = uiState.value.accounts.find { it.id == accountId } ?: return
+        val currencyCode = uiState.value.selectedCurrencyCode ?: account.currencyCode
 
         viewModelScope.launch {
             formState.update { it.copy(isSaving = true) }
             try {
                 if (editTransactionId != null && originalTransaction != null) {
-                    updateExistingTransaction(current, account)
+                    updateExistingTransaction(current, account, currencyCode)
                 } else {
                     recordTransactionUseCase(
                         amount = amount,
-                        currencyCode = account.currencyCode,
+                        currencyCode = currencyCode,
                         accountId = accountId,
                         categoryId = current.selectedCategoryId,
                         type = current.transactionType,
@@ -240,22 +254,23 @@ class TransactionEntryViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateExistingTransaction(current: FormState, account: Account) {
+    private suspend fun updateExistingTransaction(current: FormState, account: Account, currencyCode: String) {
         val original = originalTransaction ?: return
         val now = DateUtils.now()
         val prefs = userPreferencesRepository.userPreferences.first()
+        val amount = current.amountText.toDoubleOrNull() ?: return
 
         // Recalculate exchange rate via resolver (handles USDT/EURI/cross-rates)
-        val result = resolveExchangeRate.toUsd(account.currencyCode, prefs.preferredRateSource)
+        val result = resolveExchangeRate.toUsd(currencyCode, prefs.preferredRateSource)
         val rateToUsd = result.rate
         val rateSource = result.source
 
-        val amountInUsd = MoneyCalculator.toUsd(current.evaluatedAmount, account.currencyCode, rateToUsd)
+        val amountInUsd = MoneyCalculator.toUsd(amount, currencyCode, rateToUsd)
 
         val updated = original.copy(
             type = current.transactionType,
-            amount = current.evaluatedAmount,
-            currencyCode = account.currencyCode,
+            amount = amount,
+            currencyCode = currencyCode,
             accountId = account.id,
             categoryId = current.selectedCategoryId,
             note = current.note.ifBlank { null },
@@ -297,15 +312,15 @@ class TransactionEntryViewModel @Inject constructor(
                     TransactionType.TRANSFER -> targetAccount.balance + original.amount
                 }
                 when (current.transactionType) {
-                    TransactionType.INCOME -> reverted + current.evaluatedAmount
-                    TransactionType.EXPENSE -> reverted - current.evaluatedAmount
-                    TransactionType.TRANSFER -> reverted - current.evaluatedAmount
+                    TransactionType.INCOME -> reverted + amount
+                    TransactionType.EXPENSE -> reverted - amount
+                    TransactionType.TRANSFER -> reverted - amount
                 }
             } else {
                 when (current.transactionType) {
-                    TransactionType.INCOME -> targetAccount.balance + current.evaluatedAmount
-                    TransactionType.EXPENSE -> targetAccount.balance - current.evaluatedAmount
-                    TransactionType.TRANSFER -> targetAccount.balance - current.evaluatedAmount
+                    TransactionType.INCOME -> targetAccount.balance + amount
+                    TransactionType.EXPENSE -> targetAccount.balance - amount
+                    TransactionType.TRANSFER -> targetAccount.balance - amount
                 }
             }
             accountRepository.updateBalance(account.id, targetBalance)
@@ -313,14 +328,15 @@ class TransactionEntryViewModel @Inject constructor(
     }
 
     private data class FormState(
-        val expression: String = "0",
-        val evaluatedAmount: Double = 0.0,
+        val amountText: String = "",
         val transactionType: TransactionType = TransactionType.EXPENSE,
         val selectedAccountId: String? = null,
         val selectedCategoryId: String? = null,
+        val selectedCurrencyCode: String? = null,
         val suggestedCategoryId: String? = null,
         val note: String = "",
         val isSaving: Boolean = false,
         val isSaved: Boolean = false,
+        val currencyEquivalents: Map<String, Double> = emptyMap(),
     )
 }

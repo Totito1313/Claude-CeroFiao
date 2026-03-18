@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
@@ -110,7 +110,7 @@ fun CategoryIcon(
     colorHex: String,
     modifier: Modifier = Modifier,
 ) {
-    val icon: ImageVector = CeroFiaoIcons.getCategoryIcon(iconName)
+    val iconRes = CeroFiaoIcons.getCategoryIconRes(iconName)
     val color = try {
         Color(android.graphics.Color.parseColor(colorHex))
     } catch (_: Exception) {
@@ -123,7 +123,7 @@ fun CategoryIcon(
         color = color.copy(alpha = 0.12f),
     ) {
         Icon(
-            imageVector = icon,
+            painter = painterResource(iconRes),
             contentDescription = null,
             tint = color,
             modifier = Modifier.padding(8.dp),

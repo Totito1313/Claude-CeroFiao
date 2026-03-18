@@ -10,4 +10,6 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material.icons.extended)
+    api(libs.lucide.icons)
+    api(libs.oneui.icons)
 }

@@ -75,6 +75,17 @@ interface TransactionDao {
         endDate: Long,
     ): Flow<List<CategoryExpenseSum>>
 
+    @Query(
+        "SELECT categoryId, type, SUM(amountInUsd) as total FROM transactions " +
+            "WHERE isDeleted = 0 AND categoryId IS NOT NULL " +
+            "AND date BETWEEN :startDate AND :endDate " +
+            "GROUP BY categoryId, type ORDER BY total DESC"
+    )
+    fun getCategoryTotalsForPeriod(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<CategoryTypeSum>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transaction: TransactionEntity)
 
@@ -93,5 +104,11 @@ interface TransactionDao {
 
 data class CategoryExpenseSum(
     val categoryId: String,
+    val total: Double,
+)
+
+data class CategoryTypeSum(
+    val categoryId: String,
+    val type: String,
     val total: Double,
 )

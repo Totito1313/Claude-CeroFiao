@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.feature.budget
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -60,7 +59,7 @@ fun AddBudgetScreen(
                 title = { Text(if (uiState.isEditMode) "Editar presupuesto" else "Nuevo presupuesto") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
@@ -173,7 +172,7 @@ fun AddBudgetScreen(
                         label = { Text(category.name) },
                         leadingIcon = {
                             Icon(
-                                imageVector = CeroFiaoIcons.getCategoryIcon(category.iconName),
+                                painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
                             )

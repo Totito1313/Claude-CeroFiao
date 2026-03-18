@@ -2,6 +2,8 @@ package com.schwarckdev.cerofiao.feature.transactions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -19,11 +21,15 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,10 +41,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.model.RecurrenceType
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RecurringFormScreen(
     onBack: () -> Unit,
@@ -47,6 +55,7 @@ fun RecurringFormScreen(
     viewModel: RecurringFormViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) onSaved()
@@ -59,7 +68,7 @@ fun RecurringFormScreen(
                 title = { Text("Nueva recurrente") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
             )
@@ -90,6 +99,21 @@ fun RecurringFormScreen(
                 singleLine = true,
             )
 
+            // Currency selector
+            Text(text = "Moneda", style = MaterialTheme.typography.labelLarge)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf("USD", "VES", "USDT", "EUR").forEach { code ->
+                    FilterChip(
+                        selected = uiState.selectedCurrencyCode == code,
+                        onClick = { viewModel.selectCurrency(code) },
+                        label = { Text(code) },
+                    )
+                }
+            }
+
             // Transaction type chips
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(TransactionType.EXPENSE to "Gasto", TransactionType.INCOME to "Ingreso").forEach { (type, label) ->
@@ -102,7 +126,10 @@ fun RecurringFormScreen(
             }
 
             // Recurrence chips
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 listOf(
                     RecurrenceType.DAILY to "Diario",
                     RecurrenceType.WEEKLY to "Semanal",
@@ -117,6 +144,15 @@ fun RecurringFormScreen(
                 }
             }
 
+            // Start date picker
+            Text(text = "Fecha de inicio", style = MaterialTheme.typography.labelLarge)
+            OutlinedButton(
+                onClick = { showDatePicker = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(DateUtils.formatDisplayDate(uiState.startDate))
+            }
+
             // Account selector
             if (uiState.accounts.isNotEmpty()) {
                 var accountExpanded by remember { mutableStateOf(false) }
@@ -126,7 +162,7 @@ fun RecurringFormScreen(
                     onExpandedChange = { accountExpanded = it },
                 ) {
                     OutlinedTextField(
-                        value = selectedAccount?.name ?: "",
+                        value = selectedAccount?.let { "${it.name} (${it.currencyCode})" } ?: "",
                         onValueChange = {},
                         label = { Text("Cuenta") },
                         readOnly = true,
@@ -197,6 +233,28 @@ fun RecurringFormScreen(
             ) {
                 Text("Guardar recurrente")
             }
+        }
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = uiState.startDate,
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { viewModel.setStartDate(it) }
+                        showDatePicker = false
+                    },
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            },
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }

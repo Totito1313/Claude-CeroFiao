@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
+import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -105,13 +103,13 @@ fun DebtDetailScreen(
                 title = { Text(debt?.personName ?: "Deuda") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
-                            Icons.Default.Delete,
+                            CeroFiaoIcons.Delete,
                             contentDescription = "Eliminar",
                             tint = MaterialTheme.colorScheme.error,
                         )

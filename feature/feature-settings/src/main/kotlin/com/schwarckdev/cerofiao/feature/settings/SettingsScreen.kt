@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Share
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -164,7 +163,7 @@ fun SettingsScreen(
             SectionHeader("Datos")
 
             NavigationRow(
-                icon = Icons.Default.Share,
+                icon = Lucide.Share,
                 label = "Importar / Exportar CSV",
                 onClick = onNavigateToCsvExport,
             )
@@ -246,7 +245,7 @@ private fun NavigationRow(
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            imageVector = CeroFiaoIcons.ChevronRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )

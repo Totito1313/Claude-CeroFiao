@@ -13,6 +13,7 @@ interface TransactionRepository {
     fun getTotalExpensesInUsdForPeriod(startDate: Long, endDate: Long): Flow<Double?>
     fun getTotalIncomeInUsdForPeriod(startDate: Long, endDate: Long): Flow<Double?>
     fun getExpensesByCategoryForPeriod(startDate: Long, endDate: Long): Flow<List<Pair<String, Double>>>
+    fun getCategoryTotalsForPeriod(startDate: Long, endDate: Long): Flow<Map<String, Double>>
     suspend fun getTransactionByIdOnce(id: String): Transaction?
     suspend fun insertTransaction(transaction: Transaction)
     suspend fun updateTransaction(transaction: Transaction)
