@@ -11,8 +11,8 @@ CeroFiao is a multi-currency expense tracking Android app for Venezuela. Support
 ## Module Structure
 ### Core Modules
 - `core-model` - Domain entities (no Android deps): Transaction, Account, Category, Budget, Debt, DebtPayment, ExchangeRate, Currency, GlobalBalance
-- `core-common` - Utilities: CurrencyFormatter, DateUtils, MoneyCalculator, UuidGenerator, ExpressionEvaluator
-- `core-designsystem` - Theme, typography, colors (light + dark), CeroFiaoIcons
+- `core-common` - Utilities: CurrencyFormatter, DateUtils, MoneyCalculator, UuidGenerator
+- `core-designsystem` - Theme, typography, colors (light + dark), CeroFiaoIcons (Lucide + OneUI)
 - `core-database` - Room DB, DAOs, entities, EntityMappers, DatabasePrepopulate
 - `core-datastore` - DataStore preferences (theme, display currency, preferred rate source)
 - `core-network` - Ktor client (dolarapi.com) for USD and EUR rates
@@ -22,11 +22,11 @@ CeroFiao is a multi-currency expense tracking Android app for Venezuela. Support
 
 ### Feature Modules
 - `feature-dashboard` - Main screen: balance, currency breakdown, exchange rates (USD + EUR), monthly summary, top categories, recent transactions
-- `feature-transactions` - Transaction list, entry (add/edit with calculator numpad), detail view
+- `feature-transactions` - Transaction list, entry (add/edit with system keyboard), detail view, recurring transactions, transfer
 - `feature-accounts` - Account list, add account, account detail
-- `feature-categories` - Category management with icon picker
+- `feature-categories` - Category CRUD with OneUI icon picker, color palette, monthly summaries
 - `feature-exchange-rates` - Full exchange rate screen with BCV, USDT, EURI rates and historical charts
-- `feature-settings` - Theme, display currency, rate source, navigation to management screens
+- `feature-settings` - Theme, display currency, rate source, CSV import/export, associated titles, navigation to management screens
 - `feature-onboarding` - Initial setup (accounts, display currency)
 - `feature-budget` - Budget CRUD with progress tracking per category
 - `feature-debt` - Debt tracking (I owe / they owe), payment registration, settle
@@ -64,8 +64,10 @@ CeroFiao is a multi-currency expense tracking Android app for Venezuela. Support
 - All entities have `syncId` + `isDeleted` for future Supabase sync (soft delete)
 - Room is single source of truth (offline-first)
 - Currency math isolated in `MoneyCalculator` utility
-- `ExpressionEvaluator` for calculator-style numpad input in transaction entry
-- Swipe-to-delete pattern on list screens (transactions, budgets, debts)
+- Swipe-to-delete pattern on list screens (transactions, budgets, debts, categories)
+- Icons: Lucide (ImageVector) for nav/actions, OneUI (DrawableRes) for category icons
+- Transaction currency decoupled from account currency with multi-currency equivalents
+- Associated titles for intelligent category suggestions (title→category learning)
 
 ## Commands
 - Build: `JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew assembleDebug`

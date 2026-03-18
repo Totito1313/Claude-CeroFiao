@@ -337,23 +337,33 @@ data class SavingsGoal(
 
 ## Checklist de Implementación
 
-### Sprint 1
-- [ ] CSV Export — pantalla + use case + columnas venezolanas
-- [ ] CSV Import — parser + mapeo de columnas
-- [ ] Quick Actions — shortcuts.xml + manifest + intent handling
-- [ ] Transaction Activity Log — entidad + DAO + pantalla
+### Sprint 1 ✅ COMPLETADO
+- [x] CSV Export — pantalla + use case + columnas venezolanas
+- [x] CSV Import — parser + mapeo de columnas
+- [x] Quick Actions — shortcuts.xml + manifest + intent handling
+- [x] Transaction Activity Log — entidad + DAO + pantalla
 
-### Sprint 2
-- [ ] RecurringTransaction — model + DB + repository
-- [ ] RecurringTransactionWorker — WorkManager job
-- [ ] Feature UI — crear/editar recurrentes
-- [ ] Feature UI — lista "Próximas transacciones"
-- [ ] TransactionTitle — model + DB + repository
-- [ ] Sugerencia en AddTransaction — debounce + chip UI
-- [ ] Gestión de títulos en Settings
+### Sprint 2 ✅ COMPLETADO
+- [x] RecurringTransaction — model + DB + repository
+- [ ] RecurringTransactionWorker — WorkManager job (pendiente — generación automática al vencer)
+- [x] Feature UI — crear/editar recurrentes
+- [x] Feature UI — lista "Próximas transacciones" (30 días)
+- [x] TransactionTitle — model + DB + repository
+- [x] Sugerencia en AddTransaction — debounce + chip UI
+- [x] Gestión de títulos en Settings
 
-### Sprint 3
-- [ ] Category.parentCategoryId — Room migration
+### Sprint 3 — UI Overhaul ✅ COMPLETADO (nuevo sprint, no el original)
+- [x] Icon system: Lucide (nav/actions) + OneUI (category icons) — reemplaza Material Icons
+- [x] System keyboard: eliminar NumpadComponent, usar KeyboardType.Decimal
+- [x] Currency independence: selector de moneda en transaction entry + recurring form
+- [x] Multi-currency equivalents card en transaction entry
+- [x] DatePicker en recurring form
+- [x] Category CRUD: AddEditCategoryScreen con icon picker + color palette
+- [x] Category summaries: totales mensuales por categoría en CategoryListScreen
+- [x] Swipe-to-delete + tap-to-edit en CategoryListScreen
+
+### Sprint 3 (original) — Organización Avanzada → PENDIENTE
+- [ ] Category.parentCategoryId — Room migration (subcategorías)
 - [ ] UI jerárquica en feature-categories
 - [ ] Selector dos niveles en feature-transactions
 - [ ] SavingsGoal — model + DB + repository + feature-goals
