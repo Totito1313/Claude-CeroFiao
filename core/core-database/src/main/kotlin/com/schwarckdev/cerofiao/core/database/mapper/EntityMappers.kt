@@ -7,7 +7,9 @@ import com.schwarckdev.cerofiao.core.database.entity.CurrencyEntity
 import com.schwarckdev.cerofiao.core.database.entity.DebtEntity
 import com.schwarckdev.cerofiao.core.database.entity.DebtPaymentEntity
 import com.schwarckdev.cerofiao.core.database.entity.ExchangeRateEntity
+import com.schwarckdev.cerofiao.core.database.entity.RecurringTransactionEntity
 import com.schwarckdev.cerofiao.core.database.entity.TransactionEntity
+import com.schwarckdev.cerofiao.core.database.entity.TransactionTitleEntity
 import com.schwarckdev.cerofiao.core.database.entity.TransactionLogEntity
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
@@ -22,8 +24,11 @@ import com.schwarckdev.cerofiao.core.model.DebtPayment
 import com.schwarckdev.cerofiao.core.model.DebtType
 import com.schwarckdev.cerofiao.core.model.ExchangeRate
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
+import com.schwarckdev.cerofiao.core.model.RecurrenceType
+import com.schwarckdev.cerofiao.core.model.RecurringTransaction
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionLog
+import com.schwarckdev.cerofiao.core.model.TransactionTitle
 import com.schwarckdev.cerofiao.core.model.TransactionLogAction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
@@ -270,4 +275,62 @@ fun TransactionLog.toEntity() = TransactionLogEntity(
     action = action.name,
     timestamp = timestamp,
     snapshotJson = snapshotJson,
+)
+
+// RecurringTransaction
+fun RecurringTransactionEntity.toModel() = RecurringTransaction(
+    id = id,
+    title = title,
+    amount = amount,
+    currencyCode = currencyCode,
+    categoryId = categoryId,
+    accountId = accountId,
+    type = TransactionType.valueOf(type),
+    recurrence = try { RecurrenceType.valueOf(recurrence) } catch (_: Exception) { RecurrenceType.MONTHLY },
+    periodLength = periodLength,
+    startDate = startDate,
+    endDate = endDate,
+    nextDueDate = nextDueDate,
+    isActive = isActive,
+    note = note,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+)
+
+fun RecurringTransaction.toEntity(syncId: String? = null, isDeleted: Boolean = false) = RecurringTransactionEntity(
+    id = id,
+    title = title,
+    amount = amount,
+    currencyCode = currencyCode,
+    categoryId = categoryId,
+    accountId = accountId,
+    type = type.name,
+    recurrence = recurrence.name,
+    periodLength = periodLength,
+    startDate = startDate,
+    endDate = endDate,
+    nextDueDate = nextDueDate,
+    isActive = isActive,
+    note = note,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    syncId = syncId,
+    isDeleted = isDeleted,
+)
+
+// TransactionTitle
+fun TransactionTitleEntity.toModel() = TransactionTitle(
+    id = id,
+    title = title,
+    categoryId = categoryId,
+    isExactMatch = isExactMatch,
+)
+
+fun TransactionTitle.toEntity(syncId: String? = null, isDeleted: Boolean = false) = TransactionTitleEntity(
+    id = id,
+    title = title,
+    categoryId = categoryId,
+    isExactMatch = isExactMatch,
+    syncId = syncId,
+    isDeleted = isDeleted,
 )

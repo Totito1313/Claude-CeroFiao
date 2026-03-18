@@ -14,11 +14,14 @@ import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RecordTransactionUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.SuggestCategoryByTitleUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +44,7 @@ data class TransactionEntryUiState(
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val isEditMode: Boolean = false,
+    val suggestedCategoryId: String? = null,
 )
 
 @HiltViewModel
@@ -53,11 +57,13 @@ class TransactionEntryViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val resolveExchangeRate: ResolveExchangeRateUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val suggestCategoryByTitle: SuggestCategoryByTitleUseCase,
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<TransactionEntryRoute>()
     private val editTransactionId: String? = route.transactionId
     private var originalTransaction: Transaction? = null
+    private var suggestionJob: Job? = null
 
     private val formState = MutableStateFlow(FormState())
 
@@ -86,6 +92,7 @@ class TransactionEntryViewModel @Inject constructor(
             isSaving = form.isSaving,
             isSaved = form.isSaved,
             isEditMode = editTransactionId != null,
+            suggestedCategoryId = form.suggestedCategoryId,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -178,6 +185,23 @@ class TransactionEntryViewModel @Inject constructor(
 
     fun setNote(note: String) {
         formState.update { it.copy(note = note) }
+        suggestionJob?.cancel()
+        if (note.isNotBlank() && formState.value.selectedCategoryId == null) {
+            suggestionJob = viewModelScope.launch {
+                delay(500)
+                val categoryId = suggestCategoryByTitle.suggest(note)
+                if (categoryId != null) {
+                    formState.update { it.copy(suggestedCategoryId = categoryId) }
+                }
+            }
+        } else {
+            formState.update { it.copy(suggestedCategoryId = null) }
+        }
+    }
+
+    fun applySuggestedCategory() {
+        val suggested = formState.value.suggestedCategoryId ?: return
+        formState.update { it.copy(selectedCategoryId = suggested, suggestedCategoryId = null) }
     }
 
     fun save() {
@@ -202,6 +226,12 @@ class TransactionEntryViewModel @Inject constructor(
                         type = current.transactionType,
                         note = current.note.ifBlank { null },
                     )
+                }
+                // Learn title→category association for future suggestions
+                val categoryId = current.selectedCategoryId
+                val note = current.note.trim()
+                if (categoryId != null && note.isNotBlank()) {
+                    suggestCategoryByTitle.saveAssociation(note, categoryId)
                 }
                 formState.update { it.copy(isSaving = false, isSaved = true) }
             } catch (_: Exception) {
@@ -288,6 +318,7 @@ class TransactionEntryViewModel @Inject constructor(
         val transactionType: TransactionType = TransactionType.EXPENSE,
         val selectedAccountId: String? = null,
         val selectedCategoryId: String? = null,
+        val suggestedCategoryId: String? = null,
         val note: String = "",
         val isSaving: Boolean = false,
         val isSaved: Boolean = false,

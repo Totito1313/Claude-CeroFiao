@@ -44,6 +44,7 @@ fun SettingsScreen(
     onNavigateToBudgets: () -> Unit = {},
     onNavigateToDebts: () -> Unit = {},
     onNavigateToCsvExport: () -> Unit = {},
+    onNavigateToRecurring: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -142,6 +143,12 @@ fun SettingsScreen(
                 icon = CeroFiaoIcons.Debt,
                 label = "Deudas",
                 onClick = onNavigateToDebts,
+            )
+
+            NavigationRow(
+                icon = CeroFiaoIcons.Transactions,
+                label = "Transacciones recurrentes",
+                onClick = onNavigateToRecurring,
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

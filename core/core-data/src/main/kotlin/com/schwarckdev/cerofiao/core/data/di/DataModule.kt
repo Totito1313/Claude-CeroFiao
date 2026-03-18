@@ -5,16 +5,20 @@ import com.schwarckdev.cerofiao.core.data.repository.BudgetRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.CategoryRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.DebtRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.ExchangeRateRepositoryImpl
+import com.schwarckdev.cerofiao.core.data.repository.RecurringTransactionRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionLogRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionRepositoryImpl
+import com.schwarckdev.cerofiao.core.data.repository.TransactionTitleRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.UserPreferencesRepositoryImpl
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.BudgetRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.DebtRepository
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
+import com.schwarckdev.cerofiao.core.domain.repository.RecurringTransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionLogRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
+import com.schwarckdev.cerofiao.core.domain.repository.TransactionTitleRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import dagger.Binds
 import dagger.Module
@@ -57,4 +61,12 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindTransactionLogRepository(impl: TransactionLogRepositoryImpl): TransactionLogRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecurringTransactionRepository(impl: RecurringTransactionRepositoryImpl): RecurringTransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionTitleRepository(impl: TransactionTitleRepositoryImpl): TransactionTitleRepository
 }

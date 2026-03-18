@@ -35,8 +35,12 @@ import com.schwarckdev.cerofiao.feature.settings.settingsScreen
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionDetail
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionEntry
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionList
+import com.schwarckdev.cerofiao.feature.transactions.navigateToRecurringForm
+import com.schwarckdev.cerofiao.feature.transactions.navigateToRecurringList
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionActivity
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransfer
+import com.schwarckdev.cerofiao.feature.transactions.recurringFormScreen
+import com.schwarckdev.cerofiao.feature.transactions.recurringListScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionActivityScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionDetailScreen
 import com.schwarckdev.cerofiao.feature.transactions.transactionEntryScreen
@@ -126,6 +130,7 @@ fun CeroFiaoNavHost(
             onNavigateToBudgets = { navController.navigateToBudgetList() },
             onNavigateToDebts = { navController.navigateToDebtList() },
             onNavigateToCsvExport = { navController.navigateToCsvExport() },
+            onNavigateToRecurring = { navController.navigateToRecurringList() },
         )
 
         csvExportScreen(
@@ -134,6 +139,16 @@ fun CeroFiaoNavHost(
 
         transactionActivityScreen(
             onBack = { navController.popBackStack() },
+        )
+
+        recurringListScreen(
+            onBack = { navController.popBackStack() },
+            onAddRecurring = { navController.navigateToRecurringForm() },
+        )
+
+        recurringFormScreen(
+            onBack = { navController.popBackStack() },
+            onSaved = { navController.popBackStack() },
         )
 
         budgetListScreen(

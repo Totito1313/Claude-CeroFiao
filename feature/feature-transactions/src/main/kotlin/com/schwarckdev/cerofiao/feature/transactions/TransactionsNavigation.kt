@@ -97,3 +97,41 @@ fun NavGraphBuilder.transactionActivityScreen(
 fun NavController.navigateToTransactionActivity() {
     navigate(TransactionActivityRoute)
 }
+
+@Serializable
+object RecurringListRoute
+
+@Serializable
+object RecurringFormRoute
+
+fun NavGraphBuilder.recurringListScreen(
+    onBack: () -> Unit,
+    onAddRecurring: () -> Unit,
+) {
+    composable<RecurringListRoute> {
+        RecurringListScreen(
+            onBack = onBack,
+            onAddRecurring = onAddRecurring,
+        )
+    }
+}
+
+fun NavGraphBuilder.recurringFormScreen(
+    onBack: () -> Unit,
+    onSaved: () -> Unit,
+) {
+    composable<RecurringFormRoute> {
+        RecurringFormScreen(
+            onBack = onBack,
+            onSaved = onSaved,
+        )
+    }
+}
+
+fun NavController.navigateToRecurringList() {
+    navigate(RecurringListRoute)
+}
+
+fun NavController.navigateToRecurringForm() {
+    navigate(RecurringFormRoute)
+}
