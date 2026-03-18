@@ -13,7 +13,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -97,9 +101,11 @@ fun CeroFiaoApp(
         currentDestination?.hasRoute(dest.route::class) == true
     }
 
-    // Handle shortcut actions after NavHost is ready
-    androidx.compose.runtime.LaunchedEffect(shortcutAction) {
-        if (shortcutAction != null && hasCompletedOnboarding) {
+    // Handle shortcut actions — wait until onboarding is loaded, then navigate once
+    var shortcutHandled by remember { mutableStateOf(false) }
+    LaunchedEffect(shortcutAction, hasCompletedOnboarding) {
+        if (shortcutAction != null && hasCompletedOnboarding && !shortcutHandled) {
+            shortcutHandled = true
             when (shortcutAction) {
                 ShortcutAction.ADD_TRANSACTION -> {
                     navController.navigateToTransactionEntry()
