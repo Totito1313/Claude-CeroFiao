@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -23,12 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.BudgetPeriod
 import com.schwarckdev.cerofiao.core.ui.EmptyState
 
@@ -55,31 +55,48 @@ fun BudgetListScreen(
     modifier: Modifier = Modifier,
     viewModel: BudgetListViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Presupuestos") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddBudget) {
-                Icon(CeroFiaoIcons.Add, contentDescription = "Nuevo presupuesto")
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Back button
+        Surface(
+            shape = CircleShape,
+            color = t.iconBg,
+            modifier = Modifier
+                .padding(16.dp)
+                .size(40.dp)
+                .align(Alignment.TopStart),
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = CeroFiaoIcons.Back,
+                    contentDescription = "Volver",
+                    tint = t.text,
+                )
             }
-        },
-    ) { innerPadding ->
+        }
+
+        // Title
+        Text(
+            text = "Presupuestos",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = t.text,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 20.dp),
+        )
+
         if (uiState.budgets.isEmpty() && !uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(top = 64.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 EmptyState(
@@ -94,8 +111,8 @@ fun BudgetListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(top = 64.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(
@@ -118,13 +135,13 @@ fun BudgetListScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.errorContainer),
+                                    .background(t.danger.copy(alpha = 0.15f)),
                                 contentAlignment = Alignment.CenterEnd,
                             ) {
                                 Icon(
                                     imageVector = CeroFiaoIcons.Delete,
                                     contentDescription = "Eliminar",
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    tint = t.danger,
                                     modifier = Modifier.padding(end = 16.dp),
                                 )
                             }
@@ -138,6 +155,21 @@ fun BudgetListScreen(
                 }
             }
         }
+
+        // FAB
+        FloatingActionButton(
+            onClick = onAddBudget,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 116.dp),
+            containerColor = Color(0xFF8A2BE2),
+        ) {
+            Icon(
+                imageVector = CeroFiaoIcons.Add,
+                contentDescription = "Nuevo presupuesto",
+                tint = Color.White,
+            )
+        }
     }
 }
 
@@ -147,6 +179,7 @@ private fun BudgetCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     val budget = budgetWithProgress.budget
     val isOverBudget = budgetWithProgress.progress > 1f
     val progressColor = when {
@@ -159,7 +192,7 @@ private fun BudgetCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = t.surface,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -177,13 +210,14 @@ private fun BudgetCard(
                             painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = t.text,
                         )
                     }
                     Text(
                         text = budget.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
+                        color = t.text,
                     )
                 }
                 Text(
@@ -193,7 +227,7 @@ private fun BudgetCard(
                         BudgetPeriod.MONTHLY -> "Mensual"
                     },
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
             }
 
@@ -207,7 +241,7 @@ private fun BudgetCard(
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
                 color = progressColor,
-                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                trackColor = t.inputBg,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -219,12 +253,12 @@ private fun BudgetCard(
                 Text(
                     text = "Gastado: ${CurrencyFormatter.format(budgetWithProgress.spentAmount, budgetWithProgress.currencyCode)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isOverBudget) Color(0xFFF44336) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (isOverBudget) Color(0xFFF44336) else t.textSecondary,
                 )
                 Text(
                     text = "Límite: ${CurrencyFormatter.format(budgetWithProgress.limitAmount, budgetWithProgress.currencyCode)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
             }
 

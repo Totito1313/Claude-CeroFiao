@@ -1,13 +1,17 @@
 package com.schwarckdev.cerofiao.feature.accounts
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
@@ -21,15 +25,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,6 +42,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.common.UuidGenerator
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
@@ -85,6 +91,7 @@ fun AddAccountScreen(
     modifier: Modifier = Modifier,
     viewModel: AddAccountViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     var name by remember { mutableStateOf("") }
     var selectedPlatform by remember { mutableStateOf(AccountPlatform.NONE) }
     var currencyCode by remember { mutableStateOf(AccountPlatform.NONE.defaultCurrencyCode) }
@@ -95,28 +102,45 @@ fun AddAccountScreen(
 
     val isFormValid = name.isNotBlank()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "Nueva Cuenta")
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = CeroFiaoIcons.Back,
-                            contentDescription = "Volver",
-                        )
-                    }
-                },
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Top bar row with back button and title
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = t.iconBg,
+                modifier = Modifier.size(40.dp),
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = CeroFiaoIcons.Back,
+                        contentDescription = "Volver",
+                        tint = t.text,
+                    )
+                }
+            }
+            Text(
+                text = "Nueva Cuenta",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = t.text,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
             )
-        },
-    ) { innerPadding ->
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),

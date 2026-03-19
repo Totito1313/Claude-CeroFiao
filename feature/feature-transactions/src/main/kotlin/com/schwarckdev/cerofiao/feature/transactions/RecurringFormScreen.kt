@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -25,10 +27,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,13 +37,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.RecurrenceType
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
@@ -54,6 +58,7 @@ fun RecurringFormScreen(
     modifier: Modifier = Modifier,
     viewModel: RecurringFormViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -61,23 +66,35 @@ fun RecurringFormScreen(
         if (uiState.isSaved) onSaved()
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Nueva recurrente") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Top bar row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(shape = CircleShape, color = t.iconBg) {
+                IconButton(onClick = onBack) {
+                    Icon(CeroFiaoIcons.Back, contentDescription = "Volver", tint = t.text)
+                }
+            }
+            Text(
+                text = "Nueva recurrente",
+                style = MaterialTheme.typography.titleMedium,
+                color = t.text,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 12.dp),
             )
-        },
-    ) { innerPadding ->
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -100,7 +117,7 @@ fun RecurringFormScreen(
             )
 
             // Currency selector
-            Text(text = "Moneda", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Moneda", style = MaterialTheme.typography.labelLarge, color = t.text)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -145,7 +162,7 @@ fun RecurringFormScreen(
             }
 
             // Start date picker
-            Text(text = "Fecha de inicio", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Fecha de inicio", style = MaterialTheme.typography.labelLarge, color = t.text)
             OutlinedButton(
                 onClick = { showDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -233,6 +250,8 @@ fun RecurringFormScreen(
             ) {
                 Text("Guardar recurrente")
             }
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
     }
 

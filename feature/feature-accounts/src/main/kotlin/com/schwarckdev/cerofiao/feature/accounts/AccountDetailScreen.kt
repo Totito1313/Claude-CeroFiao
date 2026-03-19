@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.accounts
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,19 +14,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.core.ui.MoneyText
@@ -51,6 +51,7 @@ fun AccountDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AccountDetailViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -70,7 +71,7 @@ fun AccountDetailScreen(
                         onBack()
                     },
                 ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text("Eliminar", color = t.danger)
                 }
             },
             dismissButton = {
@@ -83,93 +84,120 @@ fun AccountDetailScreen(
 
     val account = uiState.account
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(account?.name ?: "Cuenta") },
-                navigationIcon = {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Top bar row with back button, title, and delete action
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = t.iconBg,
+                    modifier = Modifier.size(40.dp),
+                ) {
                     IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
+                        Icon(
+                            CeroFiaoIcons.Back,
+                            contentDescription = "Volver",
+                            tint = t.text,
+                        )
                     }
-                },
-                actions = {
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = account?.name ?: "Cuenta",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = t.text,
+                    modifier = Modifier.weight(1f),
+                )
+                Surface(
+                    shape = CircleShape,
+                    color = t.iconBg,
+                    modifier = Modifier.size(40.dp),
+                ) {
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             CeroFiaoIcons.Delete,
                             contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error,
+                            tint = t.danger,
                         )
                     }
-                },
-            )
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // Account info card
-            if (account != null) {
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                }
+            }
+        }
+
+        // Account info card
+        if (account != null) {
+            item {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF8A2BE2).copy(alpha = 0.15f),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = account.platform.displayName,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            MoneyText(
-                                amount = account.balance,
-                                currencyCode = account.currencyCode,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = account.currencyCode,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                            )
-                        }
+                        Text(
+                            text = account.platform.displayName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = t.textSecondary,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        MoneyText(
+                            amount = account.balance,
+                            currencyCode = account.currencyCode,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = t.text,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = account.currencyCode,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = t.textSecondary,
+                        )
                     }
                 }
             }
+        }
 
-            // Transaction history header
+        // Transaction history header
+        item {
+            Text(
+                text = "Historial de transacciones",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = t.text,
+            )
+        }
+
+        if (uiState.transactions.isEmpty()) {
             item {
                 Text(
-                    text = "Historial de transacciones",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    text = "No hay transacciones en esta cuenta",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = t.textSecondary,
                 )
             }
-
-            if (uiState.transactions.isEmpty()) {
-                item {
-                    Text(
-                        text = "No hay transacciones en esta cuenta",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                items(uiState.transactions, key = { it.id }) { transaction ->
-                    AccountTransactionRow(transaction = transaction)
-                }
+        } else {
+            items(uiState.transactions, key = { it.id }) { transaction ->
+                AccountTransactionRow(transaction = transaction)
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
@@ -179,16 +207,17 @@ private fun AccountTransactionRow(
     transaction: Transaction,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     val (icon, iconColor, sign) = when (transaction.type) {
         TransactionType.INCOME -> Triple(CeroFiaoIcons.Income, Color(0xFF4CAF50), "+")
         TransactionType.EXPENSE -> Triple(CeroFiaoIcons.Expense, Color(0xFFF44336), "-")
-        TransactionType.TRANSFER -> Triple(CeroFiaoIcons.Transfer, MaterialTheme.colorScheme.tertiary, "")
+        TransactionType.TRANSFER -> Triple(CeroFiaoIcons.Transfer, Color(0xFF8A2BE2), "")
     }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = t.surface,
     ) {
         Row(
             modifier = Modifier
@@ -214,12 +243,13 @@ private fun AccountTransactionRow(
                     text = transaction.note ?: transaction.type.name.lowercase()
                         .replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.bodyMedium,
+                    color = t.text,
                     maxLines = 1,
                 )
                 Text(
                     text = DateUtils.formatDisplayDate(transaction.date),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
             }
             Text(

@@ -509,7 +509,8 @@ private fun IOSToggle(
         label = "thumb_offset",
     )
 
-    val trackColor = if (checked) Color(0xFF00FF66) else Color.White.copy(alpha = 0.12f)
+    val t = CeroFiaoTheme.tokens
+    val trackColor = if (checked) t.success else t.handleBg
 
     Box(
         modifier = modifier

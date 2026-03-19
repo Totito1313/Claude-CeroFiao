@@ -74,7 +74,7 @@ fun DashboardScreen(
     val t = CeroFiaoTheme.tokens
     var balanceVisible by remember { mutableStateOf(true) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().background(t.bg)) {
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = viewModel::refreshRates,
@@ -276,7 +276,7 @@ private fun DashboardHeader(usdVesRate: Double?) {
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF00FF66)),
+                            .background(t.success),
                     )
                     Text(
                         text = "$1 = Bs.${String.format("%.2f", usdVesRate)}",
@@ -356,8 +356,8 @@ private fun GlobalBalanceSection(
             // Income pill
             Surface(
                 shape = CircleShape,
-                color = Color(0x0F00FF66),
-                border = BorderStroke(1.dp, Color(0x1F00FF66)),
+                color = t.success.copy(alpha = 0.06f),
+                border = BorderStroke(1.dp, t.success.copy(alpha = 0.12f)),
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -368,13 +368,13 @@ private fun GlobalBalanceSection(
                         imageVector = CeroFiaoIcons.TrendingUp,
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
-                        tint = Color(0xFF00FF66),
+                        tint = t.success,
                     )
                     Text(
                         text = if (balanceVisible) "$${monthlyIncome.toLong()}" else "••••",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF00FF66),
+                        color = t.success,
                     )
                 }
             }
@@ -382,8 +382,8 @@ private fun GlobalBalanceSection(
             // Expense pill
             Surface(
                 shape = CircleShape,
-                color = Color(0x0FFF4433),
-                border = BorderStroke(1.dp, Color(0x1FFF4433)),
+                color = t.danger.copy(alpha = 0.06f),
+                border = BorderStroke(1.dp, t.danger.copy(alpha = 0.12f)),
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -394,13 +394,13 @@ private fun GlobalBalanceSection(
                         imageVector = CeroFiaoIcons.TrendingDown,
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
-                        tint = Color(0xFFFF4433),
+                        tint = t.danger,
                     )
                     Text(
                         text = if (balanceVisible) "$${monthlyExpenses.toLong()}" else "••••",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFFF4433),
+                        color = t.danger,
                     )
                 }
             }
@@ -461,7 +461,7 @@ private fun PocketCardsSection(
 ) {
     val t = CeroFiaoTheme.tokens
     val colors = listOf(
-        Color(0xFF00FF66), Color(0xFF8A2BE2), Color(0xFFFF6B00),
+        t.success, Color(0xFF8A2BE2), Color(0xFFFF6B00),
         Color(0xFF00D4FF), Color(0xFFF0B90B),
     )
 
@@ -672,9 +672,9 @@ private fun BudgetRow(expense: CategoryExpense) {
     val t = CeroFiaoTheme.tokens
     val pct = expense.percentage.coerceIn(0f, 1f)
     val barColor = when {
-        pct > 0.8f -> Color(0xFFFF4433)
-        pct > 0.5f -> Color(0xFFFF6B00)
-        else -> Color(0xFF00FF66)
+        pct > 0.8f -> t.danger
+        pct > 0.5f -> Color(0xFFFF6B00)  // orange warning — intentional brand color
+        else -> t.success
     }
 
     Column {
@@ -728,7 +728,7 @@ private fun TransactionRow(
 ) {
     val t = CeroFiaoTheme.tokens
     val isIncome = transaction.type == TransactionType.INCOME
-    val amountColor = if (isIncome) Color(0xFF00FF66) else t.expense
+    val amountColor = if (isIncome) t.success else t.expense
     val sign = if (isIncome) "+" else "-"
     val symbol = if (transaction.currencyCode == "VES") "Bs." else "$"
 
@@ -788,7 +788,7 @@ private fun TransactionRow(
                 imageVector = if (isIncome) CeroFiaoIcons.ArrowIncome else CeroFiaoIcons.ArrowExpense,
                 contentDescription = null,
                 modifier = Modifier.size(11.dp),
-                tint = if (isIncome) Color(0xFF00FF66) else Color(0xFFFF4433),
+                tint = if (isIncome) t.success else t.danger,
             )
             Text(
                 text = "$sign$symbol${CurrencyFormatter.format(transaction.amount, transaction.currencyCode)}",
@@ -831,13 +831,13 @@ private fun SectionHeader(
                 text = actionLabel,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF00FF66),
+                color = t.success,
             )
             Icon(
                 imageVector = CeroFiaoIcons.ChevronRight,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
-                tint = Color(0xFF00FF66),
+                tint = t.success,
             )
         }
     }

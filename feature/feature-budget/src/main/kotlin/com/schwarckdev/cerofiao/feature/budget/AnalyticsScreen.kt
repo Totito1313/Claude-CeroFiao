@@ -353,9 +353,9 @@ private fun BudgetPacingItem(
     var isExpanded by remember { mutableStateOf(false) }
 
     val progressColor = when {
-        budgetWithProgress.progress > 0.8f -> Color(0xFFFF4433)
-        budgetWithProgress.progress > 0.5f -> Color(0xFFFF6B00)
-        else -> Color(0xFF00FF66)
+        budgetWithProgress.progress > 0.8f -> t.danger
+        budgetWithProgress.progress > 0.5f -> Color(0xFFFF6B00) // orange warning
+        else -> t.success
     }
 
     val animatedProgress by animateFloatAsState(
@@ -434,7 +434,7 @@ private fun BudgetPacingItem(
                         "Excedido por ${CurrencyFormatter.format(-remaining, budgetWithProgress.currencyCode)}"
                     },
                     fontSize = 11.sp,
-                    color = if (remaining >= 0) t.textMuted else Color(0xFFFF4433),
+                    color = if (remaining >= 0) t.textMuted else t.danger,
                 )
             }
 
@@ -525,7 +525,7 @@ private fun BudgetPacingItem(
                     } else {
                         "-${CurrencyFormatter.format(-remaining, budgetWithProgress.currencyCode)}"
                     },
-                    valueColor = if (remaining >= 0) t.success else Color(0xFFFF4433),
+                    valueColor = if (remaining >= 0) t.success else t.danger,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -553,7 +553,7 @@ private fun BudgetPacingItem(
                 DetailRow(
                     label = "Ritmo diario",
                     value = "${CurrencyFormatter.format(dailyPace, budgetWithProgress.currencyCode)}/d\u00EDa",
-                    valueColor = if (dailyPace <= idealDailyPace) t.success else Color(0xFFFF6B00),
+                    valueColor = if (dailyPace <= idealDailyPace) t.success else Color(0xFFFF6B00), // orange warning
                 )
             }
         }

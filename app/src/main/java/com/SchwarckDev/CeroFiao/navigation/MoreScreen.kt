@@ -1,6 +1,7 @@
 package com.SchwarckDev.CeroFiao.navigation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +83,7 @@ fun MoreScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(t.bg)
             .verticalScroll(rememberScrollState())
             .padding(bottom = 100.dp),
     ) {

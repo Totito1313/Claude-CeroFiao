@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.debt
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,12 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,11 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ fun DebtDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: DebtDetailViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPaymentDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -83,7 +86,7 @@ fun DebtDetailScreen(
                         onBack()
                     },
                 ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text("Eliminar", color = t.danger)
                 }
             },
             dismissButton = {
@@ -96,155 +99,181 @@ fun DebtDetailScreen(
 
     val debt = uiState.debt
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(debt?.personName ?: "Deuda") },
-                navigationIcon = {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Top bar with back button, title, and delete action
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = t.iconBg,
+                    modifier = Modifier.size(40.dp),
+                ) {
                     IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
-                            CeroFiaoIcons.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error,
+                            imageVector = CeroFiaoIcons.Back,
+                            contentDescription = "Volver",
+                            tint = t.text,
                         )
                     }
-                },
-            )
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // Debt info card
-            if (debt != null) {
-                val typeColor = if (debt.type == DebtType.THEY_OWE) Color(0xFF4CAF50) else Color(0xFFF44336)
-                val typeLabel = if (debt.type == DebtType.THEY_OWE) "Me debe" else "Le debo"
+                }
 
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                Text(
+                    text = debt?.personName ?: "Deuda",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = t.text,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
+                )
+
+                Surface(
+                    shape = CircleShape,
+                    color = t.iconBg,
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = CeroFiaoIcons.Delete,
+                            contentDescription = "Eliminar",
+                            tint = t.danger,
+                        )
+                    }
+                }
+            }
+        }
+
+        // Debt info card
+        if (debt != null) {
+            val typeColor = if (debt.type == DebtType.THEY_OWE) Color(0xFF4CAF50) else Color(0xFFF44336)
+            val typeLabel = if (debt.type == DebtType.THEY_OWE) "Me debe" else "Le debo"
+
+            item {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF8A2BE2).copy(alpha = 0.15f),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = typeLabel,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                            )
+                        Text(
+                            text = typeLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = t.textSecondary,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = CurrencyFormatter.format(debt.remainingAmount, debt.currencyCode),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = typeColor,
+                        )
+                        if (debt.remainingAmount != debt.originalAmount) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = CurrencyFormatter.format(debt.remainingAmount, debt.currencyCode),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = typeColor,
+                                text = "de ${CurrencyFormatter.format(debt.originalAmount, debt.currencyCode)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = t.textSecondary,
                             )
-                            if (debt.remainingAmount != debt.originalAmount) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "de ${CurrencyFormatter.format(debt.originalAmount, debt.currencyCode)}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                                )
-                            }
-                            if (debt.isSettled) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Saldada",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF4CAF50),
-                                )
-                            }
                         }
-                    }
-                }
-
-                // Details
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            DetailRow(label = "Persona", value = debt.personName)
-                            DetailRow(label = "Moneda", value = debt.currencyCode)
-                            DetailRow(label = "Creada", value = DateUtils.formatDisplayDate(debt.createdAt))
-                            val dueDate = debt.dueDate
-                            if (dueDate != null) {
-                                DetailRow(label = "Vence", value = DateUtils.formatDisplayDate(dueDate))
-                            }
-                            val debtNote = debt.note
-                            if (!debtNote.isNullOrBlank()) {
-                                DetailRow(label = "Nota", value = debtNote)
-                            }
-                            val settledAt = debt.settledAt
-                            if (settledAt != null) {
-                                DetailRow(label = "Saldada", value = DateUtils.formatDisplayDate(settledAt))
-                            }
-                        }
-                    }
-                }
-
-                // Action buttons
-                if (!debt.isSettled) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Button(
-                                onClick = { showPaymentDialog = true },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text("Registrar pago")
-                            }
-                            OutlinedButton(
-                                onClick = { viewModel.markAsSettled() },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text("Marcar saldada")
-                            }
+                        if (debt.isSettled) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Saldada",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4CAF50),
+                            )
                         }
                     }
                 }
             }
 
-            // Payment history header
+            // Details
+            item {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = t.surface,
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        DetailRow(label = "Persona", value = debt.personName)
+                        DetailRow(label = "Moneda", value = debt.currencyCode)
+                        DetailRow(label = "Creada", value = DateUtils.formatDisplayDate(debt.createdAt))
+                        val dueDate = debt.dueDate
+                        if (dueDate != null) {
+                            DetailRow(label = "Vence", value = DateUtils.formatDisplayDate(dueDate))
+                        }
+                        val debtNote = debt.note
+                        if (!debtNote.isNullOrBlank()) {
+                            DetailRow(label = "Nota", value = debtNote)
+                        }
+                        val settledAt = debt.settledAt
+                        if (settledAt != null) {
+                            DetailRow(label = "Saldada", value = DateUtils.formatDisplayDate(settledAt))
+                        }
+                    }
+                }
+            }
+
+            // Action buttons
+            if (!debt.isSettled) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Button(
+                            onClick = { showPaymentDialog = true },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text("Registrar pago")
+                        }
+                        OutlinedButton(
+                            onClick = { viewModel.markAsSettled() },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text("Marcar saldada")
+                        }
+                    }
+                }
+            }
+        }
+
+        // Payment history header
+        item {
+            Text(
+                text = "Historial de pagos",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = t.text,
+            )
+        }
+
+        if (uiState.payments.isEmpty()) {
             item {
                 Text(
-                    text = "Historial de pagos",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    text = "No hay pagos registrados",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = t.textSecondary,
                 )
             }
-
-            if (uiState.payments.isEmpty()) {
-                item {
-                    Text(
-                        text = "No hay pagos registrados",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                items(uiState.payments, key = { it.id }) { payment ->
-                    PaymentRow(payment = payment)
-                }
+        } else {
+            items(uiState.payments, key = { it.id }) { payment ->
+                PaymentRow(payment = payment)
             }
         }
     }
@@ -256,6 +285,7 @@ private fun DetailRow(
     value: String,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -265,12 +295,13 @@ private fun DetailRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = t.textSecondary,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
+            color = t.text,
         )
     }
 }
@@ -280,10 +311,11 @@ private fun PaymentRow(
     payment: DebtPayment,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = t.surface,
     ) {
         Row(
             modifier = Modifier
@@ -296,11 +328,12 @@ private fun PaymentRow(
                     text = payment.note ?: "Pago",
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
+                    color = t.text,
                 )
                 Text(
                     text = DateUtils.formatDisplayDate(payment.paidAt),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
             }
             Text(
@@ -320,6 +353,7 @@ private fun PaymentDialog(
     onDismiss: () -> Unit,
     onConfirm: (amount: String, note: String) -> Unit,
 ) {
+    val t = CeroFiaoTheme.tokens
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
 
@@ -331,7 +365,7 @@ private fun PaymentDialog(
                 Text(
                     text = "Monto pendiente: ${CurrencyFormatter.format(maxAmount, currencyCode)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(

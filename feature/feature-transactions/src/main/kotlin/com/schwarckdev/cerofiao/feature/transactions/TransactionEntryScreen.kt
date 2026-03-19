@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -25,18 +27,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -55,29 +57,42 @@ fun TransactionEntryScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionEntryViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) onSaved()
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(if (uiState.isEditMode) "Editar transacción" else "Nueva transacción") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Top bar row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(shape = CircleShape, color = t.iconBg) {
+                IconButton(onClick = onBack) {
+                    Icon(CeroFiaoIcons.Back, contentDescription = "Volver", tint = t.text)
+                }
+            }
+            Text(
+                text = if (uiState.isEditMode) "Editar transacción" else "Nueva transacción",
+                style = MaterialTheme.typography.titleMedium,
+                color = t.text,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 12.dp),
             )
-        },
-    ) { innerPadding ->
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -118,6 +133,7 @@ fun TransactionEntryScreen(
             Text(
                 text = "Moneda",
                 style = MaterialTheme.typography.labelLarge,
+                color = t.text,
             )
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -137,7 +153,7 @@ fun TransactionEntryScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        containerColor = t.inputBg,
                     ),
                 ) {
                     Column(
@@ -147,13 +163,13 @@ fun TransactionEntryScreen(
                         Text(
                             text = "Equivalentes",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color(0xFF8A2BE2),
                         )
                         uiState.currencyEquivalents.forEach { (currency, amount) ->
                             Text(
                                 text = CurrencyFormatter.format(amount, currency),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = t.textSecondary,
                             )
                         }
                     }
@@ -164,6 +180,7 @@ fun TransactionEntryScreen(
             Text(
                 text = "Cuenta",
                 style = MaterialTheme.typography.labelLarge,
+                color = t.text,
             )
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -183,6 +200,7 @@ fun TransactionEntryScreen(
                 Text(
                     text = "Categoría",
                     style = MaterialTheme.typography.labelLarge,
+                    color = t.text,
                 )
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -222,7 +240,7 @@ fun TransactionEntryScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        color = t.pillBg,
                         tonalElevation = 1.dp,
                     ) {
                         Row(
@@ -237,18 +255,18 @@ fun TransactionEntryScreen(
                                 painter = painterResource(CeroFiaoIcons.getCategoryIconRes(suggestedCategory.iconName)),
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                tint = t.text,
                             )
                             Text(
                                 text = "Sugerencia: ${suggestedCategory.name}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                color = t.text,
                                 modifier = Modifier.weight(1f),
                             )
                             Text(
                                 text = "Aplicar",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color(0xFF8A2BE2),
                                 fontWeight = FontWeight.Bold,
                             )
                         }
@@ -265,7 +283,7 @@ fun TransactionEntryScreen(
                 Text("Guardar")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }

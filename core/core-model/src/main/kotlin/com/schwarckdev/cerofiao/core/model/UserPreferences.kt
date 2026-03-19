@@ -14,6 +14,6 @@ data class UserPreferences(
     val displayCurrencyCode: String = "USD",
     val preferredRateSource: ExchangeRateSource = ExchangeRateSource.USDT,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val useDynamicColor: Boolean = true,
+    val useDynamicColor: Boolean = false,
     val hasCompletedOnboarding: Boolean = false,
 )

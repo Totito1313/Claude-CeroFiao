@@ -39,7 +39,7 @@ class UserPreferencesDataStore @Inject constructor(
             themeMode = prefs[Keys.THEME_MODE]?.let {
                 try { ThemeMode.valueOf(it) } catch (_: Exception) { ThemeMode.SYSTEM }
             } ?: ThemeMode.SYSTEM,
-            useDynamicColor = prefs[Keys.USE_DYNAMIC_COLOR] ?: true,
+            useDynamicColor = prefs[Keys.USE_DYNAMIC_COLOR] ?: false,
             hasCompletedOnboarding = prefs[Keys.HAS_COMPLETED_ONBOARDING] ?: false,
         )
     }

@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -30,17 +32,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
 import com.schwarckdev.cerofiao.core.ui.CurrencyChip
@@ -51,20 +55,15 @@ fun OnboardingScreen(
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        modifier = modifier,
-        bottomBar = {
-            OnboardingBottomBar(
-                currentStep = uiState.currentStep,
-                isLoading = uiState.isLoading,
-                onBack = viewModel::previousStep,
-                onNext = viewModel::nextStep,
-                onComplete = { viewModel.completeOnboarding(onOnboardingComplete) },
-            )
-        },
-    ) { innerPadding ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Animated step content
         AnimatedContent(
             targetState = uiState.currentStep,
             label = "onboarding_step",
@@ -77,11 +76,11 @@ fun OnboardingScreen(
                         .togetherWith(slideOutHorizontally { it } + fadeOut())
                 }
             },
+            modifier = Modifier.weight(1f),
         ) { step ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
                     .padding(horizontal = 24.dp),
             ) {
                 when (step) {
@@ -101,6 +100,15 @@ fun OnboardingScreen(
                 }
             }
         }
+
+        // Bottom bar
+        OnboardingBottomBar(
+            currentStep = uiState.currentStep,
+            isLoading = uiState.isLoading,
+            onBack = viewModel::previousStep,
+            onNext = viewModel::nextStep,
+            onComplete = { viewModel.completeOnboarding(onOnboardingComplete) },
+        )
     }
 }
 
@@ -108,6 +116,7 @@ fun OnboardingScreen(
 private fun WelcomeStep(
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -119,7 +128,7 @@ private fun WelcomeStep(
             imageVector = CeroFiaoIcons.Cash,
             contentDescription = null,
             modifier = Modifier.size(96.dp),
-            tint = MaterialTheme.colorScheme.primary,
+            tint = Color(0xFF8A2BE2),
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -127,7 +136,7 @@ private fun WelcomeStep(
         Text(
             text = "CeroFiao",
             style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.primary,
+            color = Color(0xFF8A2BE2),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -136,7 +145,7 @@ private fun WelcomeStep(
             text = "Tu dinero, todas tus monedas, un solo lugar",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = t.textSecondary,
         )
     }
 }
@@ -148,6 +157,7 @@ private fun CurrencyStep(
     onCurrencySelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     val currencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
 
     Column(
@@ -160,6 +170,7 @@ private fun CurrencyStep(
             text = "\u00BFEn qu\u00E9 moneda quieres ver tus totales?",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
+            color = t.text,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -184,6 +195,7 @@ private fun RateSourceStep(
     onSourceSelected: (ExchangeRateSource) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -194,6 +206,7 @@ private fun RateSourceStep(
             text = "\u00BFQu\u00E9 tasa de cambio prefieres?",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
+            color = t.text,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -233,14 +246,15 @@ private fun RateSourceCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFF8A2BE2).copy(alpha = 0.15f)
             } else {
-                MaterialTheme.colorScheme.surfaceVariant
+                t.pillBg
             },
         ),
         border = if (isSelected) {
@@ -255,11 +269,8 @@ private fun RateSourceCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                fontWeight = FontWeight.SemiBold,
+                color = if (isSelected) Color(0xFF8A2BE2) else t.text,
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -267,11 +278,7 @@ private fun RateSourceCard(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                color = if (isSelected) Color(0xFF8A2BE2).copy(alpha = 0.8f) else t.textSecondary,
             )
         }
     }
@@ -284,6 +291,7 @@ private fun AccountsStep(
     onTogglePlatform: (AccountPlatform) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     val platforms = AccountPlatform.entries.filter { it != AccountPlatform.NONE }
 
     Column(
@@ -297,6 +305,7 @@ private fun AccountsStep(
             text = "\u00BFQu\u00E9 cuentas usas?",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
+            color = t.text,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -304,7 +313,7 @@ private fun AccountsStep(
         Text(
             text = "Podr\u00E1s agregar m\u00E1s despu\u00E9s",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = t.textSecondary,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -333,16 +342,20 @@ private fun OnboardingBottomBar(
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
     val totalSteps = 4
 
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .background(t.bg)
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         LinearProgressIndicator(
             progress = { (currentStep + 1).toFloat() / totalSteps },
             modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF8A2BE2),
+            trackColor = t.surfaceBorder,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -379,7 +392,7 @@ private fun OnboardingBottomBar(
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                         )
                     } else {
                         Text(text = "Finalizar")

@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.transactions
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Column
@@ -11,19 +12,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,9 +39,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailScreen(
     onBack: () -> Unit,
@@ -50,6 +49,7 @@ fun TransactionDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionDetailViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -70,7 +70,7 @@ fun TransactionDetailScreen(
                         onBack()
                     },
                 ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text("Eliminar", color = t.danger)
                 }
             },
             dismissButton = {
@@ -81,58 +81,71 @@ fun TransactionDetailScreen(
         )
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalle") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
-                actions = {
-                    val tx = uiState.transaction
-                    if (tx != null && tx.type != TransactionType.TRANSFER) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Top bar row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Surface(shape = CircleShape, color = t.iconBg) {
+                IconButton(onClick = onBack) {
+                    Icon(CeroFiaoIcons.Back, contentDescription = "Volver", tint = t.text)
+                }
+            }
+            Text(
+                text = "Detalle",
+                style = MaterialTheme.typography.titleMedium,
+                color = t.text,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Row {
+                val tx = uiState.transaction
+                if (tx != null && tx.type != TransactionType.TRANSFER) {
+                    Surface(shape = CircleShape, color = t.iconBg) {
                         IconButton(onClick = { onEdit(tx.id) }) {
-                            Icon(CeroFiaoIcons.Edit, contentDescription = "Editar")
+                            Icon(CeroFiaoIcons.Edit, contentDescription = "Editar", tint = t.text)
                         }
                     }
-                    if (tx != null) {
+                }
+                if (tx != null) {
+                    Surface(shape = CircleShape, color = t.iconBg) {
                         IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(
                                 CeroFiaoIcons.Delete,
                                 contentDescription = "Eliminar",
-                                tint = MaterialTheme.colorScheme.error,
+                                tint = t.danger,
                             )
                         }
                     }
-                },
-            )
-        },
-    ) { innerPadding ->
+                }
+            }
+        }
+
         val transaction = uiState.transaction
 
         if (transaction == null) {
-            // Loading or not found
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = "Cargando...",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                 )
             }
         } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
                     .verticalScroll(rememberScrollState()),
             ) {
                 // Amount header
@@ -148,7 +161,7 @@ fun TransactionDetailScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    color = t.surface,
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         DetailRow(
@@ -160,7 +173,10 @@ fun TransactionDetailScreen(
                             },
                         )
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = t.surfaceBorder,
+                        )
 
                         DetailRow(
                             label = "Cuenta",
@@ -168,7 +184,10 @@ fun TransactionDetailScreen(
                         )
 
                         if (transaction.type == TransactionType.TRANSFER && uiState.transferToAccount != null) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             DetailRow(
                                 label = "Cuenta destino",
                                 value = uiState.transferToAccount?.name ?: "—",
@@ -176,7 +195,10 @@ fun TransactionDetailScreen(
                         }
 
                         if (uiState.category != null) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -185,7 +207,7 @@ fun TransactionDetailScreen(
                                 Text(
                                     text = "Categoría",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = t.textSecondary,
                                 )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -195,18 +217,22 @@ fun TransactionDetailScreen(
                                         painter = painterResource(CeroFiaoIcons.getCategoryIconRes(uiState.category!!.iconName)),
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        tint = t.text,
                                     )
                                     Text(
                                         text = uiState.category!!.name,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
+                                        color = t.text,
                                     )
                                 }
                             }
                         }
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = t.surfaceBorder,
+                        )
 
                         DetailRow(
                             label = "Fecha",
@@ -215,7 +241,10 @@ fun TransactionDetailScreen(
 
                         val note = transaction.note
                         if (!note.isNullOrBlank()) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             DetailRow(
                                 label = "Nota",
                                 value = note,
@@ -224,7 +253,10 @@ fun TransactionDetailScreen(
 
                         val commission = transaction.transferCommission
                         if (commission != null && commission > 0) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             DetailRow(
                                 label = "Comisión",
                                 value = CurrencyFormatter.format(
@@ -244,13 +276,13 @@ fun TransactionDetailScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    color = t.surface,
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "Información cambiaria",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = t.textSecondary,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -260,7 +292,10 @@ fun TransactionDetailScreen(
                         )
 
                         if (transaction.currencyCode != "USD") {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             DetailRow(
                                 label = "Tasa usada",
                                 value = "1 USD = ${CurrencyFormatter.format(1.0 / transaction.exchangeRateToUsd, transaction.currencyCode, showSymbol = false)} ${transaction.currencyCode}",
@@ -269,7 +304,10 @@ fun TransactionDetailScreen(
 
                         val rateSource = transaction.exchangeRateSource
                         if (rateSource != null) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = t.surfaceBorder,
+                            )
                             DetailRow(
                                 label = "Fuente",
                                 value = rateSource.name,
@@ -284,19 +322,19 @@ fun TransactionDetailScreen(
                 Text(
                     text = "Creado: ${DateUtils.formatDisplayDateTime(transaction.createdAt)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = t.textSecondary,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 if (transaction.updatedAt != transaction.createdAt) {
                     Text(
                         text = "Modificado: ${DateUtils.formatDisplayDateTime(transaction.updatedAt)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = t.textSecondary,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }
@@ -306,6 +344,7 @@ fun TransactionDetailScreen(
 private fun AmountHeader(
     transaction: com.schwarckdev.cerofiao.core.model.Transaction,
 ) {
+    val t = CeroFiaoTheme.tokens
     val iconColor = when (transaction.type) {
         TransactionType.INCOME -> Color(0xFF4CAF50)
         TransactionType.EXPENSE -> Color(0xFFF44336)
@@ -357,7 +396,7 @@ private fun AmountHeader(
                 TransactionType.TRANSFER -> "Transferencia"
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = t.textSecondary,
         )
     }
 }
@@ -367,6 +406,7 @@ private fun DetailRow(
     label: String,
     value: String,
 ) {
+    val t = CeroFiaoTheme.tokens
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -375,12 +415,13 @@ private fun DetailRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = t.textSecondary,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
+            color = t.text,
         )
     }
 }

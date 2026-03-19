@@ -1,6 +1,7 @@
 package com.schwarckdev.cerofiao.feature.accounts
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ fun AccountListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(t.bg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
             .padding(top = 16.dp, bottom = 100.dp),

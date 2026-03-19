@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,13 +26,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,10 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.CategoryType
 
 private val colorPalette = listOf(
@@ -62,29 +63,52 @@ fun AddEditCategoryScreen(
     modifier: Modifier = Modifier,
     viewModel: AddEditCategoryViewModel = hiltViewModel(),
 ) {
+    val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) onSaved()
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(if (uiState.isEditMode) "Editar categoría" else "Nueva categoría") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // Top bar row with back button and title
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = t.iconBg,
+                modifier = Modifier.size(40.dp),
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        CeroFiaoIcons.Back,
+                        contentDescription = "Volver",
+                        tint = t.text,
+                    )
+                }
+            }
+            Text(
+                text = if (uiState.isEditMode) "Editar categoría" else "Nueva categoría",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = t.text,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
             )
-        },
-    ) { innerPadding ->
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -99,7 +123,7 @@ fun AddEditCategoryScreen(
             )
 
             // Type selector
-            Text(text = "Tipo", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Tipo", style = MaterialTheme.typography.labelLarge, color = t.text)
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -116,7 +140,7 @@ fun AddEditCategoryScreen(
             }
 
             // Color picker
-            Text(text = "Color", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Color", style = MaterialTheme.typography.labelLarge, color = t.text)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -136,7 +160,7 @@ fun AddEditCategoryScreen(
                             .background(color)
                             .then(
                                 if (isSelected) {
-                                    Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                    Modifier.border(3.dp, t.text, CircleShape)
                                 } else {
                                     Modifier
                                 },
@@ -147,12 +171,12 @@ fun AddEditCategoryScreen(
             }
 
             // Icon picker
-            Text(text = "Icono", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Icono", style = MaterialTheme.typography.labelLarge, color = t.text)
 
             val selectedColor = try {
                 Color(android.graphics.Color.parseColor(uiState.colorHex))
             } catch (_: Exception) {
-                MaterialTheme.colorScheme.primary
+                Color(0xFF8A2BE2)
             }
 
             LazyVerticalGrid(
@@ -173,7 +197,7 @@ fun AddEditCategoryScreen(
                         color = if (isSelected) {
                             selectedColor.copy(alpha = 0.15f)
                         } else {
-                            MaterialTheme.colorScheme.surfaceContainerLow
+                            t.pillBg
                         },
                         tonalElevation = if (isSelected) 2.dp else 0.dp,
                     ) {
@@ -181,7 +205,7 @@ fun AddEditCategoryScreen(
                             Icon(
                                 painter = painterResource(resId),
                                 contentDescription = name,
-                                tint = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (isSelected) selectedColor else t.textSecondary,
                                 modifier = Modifier.size(28.dp),
                             )
                         }
