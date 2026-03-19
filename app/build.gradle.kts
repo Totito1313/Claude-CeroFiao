@@ -39,6 +39,8 @@ dependencies {
     implementation(project(":feature:feature-onboarding"))
     implementation(project(":feature:feature-budget"))
     implementation(project(":feature:feature-debt"))
+    implementation(project(":feature:feature-goals"))
+    implementation(project(":feature:feature-billsplitter"))
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
@@ -48,6 +50,10 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.serialization.json)
+    
+    // Glance Widget
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)

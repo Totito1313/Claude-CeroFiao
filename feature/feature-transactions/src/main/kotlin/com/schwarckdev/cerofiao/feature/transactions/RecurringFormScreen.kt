@@ -12,24 +12,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +46,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.model.RecurrenceType
 import com.schwarckdev.cerofiao.core.model.TransactionType
 
@@ -99,18 +101,18 @@ fun RecurringFormScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.title,
                 onValueChange = viewModel::setTitle,
-                label = { Text("Título") },
+                label = "Título",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
 
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.amount,
                 onValueChange = viewModel::setAmount,
-                label = { Text("Monto") },
+                label = "Monto",
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
@@ -123,10 +125,10 @@ fun RecurringFormScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 listOf("USD", "VES", "USDT", "EUR").forEach { code ->
-                    FilterChip(
+                    OptionChip(
+                        label = code,
                         selected = uiState.selectedCurrencyCode == code,
-                        onClick = { viewModel.selectCurrency(code) },
-                        label = { Text(code) },
+                        onClick = { viewModel.selectCurrency(code) }
                     )
                 }
             }
@@ -134,10 +136,10 @@ fun RecurringFormScreen(
             // Transaction type chips
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(TransactionType.EXPENSE to "Gasto", TransactionType.INCOME to "Ingreso").forEach { (type, label) ->
-                    FilterChip(
+                    OptionChip(
+                        label = label,
                         selected = uiState.transactionType == type,
-                        onClick = { viewModel.setTransactionType(type) },
-                        label = { Text(label) },
+                        onClick = { viewModel.setTransactionType(type) }
                     )
                 }
             }
@@ -153,22 +155,22 @@ fun RecurringFormScreen(
                     RecurrenceType.MONTHLY to "Mensual",
                     RecurrenceType.YEARLY to "Anual",
                 ).forEach { (recurrence, label) ->
-                    FilterChip(
+                    OptionChip(
+                        label = label,
                         selected = uiState.recurrence == recurrence,
-                        onClick = { viewModel.setRecurrence(recurrence) },
-                        label = { Text(label) },
+                        onClick = { viewModel.setRecurrence(recurrence) }
                     )
                 }
             }
 
             // Start date picker
             Text(text = "Fecha de inicio", style = MaterialTheme.typography.labelLarge, color = t.text)
-            OutlinedButton(
+            CeroFiaoButton(
+                text = DateUtils.formatDisplayDate(uiState.startDate),
                 onClick = { showDatePicker = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(DateUtils.formatDisplayDate(uiState.startDate))
-            }
+                variant = CeroFiaoButtonVariant.Secondary,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             // Account selector
             if (uiState.accounts.isNotEmpty()) {
@@ -178,12 +180,10 @@ fun RecurringFormScreen(
                     expanded = accountExpanded,
                     onExpandedChange = { accountExpanded = it },
                 ) {
-                    OutlinedTextField(
+                    CeroFiaoTextField(
                         value = selectedAccount?.let { "${it.name} (${it.currencyCode})" } ?: "",
                         onValueChange = {},
-                        label = { Text("Cuenta") },
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = accountExpanded) },
+                        label = "Cuenta",
                         modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     )
                     ExposedDropdownMenu(
@@ -211,12 +211,10 @@ fun RecurringFormScreen(
                     expanded = categoryExpanded,
                     onExpandedChange = { categoryExpanded = it },
                 ) {
-                    OutlinedTextField(
+                    CeroFiaoTextField(
                         value = selectedCategory?.name ?: "Sin categoría",
                         onValueChange = {},
-                        label = { Text("Categoría") },
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                        label = "Categoría",
                         modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     )
                     ExposedDropdownMenu(
@@ -236,20 +234,19 @@ fun RecurringFormScreen(
                 }
             }
 
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.note,
                 onValueChange = viewModel::setNote,
-                label = { Text("Nota (opcional)") },
+                label = "Nota (opcional)",
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Button(
+            CeroFiaoButton(
+                text = "Guardar recurrente",
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isSaving && uiState.title.isNotBlank() && uiState.amount.isNotBlank(),
-            ) {
-                Text("Guardar recurrente")
-            }
+            )
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = 100.dp))
         }
@@ -259,21 +256,57 @@ fun RecurringFormScreen(
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = uiState.startDate,
         )
-        DatePickerDialog(
+        androidx.compose.material3.DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(
+                CeroFiaoButton(
+                    text = "OK",
+                    variant = CeroFiaoButtonVariant.Text,
                     onClick = {
                         datePickerState.selectedDateMillis?.let { viewModel.setStartDate(it) }
                         showDatePicker = false
                     },
-                ) { Text("OK") }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+                CeroFiaoButton(
+                    text = "Cancelar",
+                    variant = CeroFiaoButtonVariant.Text,
+                    onClick = { showDatePicker = false }
+                )
             },
         ) {
-            DatePicker(state = datePickerState)
+            androidx.compose.material3.DatePicker(state = datePickerState)
         }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val t = com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        androidx.compose.material3.Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }

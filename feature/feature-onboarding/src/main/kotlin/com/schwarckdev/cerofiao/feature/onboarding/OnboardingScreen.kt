@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,15 +24,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,9 +42,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
 import com.schwarckdev.cerofiao.core.ui.CurrencyChip
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun OnboardingScreen(
@@ -247,21 +250,15 @@ private fun RateSourceCard(
     modifier: Modifier = Modifier,
 ) {
     val t = CeroFiaoTheme.tokens
-    Card(
+    Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                Color(0xFF8A2BE2).copy(alpha = 0.15f)
-            } else {
-                t.pillBg
-            },
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) Color(0x148A2BE2) else t.pillBg,
+        border = BorderStroke(
+            1.dp,
+            if (isSelected) Color(0x268A2BE2) else Color.Transparent
         ),
-        border = if (isSelected) {
-            CardDefaults.outlinedCardBorder()
-        } else {
-            null
-        },
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -323,10 +320,10 @@ private fun AccountsStep(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             platforms.forEach { platform ->
-                FilterChip(
+                OptionChip(
+                    label = platform.displayName,
                     selected = platform in selectedPlatforms,
-                    onClick = { onTogglePlatform(platform) },
-                    label = { Text(text = platform.displayName) },
+                    onClick = { onTogglePlatform(platform) }
                 )
             }
         }
@@ -365,40 +362,58 @@ private fun OnboardingBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             if (currentStep > 0) {
-                OutlinedButton(onClick = onBack) {
-                    Text(text = "Atr\u00E1s")
-                }
+                CeroFiaoButton(
+                    text = "Atrás",
+                    onClick = onBack,
+                    variant = CeroFiaoButtonVariant.Secondary,
+                )
             } else {
                 Spacer(modifier = Modifier.width(1.dp))
             }
 
             if (currentStep < totalSteps - 1) {
-                Button(
+                CeroFiaoButton(
+                    text = if (currentStep == 0) "Comenzar" else "Siguiente",
                     onClick = onNext,
                     enabled = !isLoading,
-                ) {
-                    if (currentStep == 0) {
-                        Text(text = "Comenzar")
-                    } else {
-                        Text(text = "Siguiente")
-                    }
-                }
+                )
             } else {
-                Button(
+                CeroFiaoButton(
+                    text = if (isLoading) "" else "Finalizar",
                     onClick = onComplete,
                     enabled = !isLoading,
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = Color.White,
-                        )
-                    } else {
-                        Text(text = "Finalizar")
-                    }
-                }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }

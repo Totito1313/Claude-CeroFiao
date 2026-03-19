@@ -12,4 +12,6 @@ dependencies {
     implementation(project(":core:core-common"))
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -24,8 +23,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -147,11 +147,10 @@ fun AddAccountScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nombre de la cuenta") },
-                placeholder = { Text(text = "Ej: Banesco Corriente") },
+                label = "Nombre de la cuenta",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -160,14 +159,10 @@ fun AddAccountScreen(
                 expanded = platformDropdownExpanded,
                 onExpandedChange = { platformDropdownExpanded = it },
             ) {
-                OutlinedTextField(
+                CeroFiaoTextField(
                     value = selectedPlatform.displayName,
                     onValueChange = {},
-                    readOnly = true,
-                    label = { Text(text = "Plataforma") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = platformDropdownExpanded)
-                    },
+                    label = "Plataforma",
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(MenuAnchorType.PrimaryNotEditable),
@@ -190,11 +185,10 @@ fun AddAccountScreen(
                 }
             }
 
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = selectedPlatform.defaultType.name,
                 onValueChange = {},
-                readOnly = true,
-                label = { Text(text = "Tipo") },
+                label = "Tipo",
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -202,14 +196,10 @@ fun AddAccountScreen(
                 expanded = currencyDropdownExpanded,
                 onExpandedChange = { currencyDropdownExpanded = it },
             ) {
-                OutlinedTextField(
+                CeroFiaoTextField(
                     value = currencyCode,
                     onValueChange = {},
-                    readOnly = true,
-                    label = { Text(text = "Moneda") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyDropdownExpanded)
-                    },
+                    label = "Moneda",
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(MenuAnchorType.PrimaryNotEditable),
@@ -231,15 +221,14 @@ fun AddAccountScreen(
                 }
             }
 
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = initialBalanceText,
                 onValueChange = { value ->
                     if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
                         initialBalanceText = value
                     }
                 },
-                label = { Text(text = "Balance inicial") },
-                placeholder = { Text(text = "0.00") },
+                label = "Balance inicial",
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
@@ -247,7 +236,8 @@ fun AddAccountScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
+            CeroFiaoButton(
+                text = "Crear Cuenta",
                 onClick = {
                     val balance = initialBalanceText.toDoubleOrNull() ?: 0.0
                     viewModel.createAccount(
@@ -262,12 +252,7 @@ fun AddAccountScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-            ) {
-                Text(
-                    text = "Crear Cuenta",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
+            )
         }
     }
 }

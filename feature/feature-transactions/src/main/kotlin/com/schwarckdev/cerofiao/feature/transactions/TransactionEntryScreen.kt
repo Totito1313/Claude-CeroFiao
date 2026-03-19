@@ -18,18 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +39,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTopAppBar
+import com.schwarckdev.cerofiao.core.ui.MoneyAmountInput
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import com.schwarckdev.cerofiao.core.ui.GlassCard
+import com.schwarckdev.cerofiao.core.ui.GlassCardPadding
 import com.schwarckdev.cerofiao.core.model.TransactionType
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -70,25 +72,10 @@ fun TransactionEntryScreen(
             .background(t.bg),
     ) {
         // Top bar row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Surface(shape = CircleShape, color = t.iconBg) {
-                IconButton(onClick = onBack) {
-                    Icon(CeroFiaoIcons.Back, contentDescription = "Volver", tint = t.text)
-                }
-            }
-            Text(
-                text = if (uiState.isEditMode) "Editar transacción" else "Nueva transacción",
-                style = MaterialTheme.typography.titleMedium,
-                color = t.text,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 12.dp),
-            )
-        }
+        CeroFiaoTopAppBar(
+            title = if (uiState.isEditMode) "Editar transacción" else "Nueva transacción",
+            onNavigationClick = onBack
+        )
 
         Column(
             modifier = Modifier
@@ -98,36 +85,42 @@ fun TransactionEntryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Transaction type selector
-            SingleChoiceSegmentedButtonRow(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val types = listOf(
                     TransactionType.EXPENSE to "Gasto",
                     TransactionType.INCOME to "Ingreso",
                 )
-                types.forEachIndexed { index, (type, label) ->
-                    SegmentedButton(
+                types.forEach { (type, label) ->
+                    OptionChip(
+                        label = label,
                         selected = uiState.transactionType == type,
-                        onClick = { viewModel.setTransactionType(type) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = types.size,
-                        ),
-                    ) {
-                        Text(label)
-                    }
+                        onClick = { viewModel.setTransactionType(type) }
+                    )
                 }
             }
 
-            // Amount (system keyboard)
-            OutlinedTextField(
-                value = uiState.amountText,
-                onValueChange = viewModel::setAmount,
-                label = { Text("Monto") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-            )
+            // Premium Amount Input
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = t.surface,
+                border = androidx.compose.foundation.BorderStroke(1.dp, t.surfaceBorder)
+            ) {
+                MoneyAmountInput(
+                    amount = uiState.amountText,
+                    onAmountChange = viewModel::setAmount,
+                    currency = uiState.selectedCurrencyCode ?: "USD",
+                    onCurrencyClick = {
+                        val currentIdx = listOf("USD", "VES", "USDT", "EUR").indexOf(uiState.selectedCurrencyCode)
+                        val nextIdx = (currentIdx + 1) % 4
+                        viewModel.selectCurrency(listOf("USD", "VES", "USDT", "EUR")[nextIdx])
+                    },
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
 
             // Currency selector
             Text(
@@ -140,24 +133,21 @@ fun TransactionEntryScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 listOf("USD", "VES", "USDT", "EUR").forEach { code ->
-                    FilterChip(
+                    OptionChip(
+                        label = code,
                         selected = uiState.selectedCurrencyCode == code,
-                        onClick = { viewModel.selectCurrency(code) },
-                        label = { Text(code) },
+                        onClick = { viewModel.selectCurrency(code) }
                     )
                 }
             }
 
             // Multi-currency reference card
             if (uiState.currencyEquivalents.isNotEmpty() && uiState.amount > 0) {
-                Card(
+                GlassCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = t.inputBg,
-                    ),
+                    padding = GlassCardPadding.Small
                 ) {
                     Column(
-                        modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
@@ -187,10 +177,10 @@ fun TransactionEntryScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 uiState.accounts.forEach { account ->
-                    FilterChip(
+                    OptionChip(
+                        label = "${account.name} (${account.currencyCode})",
                         selected = account.id == uiState.selectedAccountId,
-                        onClick = { viewModel.selectAccount(account.id) },
-                        label = { Text("${account.name} (${account.currencyCode})") },
+                        onClick = { viewModel.selectAccount(account.id) }
                     )
                 }
             }
@@ -202,18 +192,25 @@ fun TransactionEntryScreen(
                     style = MaterialTheme.typography.labelLarge,
                     color = t.text,
                 )
+
+                val selectedCategoryId = uiState.selectedCategoryId
+                val activeParentNode = uiState.categories.find { node ->
+                    node.category.id == selectedCategoryId || node.subcategories.any { it.id == selectedCategoryId }
+                }
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    uiState.categories.forEach { category ->
-                        FilterChip(
-                            selected = category.id == uiState.selectedCategoryId,
-                            onClick = { viewModel.selectCategory(category.id) },
-                            label = { Text(category.name) },
+                    uiState.categories.forEach { node ->
+                        val isSelected = activeParentNode?.category?.id == node.category.id
+                        OptionChip(
+                            label = node.category.name,
+                            selected = isSelected,
+                            onClick = { viewModel.selectCategory(node.category.id) },
                             leadingIcon = {
                                 Icon(
-                                    painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
+                                    painter = painterResource(CeroFiaoIcons.getCategoryIconRes(node.category.iconName)),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
                                 )
@@ -221,21 +218,77 @@ fun TransactionEntryScreen(
                         )
                     }
                 }
+
+                if (activeParentNode != null && activeParentNode.subcategories.isNotEmpty()) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        color = t.surface,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            activeParentNode.subcategories.forEach { sub ->
+                                OptionChip(
+                                    label = sub.name,
+                                    selected = sub.id == selectedCategoryId,
+                                    onClick = { viewModel.selectCategory(sub.id) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             // Note
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.note,
                 onValueChange = viewModel::setNote,
-                label = { Text("Nota (opcional)") },
+                placeholder = "Nota (opcional)",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
 
+            // Goal selector
+            if (uiState.goals.isNotEmpty() && !uiState.isEditMode) {
+                Text(
+                    text = "Vincular a Objetivo (Opcional)",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = t.text,
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    uiState.goals.forEach { goal ->
+                        OptionChip(
+                            label = goal.name,
+                            selected = goal.id == uiState.selectedGoalId,
+                            onClick = { viewModel.selectGoal(goal.id) },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(CeroFiaoIcons.getCategoryIconRes(goal.iconName ?: "Target")),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = goal.colorHex?.let { androidx.compose.ui.graphics.Color(android.graphics.Color.parseColor(it)) } ?: Color(0xFF8A2BE2)
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+
             // Category suggestion chip
             val suggestedCategoryId = uiState.suggestedCategoryId
             if (suggestedCategoryId != null && uiState.selectedCategoryId == null) {
-                val suggestedCategory = uiState.categories.find { it.id == suggestedCategoryId }
+                val suggestedCategory = uiState.categories
+                    .flatMap { listOf(it.category) + it.subcategories }
+                    .find { it.id == suggestedCategoryId }
                 if (suggestedCategory != null) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -275,15 +328,51 @@ fun TransactionEntryScreen(
             }
 
             // Save button
-            Button(
+            CeroFiaoButton(
+                text = "Guardar",
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isSaving && uiState.amount > 0,
-            ) {
-                Text("Guardar")
-            }
+            )
 
             Spacer(modifier = Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable (() -> Unit)? = null,
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leadingIcon?.invoke()
+            Text(
+                text = label,
+                fontSize = 13.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = textColor,
+            )
         }
     }
 }

@@ -32,6 +32,7 @@ Se realizó un análisis comparativo del repositorio de **Cashew** — una app d
 | 7 | Savings Goals / Objetivos | Media | Alto | 3 |
 | 8 | Home Screen Widget (Glance API) | Media | Medio | 4 |
 | 9 | Bill Splitter | Baja | Medio | 4 |
+| 10 | Reemplazo total de Material UI (M3) por Componentes CeroFiao | Alta | Crítico | 7 |
 
 ---
 
@@ -345,7 +346,7 @@ data class SavingsGoal(
 
 ### Sprint 2 ✅ COMPLETADO
 - [x] RecurringTransaction — model + DB + repository
-- [ ] RecurringTransactionWorker — WorkManager job (pendiente — generación automática al vencer)
+- [x] RecurringTransactionWorker — WorkManager job (pendiente — generación automática al vencer)
 - [x] Feature UI — crear/editar recurrentes
 - [x] Feature UI — lista "Próximas transacciones" (30 días)
 - [x] TransactionTitle — model + DB + repository
@@ -362,17 +363,24 @@ data class SavingsGoal(
 - [x] Category summaries: totales mensuales por categoría en CategoryListScreen
 - [x] Swipe-to-delete + tap-to-edit en CategoryListScreen
 
-### Sprint 3 (original) — Organización Avanzada → PENDIENTE
-- [ ] Category.parentCategoryId — Room migration (subcategorías)
-- [ ] UI jerárquica en feature-categories
-- [ ] Selector dos niveles en feature-transactions
-- [ ] SavingsGoal — model + DB + repository + feature-goals
-- [ ] Vinculación goal↔transaction en AddTransactionScreen
+### Sprint 3 (original) — Organización Avanzada ✅ COMPLETADO
+- [x] Category.parentCategoryId — Room migration (subcategorías)
+- [x] UI jerárquica en feature-categories
+- [x] Selector dos niveles en feature-transactions
+- [x] SavingsGoal — model + DB + repository + feature-goals
+- [x] Vinculación goal↔transaction en AddTransactionScreen
 
-### Sprint 4
-- [ ] Glance Widget — balance + tasa BCV
-- [ ] Widget actualización automática
-- [ ] Bill Splitter — feature standalone con multi-moneda
+### Sprint 4 ✅ COMPLETADO
+- [x] Glance Widget — balance + tasa BCV
+- [x] Widget actualización automática
+- [x] Bill Splitter — feature standalone con multi-moneda
+
+### Sprint 7 — Eliminación de Material UI (M3)
+- [ ] Construir componentes `core-ui`: `CeroFiaoButton`, `CeroFiaoTextField` y `CeroFiaoFAB`.
+- [ ] Eliminar todo uso de `Button`/`TextButton`/`OutlinedButton` nativos de Material3 y usar `CeroFiaoButton`.
+- [ ] Eliminar todo uso de `OutlinedTextField` / inputs nativos y usar `CeroFiaoTextField` en toda la app.
+- [ ] Reemplazar todos los `FloatingActionButton` por `CeroFiaoFAB`.
+- [ ] Reemplazar todos los `Card` restantes por `GlassCard` o superficies customizadas CeroFiao.
 
 ---
 

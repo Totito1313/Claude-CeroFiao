@@ -17,17 +17,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -109,11 +110,10 @@ fun AddBudgetScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Name
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.name,
                 onValueChange = viewModel::setName,
-                label = { Text("Nombre del presupuesto") },
-                placeholder = { Text("Ej: Comida del mes") },
+                label = "Nombre del presupuesto",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -132,10 +132,10 @@ fun AddBudgetScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 listOf("USD", "VES", "USDT", "EUR", "EURI").forEach { code ->
-                    FilterChip(
+                    OptionChip(
+                        label = code,
                         selected = uiState.currencyCode == code,
-                        onClick = { viewModel.setCurrencyCode(code) },
-                        label = { Text(code) },
+                        onClick = { viewModel.setCurrencyCode(code) }
                     )
                 }
             }
@@ -143,11 +143,10 @@ fun AddBudgetScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Amount
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.limitAmount,
                 onValueChange = viewModel::setLimitAmount,
-                label = { Text("Límite (${uiState.currencyCode})") },
-                placeholder = { Text("0.00") },
+                label = "Límite (${uiState.currencyCode})",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -162,25 +161,21 @@ fun AddBudgetScreen(
                 color = t.text,
             )
             Spacer(modifier = Modifier.height(4.dp))
-            SingleChoiceSegmentedButtonRow(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val periods = listOf(
                     BudgetPeriod.WEEKLY to "Semanal",
                     BudgetPeriod.BIWEEKLY to "Quincenal",
                     BudgetPeriod.MONTHLY to "Mensual",
                 )
-                periods.forEachIndexed { index, (period, label) ->
-                    SegmentedButton(
+                periods.forEach { (period, label) ->
+                    OptionChip(
+                        label = label,
                         selected = uiState.period == period,
-                        onClick = { viewModel.setPeriod(period) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = periods.size,
-                        ),
-                    ) {
-                        Text(label)
-                    }
+                        onClick = { viewModel.setPeriod(period) }
+                    )
                 }
             }
 
@@ -203,17 +198,17 @@ fun AddBudgetScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 uiState.categories.forEach { category ->
-                    FilterChip(
+                    OptionChip(
+                        label = category.name,
                         selected = category.id == uiState.selectedCategoryId,
                         onClick = { viewModel.selectCategory(category.id) },
-                        label = { Text(category.name) },
                         leadingIcon = {
                             Icon(
                                 painter = painterResource(CeroFiaoIcons.getCategoryIconRes(category.iconName)),
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
                             )
-                        },
+                        }
                     )
                 }
             }
@@ -221,17 +216,56 @@ fun AddBudgetScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Save button
-            Button(
+            CeroFiaoButton(
+                text = if (uiState.isEditMode) "Guardar cambios" else "Crear presupuesto",
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.name.isNotBlank() &&
                     (uiState.limitAmount.toDoubleOrNull() ?: 0.0) > 0 &&
                     !uiState.isSaving,
-            ) {
-                Text(if (uiState.isEditMode) "Guardar cambios" else "Crear presupuesto")
-            }
+            )
 
             Spacer(modifier = Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (leadingIcon != null) {
+                androidx.compose.material3.LocalContentColor.provides(textColor)
+                leadingIcon()
+            }
+            androidx.compose.material3.Text(
+                text = label,
+                fontSize = 13.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = textColor,
+            )
         }
     }
 }

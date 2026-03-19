@@ -13,8 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.RefreshCw
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -124,15 +123,14 @@ private fun TransactionLogCard(
 
     val actionColor = when (log.action) {
         TransactionLogAction.CREATED -> Color(0xFF8A2BE2)
-        TransactionLogAction.EDITED -> MaterialTheme.colorScheme.tertiary
+        TransactionLogAction.EDITED -> Color(0xFFF59E0B)
         TransactionLogAction.DELETED -> t.danger
     }
 
-    Card(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = t.surface,
-        ),
+        color = t.surface,
+        shape = RoundedCornerShape(16.dp),
     ) {
         Row(
             modifier = Modifier

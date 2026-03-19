@@ -20,17 +20,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,20 +77,22 @@ fun DebtDetailScreen(
             title = { Text("Eliminar deuda") },
             text = { Text("¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                CeroFiaoButton(
+                    text = "Eliminar",
                     onClick = {
                         viewModel.deleteDebt()
                         showDeleteDialog = false
                         onBack()
                     },
-                ) {
-                    Text("Eliminar", color = t.danger)
-                }
+                    variant = CeroFiaoButtonVariant.Danger
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancelar")
-                }
+                CeroFiaoButton(
+                    text = "Cancelar",
+                    onClick = { showDeleteDialog = false },
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
         )
     }
@@ -236,18 +236,17 @@ fun DebtDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Button(
+                        CeroFiaoButton(
+                            text = "Registrar pago",
                             onClick = { showPaymentDialog = true },
                             modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Registrar pago")
-                        }
-                        OutlinedButton(
+                        )
+                        CeroFiaoButton(
+                            text = "Marcar saldada",
                             onClick = { viewModel.markAsSettled() },
                             modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Marcar saldada")
-                        }
+                            variant = CeroFiaoButtonVariant.Secondary,
+                        )
                     }
                 }
             }
@@ -368,37 +367,37 @@ private fun PaymentDialog(
                     color = t.textSecondary,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
+                CeroFiaoTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Monto") },
-                    placeholder = { Text("0.00") },
+                    label = "Monto",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                CeroFiaoTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("Nota (opcional)") },
+                    label = "Nota (opcional)",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
             }
         },
         confirmButton = {
-            TextButton(
+            CeroFiaoButton(
+                text = "Guardar",
                 onClick = { onConfirm(amount, note) },
                 enabled = (amount.toDoubleOrNull() ?: 0.0) > 0,
-            ) {
-                Text("Guardar")
-            }
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
+            CeroFiaoButton(
+                text = "Cancelar",
+                onClick = onDismiss,
+                variant = CeroFiaoButtonVariant.Text
+            )
         },
     )
 }

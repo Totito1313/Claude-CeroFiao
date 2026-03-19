@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
-import androidx.compose.material3.Button
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -22,12 +23,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,38 +101,55 @@ fun CsvExportScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Importar / Exportar CSV") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(CeroFiaoIcons.Back, contentDescription = "Volver")
-                    }
-                },
+    val t = CeroFiaoTheme.tokens
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(t.bg),
+    ) {
+        // CeroFiao top bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = t.iconBg,
+                modifier = Modifier.size(40.dp),
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(CeroFiaoIcons.Back, contentDescription = "Volver", tint = t.text)
+                }
+            }
+            Text(
+                text = "Importar / Exportar CSV",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = t.text,
+                modifier = Modifier.padding(start = 12.dp),
             )
-        },
-    ) { innerPadding ->
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // --- EXPORT SECTION ---
             Text(
                 text = "Exportar",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color(0xFF8A2BE2),
             )
 
             Text(
                 text = "Exporta tus transacciones a un archivo CSV con tasas de cambio incluidas.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = t.textSecondary,
             )
 
             Text(
@@ -140,88 +161,66 @@ fun CsvExportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                OutlinedButton(
+                CeroFiaoButton(
+                    text = uiState.startDate?.let { DateUtils.formatDisplayDate(it) } ?: "Desde",
                     onClick = { showStartDatePicker = true },
                     modifier = Modifier.weight(1f),
-                ) {
-                    val startDate = uiState.startDate
-                    Text(
-                        if (startDate != null) DateUtils.formatDisplayDate(startDate)
-                        else "Desde",
-                    )
-                }
+                    variant = CeroFiaoButtonVariant.Secondary,
+                )
 
-                OutlinedButton(
+                CeroFiaoButton(
+                    text = uiState.endDate?.let { DateUtils.formatDisplayDate(it) } ?: "Hasta",
                     onClick = { showEndDatePicker = true },
                     modifier = Modifier.weight(1f),
-                ) {
-                    val endDate = uiState.endDate
-                    Text(
-                        if (endDate != null) DateUtils.formatDisplayDate(endDate)
-                        else "Hasta",
-                    )
-                }
+                    variant = CeroFiaoButtonVariant.Secondary,
+                )
             }
 
             if (uiState.startDate != null || uiState.endDate != null) {
-                TextButton(
+                CeroFiaoButton(
+                    text = "Limpiar filtro (exportar todo)",
                     onClick = {
                         viewModel.setStartDate(null)
                         viewModel.setEndDate(null)
                     },
-                ) {
-                    Text("Limpiar filtro (exportar todo)")
-                }
+                    variant = CeroFiaoButtonVariant.Text,
+                )
             }
 
-            Button(
+            CeroFiaoButton(
+                text = if (uiState.isExporting) "" else "Exportar transacciones",
                 onClick = { createFileLauncher.launch(CsvExportViewModel.defaultFileName()) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isExporting,
-            ) {
-                if (uiState.isExporting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                    )
-                } else {
-                    Text("Exportar transacciones")
-                }
-            }
+            )
 
             Text(
                 text = "Columnas: fecha, tipo, monto, moneda, monto_usd, tasa_usd, fuente_tasa, categoria, cuenta, nota",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = t.textMuted,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- IMPORT SECTION ---
             Text(
                 text = "Importar",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color(0xFF8A2BE2),
             )
 
             Text(
                 text = "Importa transacciones desde un CSV con el mismo formato de exportación. Las cuentas deben existir con el mismo nombre.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = t.textSecondary,
             )
 
-            OutlinedButton(
+            CeroFiaoButton(
+                text = if (uiState.isImporting) "" else "Importar desde CSV",
                 onClick = { openFileLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "*/*")) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isImporting,
-            ) {
-                if (uiState.isImporting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                    )
-                } else {
-                    Text("Importar desde CSV")
-                }
-            }
+                variant = CeroFiaoButtonVariant.Secondary,
+            )
         }
     }
 
@@ -232,15 +231,21 @@ fun CsvExportScreen(
         DatePickerDialog(
             onDismissRequest = { showStartDatePicker = false },
             confirmButton = {
-                TextButton(
+                CeroFiaoButton(
+                    text = "OK",
                     onClick = {
                         viewModel.setStartDate(datePickerState.selectedDateMillis)
                         showStartDatePicker = false
                     },
-                ) { Text("OK") }
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) { Text("Cancelar") }
+                CeroFiaoButton(
+                    text = "Cancelar",
+                    onClick = { showStartDatePicker = false },
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
         ) {
             DatePicker(state = datePickerState)
@@ -254,15 +259,21 @@ fun CsvExportScreen(
         DatePickerDialog(
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
-                TextButton(
+                CeroFiaoButton(
+                    text = "OK",
                     onClick = {
                         viewModel.setEndDate(datePickerState.selectedDateMillis)
                         showEndDatePicker = false
                     },
-                ) { Text("OK") }
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) { Text("Cancelar") }
+                CeroFiaoButton(
+                    text = "Cancelar",
+                    onClick = { showEndDatePicker = false },
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
         ) {
             DatePicker(state = datePickerState)

@@ -20,20 +20,26 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -114,27 +120,68 @@ fun AddEditCategoryScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Name
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.name,
                 onValueChange = viewModel::setName,
-                label = { Text("Nombre") },
+                label = "Nombre",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
 
             // Type selector
             Text(text = "Tipo", style = MaterialTheme.typography.labelLarge, color = t.text)
-            SingleChoiceSegmentedButtonRow(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val types = listOf(CategoryType.EXPENSE to "Gasto", CategoryType.INCOME to "Ingreso")
-                types.forEachIndexed { index, (type, label) ->
-                    SegmentedButton(
+                types.forEach { (type, label) ->
+                    OptionChip(
+                        label = label,
                         selected = uiState.type == type,
-                        onClick = { viewModel.setType(type) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
+                        onClick = { viewModel.setType(type) }
+                    )
+                }
+            }
+
+            // Parent category selector
+            if (uiState.parentCategories.isNotEmpty()) {
+                Text(text = "Categoría Padre (Opcional)", style = MaterialTheme.typography.labelLarge, color = t.text)
+                var expanded by remember { mutableStateOf(false) }
+                val selectedParent = uiState.parentCategories.find { it.id == uiState.parentId }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                ) {
+                    CeroFiaoTextField(
+                        value = selectedParent?.name ?: "Ninguna (Raíz)",
+                        onValueChange = {},
+                        label = "Categoría Padre",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
                     ) {
-                        Text(label)
+                        DropdownMenuItem(
+                            text = { Text("Ninguna (Raíz)") },
+                            onClick = {
+                                viewModel.setParent(null)
+                                expanded = false
+                            },
+                        )
+                        uiState.parentCategories.forEach { parent ->
+                            DropdownMenuItem(
+                                text = { Text(parent.name) },
+                                onClick = {
+                                    viewModel.setParent(parent.id)
+                                    expanded = false
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -214,13 +261,42 @@ fun AddEditCategoryScreen(
             }
 
             // Save button
-            Button(
+            CeroFiaoButton(
+                text = "Guardar",
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isSaving && uiState.name.isNotBlank(),
-            ) {
-                Text("Guardar")
-            }
+            )
         }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        androidx.compose.material3.Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }

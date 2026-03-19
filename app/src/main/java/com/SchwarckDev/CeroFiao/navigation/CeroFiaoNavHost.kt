@@ -13,6 +13,14 @@ import com.schwarckdev.cerofiao.feature.budget.navigateToAddBudget
 import com.schwarckdev.cerofiao.feature.budget.navigateToAlcancia
 import com.schwarckdev.cerofiao.feature.budget.navigateToAnalytics
 import com.schwarckdev.cerofiao.feature.budget.navigateToBudgetList
+import com.schwarckdev.cerofiao.feature.goals.addEditGoalScreen
+import com.schwarckdev.cerofiao.feature.goals.goalDetailScreen
+import com.schwarckdev.cerofiao.feature.goals.goalsScreen
+import com.schwarckdev.cerofiao.feature.goals.navigateToGoals
+import com.schwarckdev.cerofiao.feature.goals.navigateToAddEditGoal
+import com.schwarckdev.cerofiao.feature.goals.navigateToGoalDetail
+import com.schwarckdev.cerofiao.feature.billsplitter.navigation.billSplitterScreen
+import com.schwarckdev.cerofiao.feature.billsplitter.navigation.navigateToBillSplitter
 import com.schwarckdev.cerofiao.feature.debt.addDebtScreen
 import com.schwarckdev.cerofiao.feature.debt.debtDetailScreen
 import com.schwarckdev.cerofiao.feature.debt.debtListScreen
@@ -133,6 +141,7 @@ fun CeroFiaoNavHost(
                 onNavigateToAnalytics = { navController.navigateToAnalytics() },
                 onNavigateToAlcancia = { navController.navigateToAlcancia() },
                 onNavigateToSettings = { navController.navigateToSettings() },
+                onNavigateToBillSplitter = { navController.navigateToBillSplitter() },
             )
         }
 
@@ -178,6 +187,7 @@ fun CeroFiaoNavHost(
             onNavigateToCsvExport = { navController.navigateToCsvExport() },
             onNavigateToRecurring = { navController.navigateToRecurringList() },
             onNavigateToAssociatedTitles = { navController.navigateToAssociatedTitles() },
+            onNavigateToGoals = { navController.navigateToGoals() },
         )
 
         csvExportScreen(
@@ -219,6 +229,27 @@ fun CeroFiaoNavHost(
 
         alcanciaScreen(
             onBack = { navController.popBackStack() },
+        )
+
+        // Goals
+        goalsScreen(
+            onBack = { navController.popBackStack() },
+            onAddGoal = { navController.navigateToAddEditGoal() },
+            onGoalClick = { goalId -> navController.navigateToGoalDetail(goalId) }
+        )
+
+        addEditGoalScreen(
+            onBack = { navController.popBackStack() },
+        )
+
+        goalDetailScreen(
+            onBack = { navController.popBackStack() },
+            onEditGoal = { goalId -> navController.navigateToAddEditGoal(goalId) }
+        )
+
+        // Bill Splitter
+        billSplitterScreen(
+            onBack = { navController.popBackStack() }
         )
     }
 }

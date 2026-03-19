@@ -22,6 +22,7 @@ fun NavGraphBuilder.settingsScreen(
     onNavigateToCsvExport: () -> Unit = {},
     onNavigateToRecurring: () -> Unit = {},
     onNavigateToAssociatedTitles: () -> Unit = {},
+    onNavigateToGoals: () -> Unit = {},
 ) {
     composable<SettingsRoute> {
         SettingsScreen(
@@ -32,6 +33,7 @@ fun NavGraphBuilder.settingsScreen(
             onNavigateToCsvExport = onNavigateToCsvExport,
             onNavigateToRecurring = onNavigateToRecurring,
             onNavigateToAssociatedTitles = onNavigateToAssociatedTitles,
+            onNavigateToGoals = onNavigateToGoals,
         )
     }
 }

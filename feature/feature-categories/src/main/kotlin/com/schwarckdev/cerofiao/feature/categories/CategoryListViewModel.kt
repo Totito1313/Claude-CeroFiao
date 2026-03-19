@@ -16,9 +16,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.schwarckdev.cerofiao.core.model.CategoryNode
+
 data class CategoryListUiState(
-    val expenseCategories: List<Category> = emptyList(),
-    val incomeCategories: List<Category> = emptyList(),
+    val expenseCategories: List<CategoryNode> = emptyList(),
+    val incomeCategories: List<CategoryNode> = emptyList(),
     val categoryTotals: Map<String, Double> = emptyMap(),
 )
 
@@ -35,9 +37,12 @@ class CategoryListViewModel @Inject constructor(
         getCategoriesUseCase(),
         transactionRepository.getCategoryTotalsForPeriod(monthRange.first, monthRange.second),
     ) { categories, totals ->
+        val expenseNodes = buildCategoryNodes(categories.filter { it.type == CategoryType.EXPENSE })
+        val incomeNodes = buildCategoryNodes(categories.filter { it.type == CategoryType.INCOME })
+        
         CategoryListUiState(
-            expenseCategories = categories.filter { it.type == CategoryType.EXPENSE },
-            incomeCategories = categories.filter { it.type == CategoryType.INCOME },
+            expenseCategories = expenseNodes,
+            incomeCategories = incomeNodes,
             categoryTotals = totals,
         )
     }.stateIn(
@@ -45,6 +50,14 @@ class CategoryListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = CategoryListUiState(),
     )
+
+    private fun buildCategoryNodes(categories: List<Category>): List<CategoryNode> {
+        val rootCategories = categories.filter { it.parentId == null }.sortedBy { it.sortOrder }
+        return rootCategories.map { root ->
+            val subs = categories.filter { it.parentId == root.id }.sortedBy { it.sortOrder }
+            CategoryNode(category = root, subcategories = subs)
+        }
+    }
 
     fun deleteCategory(id: String) {
         viewModelScope.launch {

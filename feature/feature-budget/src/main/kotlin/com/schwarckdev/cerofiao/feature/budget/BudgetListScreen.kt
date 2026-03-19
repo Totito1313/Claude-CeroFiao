@@ -19,8 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoFAB
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -156,20 +156,14 @@ fun BudgetListScreen(
             }
         }
 
-        // FAB
-        FloatingActionButton(
+        CeroFiaoFAB(
+            icon = CeroFiaoIcons.Add,
             onClick = onAddBudget,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 116.dp),
-            containerColor = Color(0xFF8A2BE2),
-        ) {
-            Icon(
-                imageVector = CeroFiaoIcons.Add,
-                contentDescription = "Nuevo presupuesto",
-                tint = Color.White,
-            )
-        }
+            contentDescription = "Nuevo presupuesto"
+        )
     }
 }
 

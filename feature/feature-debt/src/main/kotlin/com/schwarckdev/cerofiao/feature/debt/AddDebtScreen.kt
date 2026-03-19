@@ -18,18 +18,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
-import androidx.compose.material3.Button
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -113,35 +115,30 @@ fun AddDebtScreen(
                 color = t.text,
             )
             Spacer(modifier = Modifier.height(4.dp))
-            SingleChoiceSegmentedButtonRow(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val types = listOf(
                     DebtType.THEY_OWE to "Me deben",
                     DebtType.I_OWE to "Debo",
                 )
-                types.forEachIndexed { index, (type, label) ->
-                    SegmentedButton(
+                types.forEach { (type, label) ->
+                    OptionChip(
+                        label = label,
                         selected = uiState.debtType == type,
-                        onClick = { viewModel.setDebtType(type) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = types.size,
-                        ),
-                    ) {
-                        Text(label)
-                    }
+                        onClick = { viewModel.setDebtType(type) }
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Person name
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.personName,
                 onValueChange = viewModel::setPersonName,
-                label = { Text("Nombre de la persona") },
-                placeholder = { Text("Ej: Juan") },
+                label = "Nombre de la persona",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -149,11 +146,10 @@ fun AddDebtScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Amount
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.amount,
                 onValueChange = viewModel::setAmount,
-                label = { Text("Monto") },
-                placeholder = { Text("0.00") },
+                label = "Monto",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -174,10 +170,10 @@ fun AddDebtScreen(
             ) {
                 val currencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
                 currencies.forEach { code ->
-                    FilterChip(
+                    OptionChip(
+                        label = code,
                         selected = uiState.currencyCode == code,
-                        onClick = { viewModel.setCurrencyCode(code) },
-                        label = { Text(code) },
+                        onClick = { viewModel.setCurrencyCode(code) }
                     )
                 }
             }
@@ -185,11 +181,10 @@ fun AddDebtScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Note
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.note,
                 onValueChange = viewModel::setNote,
-                label = { Text("Nota (opcional)") },
-                placeholder = { Text("Ej: Almuerzo del viernes") },
+                label = "Nota (opcional)",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -197,11 +192,10 @@ fun AddDebtScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Due date
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.dueDate,
                 onValueChange = viewModel::setDueDate,
-                label = { Text("Fecha de vencimiento (opcional)") },
-                placeholder = { Text("dd/mm/yyyy") },
+                label = "Fecha de vencimiento (opcional)",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -210,17 +204,46 @@ fun AddDebtScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Save button
-            Button(
+            CeroFiaoButton(
+                text = if (uiState.isEditMode) "Guardar cambios" else "Registrar deuda",
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.personName.isNotBlank() &&
                     (uiState.amount.toDoubleOrNull() ?: 0.0) > 0 &&
                     !uiState.isSaving,
-            ) {
-                Text(if (uiState.isEditMode) "Guardar cambios" else "Registrar deuda")
-            }
+            )
 
             Spacer(modifier = Modifier.height(100.dp))
         }
+    }
+}
+
+@Composable
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x148A2BE2) else t.pillBg
+    val borderColor = if (selected) Color(0x268A2BE2) else Color.Transparent
+    val textColor = if (selected) Color(0xFF8A2BE2) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor),
+    ) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }

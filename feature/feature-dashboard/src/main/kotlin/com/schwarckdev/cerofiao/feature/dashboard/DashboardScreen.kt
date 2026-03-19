@@ -414,10 +414,10 @@ private fun GlobalBalanceSection(
 private fun QuickActionsRow() {
     val t = CeroFiaoTheme.tokens
     val actions = listOf(
-        "\uD83D\uDCE4" to "Transferir",
-        "\uD83D\uDD04" to "Cambiar",
-        "\uD83D\uDC37" to "Ahorrar",
-        "\uD83D\uDCCA" to "Analytics",
+        CeroFiaoIcons.Transfer to "Transferir",
+        CeroFiaoIcons.ExchangeRate to "Cambiar",
+        CeroFiaoIcons.Savings to "Ahorrar",
+        CeroFiaoIcons.Analytics to "Analytics",
     )
 
     Row(
@@ -426,7 +426,7 @@ private fun QuickActionsRow() {
             .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
     ) {
-        actions.forEach { (emoji, label) ->
+        actions.forEach { (icon, label) ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -438,7 +438,12 @@ private fun QuickActionsRow() {
                     border = BorderStroke(1.dp, t.surfaceBorder),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(text = emoji, fontSize = 20.sp)
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = t.textSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
                 Text(
@@ -533,7 +538,12 @@ private fun PocketCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "\uD83D\uDCB0", fontSize = 18.sp)
+                Icon(
+                    imageVector = CeroFiaoIcons.DigitalWallet,
+                    contentDescription = null,
+                    tint = color.copy(alpha = 0.8f),
+                    modifier = Modifier.size(18.dp)
+                )
                 Surface(
                     shape = CircleShape,
                     color = color.copy(alpha = 0.07f),

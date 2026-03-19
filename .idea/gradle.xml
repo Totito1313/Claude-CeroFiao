@@ -36,11 +36,13 @@
             <option value="$PROJECT_DIR$/core/core-ui" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/feature-accounts" />
+            <option value="$PROJECT_DIR$/feature/feature-billsplitter" />
             <option value="$PROJECT_DIR$/feature/feature-budget" />
             <option value="$PROJECT_DIR$/feature/feature-categories" />
             <option value="$PROJECT_DIR$/feature/feature-dashboard" />
             <option value="$PROJECT_DIR$/feature/feature-debt" />
             <option value="$PROJECT_DIR$/feature/feature-exchange-rates" />
+            <option value="$PROJECT_DIR$/feature/feature-goals" />
             <option value="$PROJECT_DIR$/feature/feature-onboarding" />
             <option value="$PROJECT_DIR$/feature/feature-settings" />
             <option value="$PROJECT_DIR$/feature/feature-transactions" />

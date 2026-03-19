@@ -23,7 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,20 +65,22 @@ fun AccountDetailScreen(
             title = { Text("Eliminar cuenta") },
             text = { Text("¿Estás seguro de que quieres eliminar esta cuenta? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                CeroFiaoButton(
+                    text = "Eliminar",
                     onClick = {
                         viewModel.deleteAccount()
                         showDeleteDialog = false
                         onBack()
                     },
-                ) {
-                    Text("Eliminar", color = t.danger)
-                }
+                    variant = CeroFiaoButtonVariant.Danger
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancelar")
-                }
+                CeroFiaoButton(
+                    text = "Cancelar",
+                    onClick = { showDeleteDialog = false },
+                    variant = CeroFiaoButtonVariant.Text
+                )
             },
         )
     }

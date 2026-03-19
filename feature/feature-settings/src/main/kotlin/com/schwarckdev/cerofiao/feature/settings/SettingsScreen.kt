@@ -56,6 +56,7 @@ fun SettingsScreen(
     onNavigateToCsvExport: () -> Unit = {},
     onNavigateToRecurring: () -> Unit = {},
     onNavigateToAssociatedTitles: () -> Unit = {},
+    onNavigateToGoals: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -243,6 +244,22 @@ fun SettingsScreen(
                     label = "Categor\u00edas",
                     description = "Personalizar \u00edconos y colores",
                     onClick = onNavigateToCategories,
+                    trailing = {
+                        Icon(
+                            imageVector = CeroFiaoIcons.ChevronRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = CeroFiaoTheme.tokens.textFaint,
+                        )
+                    },
+                )
+                SettingDivider()
+                SettingRow(
+                    icon = CeroFiaoIcons.Target,
+                    iconColor = Color(0xFFFF5722),
+                    label = "Objetivos",
+                    description = "Metas de ahorro y presupuestos",
+                    onClick = onNavigateToGoals,
                     trailing = {
                         Icon(
                             imageVector = CeroFiaoIcons.ChevronRight,

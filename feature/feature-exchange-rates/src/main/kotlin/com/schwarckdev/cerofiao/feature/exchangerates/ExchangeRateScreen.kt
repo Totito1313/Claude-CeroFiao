@@ -15,7 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
-import androidx.compose.material3.Button
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -201,13 +201,12 @@ fun ExchangeRateScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
+            CeroFiaoButton(
+                text = "Actualizar tasas",
                 onClick = viewModel::refresh,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
-            ) {
-                Text("Actualizar tasas")
-            }
+            )
 
             Spacer(modifier = Modifier.height(100.dp))
         }

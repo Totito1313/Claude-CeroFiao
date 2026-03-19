@@ -4,9 +4,11 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.common.UuidGenerator
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
+import com.schwarckdev.cerofiao.core.domain.repository.SavingsGoalRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
+import com.schwarckdev.cerofiao.core.model.SavingsContribution
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import kotlinx.coroutines.flow.first
@@ -15,6 +17,7 @@ import javax.inject.Inject
 class RecordTransactionUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
+    private val savingsGoalRepository: SavingsGoalRepository,
     private val resolveExchangeRate: ResolveExchangeRateUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) {
@@ -27,6 +30,7 @@ class RecordTransactionUseCase @Inject constructor(
         note: String?,
         date: Long = DateUtils.now(),
         manualRateToUsd: Double? = null,
+        goalId: String? = null,
     ): Transaction {
         val now = DateUtils.now()
         val prefs = userPreferencesRepository.userPreferences.first()
@@ -73,6 +77,25 @@ class RecordTransactionUseCase @Inject constructor(
                 TransactionType.TRANSFER -> account.balance - amount
             }
             accountRepository.updateBalance(accountId, newBalance)
+        }
+
+        if (goalId != null) {
+            val goal = savingsGoalRepository.getGoalById(goalId).first()
+            if (goal != null) {
+                val contribution = SavingsContribution(
+                    id = UuidGenerator.generate(),
+                    goalId = goalId,
+                    transactionId = transaction.id,
+                    amount = amount,
+                    currencyCode = currencyCode,
+                    exchangeRateToUsd = rateToUsd,
+                    contributedAt = now,
+                )
+                savingsGoalRepository.insertContribution(contribution)
+
+                val newAmountInUsd = goal.currentAmountInUsd + amountInUsd
+                savingsGoalRepository.updateCurrentAmount(goalId, newAmountInUsd)
+            }
         }
 
         return transaction

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.BrandGradient
 
 private data class MenuGroup(
     val title: String,
@@ -53,6 +54,7 @@ fun MoreScreen(
     onNavigateToAnalytics: () -> Unit,
     onNavigateToAlcancia: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToBillSplitter: () -> Unit,
 ) {
     val t = CeroFiaoTheme.tokens
 
@@ -70,6 +72,7 @@ fun MoreScreen(
             items = listOf(
                 MenuItem(CeroFiaoIcons.AIChat, "Asistente IA", "Chat inteligente financiero", Color(0xFF8A2BE2), useGradient = true),
                 MenuItem(CeroFiaoIcons.ScanReceipt, "Escanear Recibo", "OCR para registro rápido", Color(0xFF00D4FF)),
+                MenuItem(CeroFiaoIcons.Debt, "Divisor de Cuentas", "Bill Splitter multi-moneda", Color(0xFFFF9800)),
             ),
         ),
         MenuGroup(
@@ -125,6 +128,7 @@ fun MoreScreen(
                                     "Analytics" -> onNavigateToAnalytics
                                     "La Alcancía" -> onNavigateToAlcancia
                                     "Ajustes" -> onNavigateToSettings
+                                    "Divisor de Cuentas" -> onNavigateToBillSplitter
                                     else -> {{}}
                                 }
 
@@ -139,7 +143,7 @@ fun MoreScreen(
 
                                 if (index < group.items.lastIndex) {
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        modifier = Modifier.padding(start = 70.dp),
                                         thickness = 1.dp,
                                         color = t.divider,
                                     )
@@ -177,7 +181,10 @@ private fun MoreMenuItem(
             shape = RoundedCornerShape(12.dp),
             color = if (useGradient) Color.Transparent else color.copy(alpha = 0.08f),
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = if (useGradient) Modifier.background(BrandGradient) else Modifier
+            ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,

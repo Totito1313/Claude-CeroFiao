@@ -16,14 +16,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Surface
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -98,12 +104,11 @@ fun TransferScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 uiState.accounts.forEach { account ->
-                    FilterChip(
+                    AccountChip(
+                        accountName = account.name,
+                        currency = account.currencyCode,
                         selected = account.id == uiState.fromAccountId,
-                        onClick = { viewModel.selectFromAccount(account.id) },
-                        label = {
-                            Text("${account.name} (${account.currencyCode})")
-                        },
+                        onClick = { viewModel.selectFromAccount(account.id) }
                     )
                 }
             }
@@ -120,24 +125,20 @@ fun TransferScreen(
                 uiState.accounts
                     .filter { it.id != uiState.fromAccountId }
                     .forEach { account ->
-                        FilterChip(
+                        AccountChip(
+                            accountName = account.name,
+                            currency = account.currencyCode,
                             selected = account.id == uiState.toAccountId,
-                            onClick = { viewModel.selectToAccount(account.id) },
-                            label = {
-                                Text("${account.name} (${account.currencyCode})")
-                            },
+                            onClick = { viewModel.selectToAccount(account.id) }
                         )
                     }
             }
 
             // Amount
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.amount,
                 onValueChange = viewModel::setAmount,
-                label = {
-                    val currency = uiState.fromAccount?.currencyCode ?: ""
-                    Text("Monto a enviar ($currency)")
-                },
+                label = "Monto a enviar (${uiState.fromAccount?.currencyCode ?: ""})",
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
@@ -145,13 +146,10 @@ fun TransferScreen(
 
             // Received amount (cross-currency)
             if (uiState.isCrossCurrency) {
-                OutlinedTextField(
+                CeroFiaoTextField(
                     value = uiState.receivedAmount,
                     onValueChange = viewModel::setReceivedAmount,
-                    label = {
-                        val currency = uiState.toAccount?.currencyCode ?: ""
-                        Text("Monto recibido ($currency)")
-                    },
+                    label = "Monto recibido (${uiState.toAccount?.currencyCode ?: ""})",
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
@@ -159,20 +157,20 @@ fun TransferScreen(
             }
 
             // Commission
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.commissionPercent,
                 onValueChange = viewModel::setCommissionPercent,
-                label = { Text("Comisión % (opcional)") },
+                label = "Comisión % (opcional)",
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
             )
 
             // Note
-            OutlinedTextField(
+            CeroFiaoTextField(
                 value = uiState.note,
                 onValueChange = viewModel::setNote,
-                label = { Text("Nota (opcional)") },
+                label = "Nota (opcional)",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -180,21 +178,46 @@ fun TransferScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Transfer button
-            Button(
+            CeroFiaoButton(
+                text = "Transferir",
                 onClick = viewModel::transfer,
                 enabled = uiState.isValid && !uiState.isSaving,
+                isLoading = uiState.isSaving,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 100.dp),
-            ) {
-                if (uiState.isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp),
-                        strokeWidth = 2.dp,
-                    )
-                }
-                Text("Transferir")
-            }
+            )
         }
+    }
+}
+
+@Composable
+private fun AccountChip(
+    accountName: String,
+    currency: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val t = CeroFiaoTheme.tokens
+    val bgColor = if (selected) Color(0x1400FF66) else t.pillBg
+    val borderColor = if (selected) Color(0x2600FF66) else Color.Transparent
+    val textColor = if (selected) Color(0xFF00FF66) else t.textSecondary
+
+    Surface(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius))
+            .clickable(onClick = onClick),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CeroFiaoShapes.ChipRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        androidx.compose.material3.Text(
+            text = "$accountName ($currency)",
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }

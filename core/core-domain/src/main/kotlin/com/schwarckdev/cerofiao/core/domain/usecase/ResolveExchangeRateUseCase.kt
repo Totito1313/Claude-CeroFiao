@@ -12,7 +12,7 @@ import javax.inject.Inject
  * - EURI ↔ EUR peg (1:1)
  * - Cross-currency conversion via VES as intermediate (since DB only stores X↔VES pairs)
  */
-class ResolveExchangeRateUseCase @Inject constructor(
+open class ResolveExchangeRateUseCase @Inject constructor(
     private val exchangeRateRepository: ExchangeRateRepository,
 ) {
     data class RateResult(
@@ -24,7 +24,7 @@ class ResolveExchangeRateUseCase @Inject constructor(
      * Resolves the rate to convert [from] currency to [to] currency.
      * Uses [preferredSource] when no implicit source is defined for the currency.
      */
-    suspend fun resolve(
+    open suspend fun resolve(
         from: String,
         to: String,
         preferredSource: ExchangeRateSource,
@@ -59,7 +59,7 @@ class ResolveExchangeRateUseCase @Inject constructor(
     /**
      * Convenience: resolves [currencyCode] → USD rate.
      */
-    suspend fun toUsd(
+    open suspend fun toUsd(
         currencyCode: String,
         preferredSource: ExchangeRateSource,
     ): RateResult = resolve(currencyCode, "USD", preferredSource)
@@ -67,7 +67,7 @@ class ResolveExchangeRateUseCase @Inject constructor(
     /**
      * Convenience: resolves USD → [currencyCode] rate.
      */
-    suspend fun fromUsd(
+    open suspend fun fromUsd(
         currencyCode: String,
         preferredSource: ExchangeRateSource,
     ): RateResult = resolve("USD", currencyCode, preferredSource)

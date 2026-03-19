@@ -6,6 +6,7 @@ import com.schwarckdev.cerofiao.core.data.repository.CategoryRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.DebtRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.ExchangeRateRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.RecurringTransactionRepositoryImpl
+import com.schwarckdev.cerofiao.core.data.repository.SavingsGoalRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionLogRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionRepositoryImpl
 import com.schwarckdev.cerofiao.core.data.repository.TransactionTitleRepositoryImpl
@@ -16,6 +17,7 @@ import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.DebtRepository
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.repository.RecurringTransactionRepository
+import com.schwarckdev.cerofiao.core.domain.repository.SavingsGoalRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionLogRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionTitleRepository
@@ -69,4 +71,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindTransactionTitleRepository(impl: TransactionTitleRepositoryImpl): TransactionTitleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSavingsGoalRepository(impl: SavingsGoalRepositoryImpl): SavingsGoalRepository
 }

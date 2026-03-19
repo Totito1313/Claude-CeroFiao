@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoFAB
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -91,18 +91,12 @@ fun CategoryListScreen(
                         .weight(1f)
                         .padding(start = 12.dp),
                 )
-                FloatingActionButton(
+                CeroFiaoFAB(
+                    icon = CeroFiaoIcons.Add,
                     onClick = onAddCategory,
                     modifier = Modifier.size(40.dp),
-                    containerColor = Color(0xFF8A2BE2),
-                ) {
-                    Icon(
-                        CeroFiaoIcons.Add,
-                        contentDescription = "Agregar categoría",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+                    contentDescription = "Agregar categoría"
+                )
             }
         }
 
@@ -114,13 +108,24 @@ fun CategoryListScreen(
                     color = Color(0xFF8A2BE2),
                 )
             }
-            items(uiState.expenseCategories, key = { it.id }) { category ->
-                SwipeToDeleteCategoryRow(
-                    category = category,
-                    totalUsd = uiState.categoryTotals[category.id],
-                    onClick = { onEditCategory(category.id) },
-                    onDelete = { viewModel.deleteCategory(category.id) },
-                )
+            uiState.expenseCategories.forEach { node ->
+                item(key = "root_${node.category.id}") {
+                    SwipeToDeleteCategoryRow(
+                        category = node.category,
+                        totalUsd = uiState.categoryTotals[node.category.id],
+                        onClick = { onEditCategory(node.category.id) },
+                        onDelete = { viewModel.deleteCategory(node.category.id) },
+                    )
+                }
+                items(node.subcategories, key = { "sub_${it.id}" }) { subcategory ->
+                    SwipeToDeleteCategoryRow(
+                        category = subcategory,
+                        totalUsd = uiState.categoryTotals[subcategory.id],
+                        onClick = { onEditCategory(subcategory.id) },
+                        onDelete = { viewModel.deleteCategory(subcategory.id) },
+                        modifier = Modifier.padding(start = 32.dp),
+                    )
+                }
             }
         }
 
@@ -133,13 +138,24 @@ fun CategoryListScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
-            items(uiState.incomeCategories, key = { it.id }) { category ->
-                SwipeToDeleteCategoryRow(
-                    category = category,
-                    totalUsd = uiState.categoryTotals[category.id],
-                    onClick = { onEditCategory(category.id) },
-                    onDelete = { viewModel.deleteCategory(category.id) },
-                )
+            uiState.incomeCategories.forEach { node ->
+                item(key = "root_${node.category.id}") {
+                    SwipeToDeleteCategoryRow(
+                        category = node.category,
+                        totalUsd = uiState.categoryTotals[node.category.id],
+                        onClick = { onEditCategory(node.category.id) },
+                        onDelete = { viewModel.deleteCategory(node.category.id) },
+                    )
+                }
+                items(node.subcategories, key = { "sub_${it.id}" }) { subcategory ->
+                    SwipeToDeleteCategoryRow(
+                        category = subcategory,
+                        totalUsd = uiState.categoryTotals[subcategory.id],
+                        onClick = { onEditCategory(subcategory.id) },
+                        onDelete = { viewModel.deleteCategory(subcategory.id) },
+                        modifier = Modifier.padding(start = 32.dp),
+                    )
+                }
             }
         }
 

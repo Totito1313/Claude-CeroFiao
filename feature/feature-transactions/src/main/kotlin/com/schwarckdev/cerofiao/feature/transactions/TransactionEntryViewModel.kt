@@ -10,12 +10,15 @@ import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.GetActiveGoalsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RecordTransactionUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.SuggestCategoryByTitleUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
+import com.schwarckdev.cerofiao.core.model.CategoryNode
+import com.schwarckdev.cerofiao.core.model.SavingsGoal
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,9 +39,11 @@ data class TransactionEntryUiState(
     val amount: Double = 0.0,
     val transactionType: TransactionType = TransactionType.EXPENSE,
     val accounts: List<Account> = emptyList(),
-    val categories: List<Category> = emptyList(),
+    val categories: List<CategoryNode> = emptyList(),
+    val goals: List<SavingsGoal> = emptyList(),
     val selectedAccountId: String? = null,
     val selectedCategoryId: String? = null,
+    val selectedGoalId: String? = null,
     val selectedCurrencyCode: String? = null,
     val note: String = "",
     val isSaving: Boolean = false,
@@ -53,6 +58,7 @@ class TransactionEntryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getAccountsUseCase: GetAccountsUseCase,
     getCategoriesUseCase: GetCategoriesUseCase,
+    getActiveGoalsUseCase: GetActiveGoalsUseCase,
     private val recordTransactionUseCase: RecordTransactionUseCase,
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
@@ -71,14 +77,21 @@ class TransactionEntryViewModel @Inject constructor(
     val uiState: StateFlow<TransactionEntryUiState> = combine(
         getAccountsUseCase(),
         getCategoriesUseCase(),
+        getActiveGoalsUseCase(),
         formState,
-    ) { accounts, categories, form ->
+    ) { accounts, categories, goals, form ->
         val filteredCategories = categories.filter { cat ->
             when (form.transactionType) {
                 TransactionType.EXPENSE -> cat.type.name == "EXPENSE"
                 TransactionType.INCOME -> cat.type.name == "INCOME"
                 TransactionType.TRANSFER -> false
             }
+        }
+
+        val rootCategories = filteredCategories.filter { it.parentId == null }.sortedBy { it.sortOrder }
+        val categoryNodes = rootCategories.map { root ->
+            val subs = filteredCategories.filter { it.parentId == root.id }.sortedBy { it.sortOrder }
+            CategoryNode(root, subs)
         }
 
         val resolvedAccountId = form.selectedAccountId ?: accounts.firstOrNull()?.id
@@ -90,9 +103,11 @@ class TransactionEntryViewModel @Inject constructor(
             amount = form.amountText.toDoubleOrNull() ?: 0.0,
             transactionType = form.transactionType,
             accounts = accounts,
-            categories = filteredCategories,
+            categories = categoryNodes,
+            goals = goals,
             selectedAccountId = resolvedAccountId,
             selectedCategoryId = form.selectedCategoryId,
+            selectedGoalId = form.selectedGoalId,
             selectedCurrencyCode = resolvedCurrency,
             note = form.note,
             isSaving = form.isSaving,
@@ -196,6 +211,10 @@ class TransactionEntryViewModel @Inject constructor(
         formState.update { it.copy(selectedCategoryId = categoryId) }
     }
 
+    fun selectGoal(goalId: String?) {
+        formState.update { it.copy(selectedGoalId = if (it.selectedGoalId == goalId) null else goalId) }
+    }
+
     fun setNote(note: String) {
         formState.update { it.copy(note = note) }
         suggestionJob?.cancel()
@@ -239,6 +258,7 @@ class TransactionEntryViewModel @Inject constructor(
                         categoryId = current.selectedCategoryId,
                         type = current.transactionType,
                         note = current.note.ifBlank { null },
+                        goalId = current.selectedGoalId,
                     )
                 }
                 // Learn title→category association for future suggestions
@@ -332,6 +352,7 @@ class TransactionEntryViewModel @Inject constructor(
         val transactionType: TransactionType = TransactionType.EXPENSE,
         val selectedAccountId: String? = null,
         val selectedCategoryId: String? = null,
+        val selectedGoalId: String? = null,
         val selectedCurrencyCode: String? = null,
         val suggestedCategoryId: String? = null,
         val note: String = "",

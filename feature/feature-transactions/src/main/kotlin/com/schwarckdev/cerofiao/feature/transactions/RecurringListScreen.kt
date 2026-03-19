@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +36,7 @@ import com.schwarckdev.cerofiao.core.model.RecurrenceType
 import com.schwarckdev.cerofiao.core.model.RecurringTransaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.core.ui.EmptyState
+import com.schwarckdev.cerofiao.core.ui.GlassCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,11 +137,10 @@ private fun UpcomingCard(
         TransactionType.INCOME -> "Ingreso"
         TransactionType.TRANSFER -> "Transferencia"
     }
-    Card(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF8A2BE2).copy(alpha = 0.12f),
-        ),
+        color = Color(0xFF8A2BE2).copy(alpha = 0.12f),
+        shape = RoundedCornerShape(16.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -181,11 +179,8 @@ private fun RecurringCard(
         RecurrenceType.YEARLY -> "Anual"
     }
 
-    Card(
+    GlassCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = t.surface,
-        ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
