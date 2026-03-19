@@ -4,9 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.schwarckdev.cerofiao.feature.budget.addBudgetScreen
+import com.schwarckdev.cerofiao.feature.budget.alcanciaScreen
+import com.schwarckdev.cerofiao.feature.budget.analyticsScreen
 import com.schwarckdev.cerofiao.feature.budget.budgetListScreen
 import com.schwarckdev.cerofiao.feature.budget.navigateToAddBudget
+import com.schwarckdev.cerofiao.feature.budget.navigateToAlcancia
+import com.schwarckdev.cerofiao.feature.budget.navigateToAnalytics
 import com.schwarckdev.cerofiao.feature.budget.navigateToBudgetList
 import com.schwarckdev.cerofiao.feature.debt.addDebtScreen
 import com.schwarckdev.cerofiao.feature.debt.debtDetailScreen
@@ -14,12 +19,11 @@ import com.schwarckdev.cerofiao.feature.debt.debtListScreen
 import com.schwarckdev.cerofiao.feature.debt.navigateToAddDebt
 import com.schwarckdev.cerofiao.feature.debt.navigateToDebtDetail
 import com.schwarckdev.cerofiao.feature.debt.navigateToDebtList
-import com.schwarckdev.cerofiao.feature.accounts.AccountListRoute
-import com.schwarckdev.cerofiao.feature.accounts.AddAccountRoute
 import com.schwarckdev.cerofiao.feature.accounts.accountDetailScreen
 import com.schwarckdev.cerofiao.feature.accounts.accountListScreen
 import com.schwarckdev.cerofiao.feature.accounts.addAccountScreen
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAccountDetail
+import com.schwarckdev.cerofiao.feature.accounts.navigateToAccountList
 import com.schwarckdev.cerofiao.feature.accounts.navigateToAddAccount
 import com.schwarckdev.cerofiao.feature.categories.addEditCategoryScreen
 import com.schwarckdev.cerofiao.feature.categories.categoryListScreen
@@ -35,6 +39,7 @@ import com.schwarckdev.cerofiao.feature.settings.associatedTitlesScreen
 import com.schwarckdev.cerofiao.feature.settings.csvExportScreen
 import com.schwarckdev.cerofiao.feature.settings.navigateToAssociatedTitles
 import com.schwarckdev.cerofiao.feature.settings.navigateToCsvExport
+import com.schwarckdev.cerofiao.feature.settings.navigateToSettings
 import com.schwarckdev.cerofiao.feature.settings.settingsScreen
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionDetail
 import com.schwarckdev.cerofiao.feature.transactions.navigateToTransactionEntry
@@ -80,6 +85,7 @@ fun CeroFiaoNavHost(
             },
         )
 
+        // Transactions (top-level tab)
         transactionListScreen(
             onAddTransaction = { navController.navigateToTransactionEntry() },
             onTransactionClick = { transactionId ->
@@ -105,6 +111,32 @@ fun CeroFiaoNavHost(
             onSaved = { navController.popBackStack() },
         )
 
+        // CeroFiao (Debts - top-level tab)
+        debtListScreen(
+            onAddDebt = { navController.navigateToAddDebt() },
+            onDebtClick = { debtId -> navController.navigateToDebtDetail(debtId) },
+        )
+
+        addDebtScreen(
+            onBack = { navController.popBackStack() },
+            onSaved = { navController.popBackStack() },
+        )
+
+        debtDetailScreen(
+            onBack = { navController.popBackStack() },
+        )
+
+        // More (top-level tab)
+        composable<MoreRoute> {
+            MoreScreen(
+                onNavigateToAccounts = { navController.navigateToAccountList() },
+                onNavigateToAnalytics = { navController.navigateToAnalytics() },
+                onNavigateToAlcancia = { navController.navigateToAlcancia() },
+                onNavigateToSettings = { navController.navigateToSettings() },
+            )
+        }
+
+        // Accounts (accessed from More)
         accountListScreen(
             onAccountClick = { accountId -> navController.navigateToAccountDetail(accountId) },
             onAddAccount = { navController.navigateToAddAccount() },
@@ -120,6 +152,7 @@ fun CeroFiaoNavHost(
             onAccountCreated = { navController.popBackStack() },
         )
 
+        // Categories
         categoryListScreen(
             onBack = { navController.popBackStack() },
             onAddCategory = { navController.navigateToAddEditCategory() },
@@ -131,10 +164,12 @@ fun CeroFiaoNavHost(
             onSaved = { navController.popBackStack() },
         )
 
+        // Exchange rates
         exchangeRateScreen(
             onBack = { navController.popBackStack() },
         )
 
+        // Settings (accessed from More)
         settingsScreen(
             onNavigateToCategories = { navController.navigateToCategories() },
             onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
@@ -178,18 +213,11 @@ fun CeroFiaoNavHost(
             onSaved = { navController.popBackStack() },
         )
 
-        debtListScreen(
+        analyticsScreen(
             onBack = { navController.popBackStack() },
-            onAddDebt = { navController.navigateToAddDebt() },
-            onDebtClick = { debtId -> navController.navigateToDebtDetail(debtId) },
         )
 
-        addDebtScreen(
-            onBack = { navController.popBackStack() },
-            onSaved = { navController.popBackStack() },
-        )
-
-        debtDetailScreen(
+        alcanciaScreen(
             onBack = { navController.popBackStack() },
         )
     }

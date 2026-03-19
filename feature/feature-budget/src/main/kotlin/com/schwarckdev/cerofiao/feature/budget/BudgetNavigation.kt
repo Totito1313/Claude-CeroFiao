@@ -44,3 +44,33 @@ fun NavController.navigateToBudgetList() {
 fun NavController.navigateToAddBudget(budgetId: String? = null) {
     navigate(AddBudgetRoute(budgetId))
 }
+
+@Serializable
+object AnalyticsRoute
+
+@Serializable
+object AlcanciaRoute
+
+fun NavGraphBuilder.analyticsScreen(
+    onBack: () -> Unit,
+) {
+    composable<AnalyticsRoute> {
+        AnalyticsScreen(onBack = onBack)
+    }
+}
+
+fun NavGraphBuilder.alcanciaScreen(
+    onBack: () -> Unit,
+) {
+    composable<AlcanciaRoute> {
+        AlcanciaScreen(onBack = onBack)
+    }
+}
+
+fun NavController.navigateToAnalytics() {
+    navigate(AnalyticsRoute)
+}
+
+fun NavController.navigateToAlcancia() {
+    navigate(AlcanciaRoute)
+}

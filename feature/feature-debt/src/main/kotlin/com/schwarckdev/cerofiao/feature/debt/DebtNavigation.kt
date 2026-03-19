@@ -15,13 +15,11 @@ data class AddDebtRoute(val debtId: String? = null)
 data class DebtDetailRoute(val debtId: String)
 
 fun NavGraphBuilder.debtListScreen(
-    onBack: () -> Unit,
     onAddDebt: () -> Unit,
     onDebtClick: (String) -> Unit,
 ) {
     composable<DebtListRoute> {
         DebtListScreen(
-            onBack = onBack,
             onAddDebt = onAddDebt,
             onDebtClick = onDebtClick,
         )

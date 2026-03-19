@@ -8,6 +8,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
@@ -71,9 +72,25 @@ fun CeroFiaoTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = CeroFiaoTypography,
-        content = content,
-    )
+    val ceroFiaoTokens = if (darkTheme) DarkCeroFiaoTokens else LightCeroFiaoTokens
+
+    CompositionLocalProvider(
+        LocalCeroFiaoTokens provides ceroFiaoTokens,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = CeroFiaoTypography,
+            content = content,
+        )
+    }
+}
+
+/**
+ * Convenience accessor for CeroFiao extended design tokens.
+ * Usage: CeroFiaoTheme.tokens.surface, CeroFiaoTheme.tokens.text, etc.
+ */
+object CeroFiaoTheme {
+    val tokens: CeroFiaoColorTokens
+        @Composable
+        get() = LocalCeroFiaoTokens.current
 }

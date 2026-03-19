@@ -1,7 +1,9 @@
 package com.schwarckdev.cerofiao.feature.dashboard
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,37 +17,49 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.theme.BrandGradient
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.model.CurrencyBalance
 import com.schwarckdev.cerofiao.core.model.ExchangeRate
 import com.schwarckdev.cerofiao.core.model.GlobalBalance
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
-import com.schwarckdev.cerofiao.core.ui.MoneyText
+import com.schwarckdev.cerofiao.core.ui.GlassCard
+import com.schwarckdev.cerofiao.core.ui.GlassCardPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,53 +71,54 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val t = CeroFiaoTheme.tokens
+    var balanceVisible by remember { mutableStateOf(true) }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "CeroFiao",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddTransaction) {
-                Icon(
-                    imageVector = CeroFiaoIcons.Add,
-                    contentDescription = "Agregar transacción",
-                )
-            }
-        },
-    ) { innerPadding ->
+    Box(modifier = modifier.fillMaxSize()) {
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = viewModel::refreshRates,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 120.dp),
             ) {
+                // ── Header ──
                 item {
-                    GlobalBalanceCard(balance = uiState.globalBalance)
+                    DashboardHeader(
+                        usdVesRate = uiState.bcvRate?.rate ?: uiState.usdtRate?.rate,
+                    )
                 }
 
+                // ── Global Balance ──
+                item {
+                    GlobalBalanceSection(
+                        balance = uiState.globalBalance,
+                        balanceVisible = balanceVisible,
+                        onToggleVisibility = { balanceVisible = !balanceVisible },
+                        monthlyIncome = uiState.monthlyIncome,
+                        monthlyExpenses = uiState.monthlyExpenses,
+                    )
+                }
+
+                // ── Quick Actions ──
+                item {
+                    QuickActionsRow()
+                }
+
+                // ── Pocket Cards (Accounts) ──
                 val breakdown = uiState.globalBalance?.breakdownByCurrency.orEmpty()
                 if (breakdown.isNotEmpty()) {
                     item {
-                        CurrencyBreakdownSection(breakdown = breakdown)
+                        PocketCardsSection(
+                            breakdown = breakdown,
+                            balanceVisible = balanceVisible,
+                        )
                     }
                 }
 
-                // Exchange rate banners
+                // ── Exchange Rate Banners ──
                 if (uiState.bcvRate != null || uiState.usdtRate != null) {
                     item {
                         ExchangeRateBanner(
@@ -113,53 +128,22 @@ fun DashboardScreen(
                     }
                 }
 
-                if (uiState.bcvEurRate != null || uiState.euriRate != null) {
-                    item {
-                        EuroRateBanner(
-                            bcvEurRate = uiState.bcvEurRate,
-                            euriRate = uiState.euriRate,
-                        )
-                    }
-                }
-
-                // Monthly summary (amounts are aggregated in USD)
-                if (uiState.monthlyExpenses > 0.0 || uiState.monthlyIncome > 0.0) {
-                    item {
-                        MonthlySummaryCard(
-                            monthlyExpenses = uiState.monthlyExpenses,
-                            monthlyIncome = uiState.monthlyIncome,
-                            currencyCode = "USD",
-                        )
-                    }
-                }
-
-                // Top category expenses
+                // ── Budgets / Top Categories ──
                 if (uiState.topCategoryExpenses.isNotEmpty()) {
                     item {
-                        TopCategoriesSection(
+                        BudgetsSection(
                             categoryExpenses = uiState.topCategoryExpenses,
                         )
                     }
                 }
 
+                // ── Recent Transactions ──
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "Transacciones recientes",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = "Ver todas",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable(onClick = onViewAllTransactions),
-                        )
-                    }
+                    SectionHeader(
+                        title = "Recientes",
+                        actionLabel = "Ver todo",
+                        onAction = onViewAllTransactions,
+                    )
                 }
 
                 if (uiState.recentTransactions.isEmpty()) {
@@ -167,91 +151,138 @@ fun DashboardScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 32.dp),
+                                .padding(vertical = 32.dp, horizontal = 20.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "Sin transacciones aún",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp,
+                                color = t.textFaint,
                             )
                         }
                     }
                 } else {
-                    items(
-                        items = uiState.recentTransactions,
-                        key = { it.id },
-                    ) { transaction ->
-                        TransactionRow(
-                            transaction = transaction,
-                            onClick = { onTransactionClick(transaction.id) },
-                        )
+                    item {
+                        GlassCard(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            padding = GlassCardPadding.None,
+                        ) {
+                            Column {
+                                uiState.recentTransactions.forEachIndexed { index, transaction ->
+                                    TransactionRow(
+                                        transaction = transaction,
+                                        onClick = { onTransactionClick(transaction.id) },
+                                    )
+                                    if (index < uiState.recentTransactions.lastIndex) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                            thickness = 1.dp,
+                                            color = t.divider,
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
 
-@Composable
-private fun GlobalBalanceCard(
-    balance: GlobalBalance?,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        tonalElevation = 2.dp,
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "Balance total",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            MoneyText(
-                amount = balance?.totalInDisplayCurrency ?: 0.0,
-                currencyCode = balance?.displayCurrencyCode ?: "USD",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+        // ── FAB ──
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 100.dp)
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(BrandGradient)
+                .clickable(onClick = onAddTransaction),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = CeroFiaoIcons.Add,
+                contentDescription = "Agregar transacción",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp),
             )
         }
     }
 }
 
+// ── Header ──
+
 @Composable
-private fun CurrencyBreakdownSection(
-    breakdown: List<CurrencyBalance>,
-    modifier: Modifier = Modifier,
-) {
+private fun DashboardHeader(usdVesRate: Double?) {
+    val t = CeroFiaoTheme.tokens
+    val greeting = remember {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        when {
+            hour < 12 -> "Buenos días"
+            hour < 18 -> "Buenas tardes"
+            else -> "Buenas noches"
+        }
+    }
+
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        breakdown.forEach { currency ->
+        // Avatar
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(BrandGradient),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "CF",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = greeting,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = t.textTertiary,
+            )
+            Text(
+                text = "CeroFiao",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = t.text,
+            )
+        }
+
+        // Rate pill
+        if (usdVesRate != null) {
             Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                tonalElevation = 1.dp,
+                shape = CircleShape,
+                color = t.pillBg,
+                border = BorderStroke(1.dp, t.surfaceBorder),
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = currency.currencyCode,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(5.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00FF66)),
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = CurrencyFormatter.format(
-                            currency.totalInOriginalCurrency,
-                            currency.currencyCode,
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        text = "$1 = Bs.${String.format("%.2f", usdVesRate)}",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = t.textSecondary,
                     )
                 }
             }
@@ -259,134 +290,349 @@ private fun CurrencyBreakdownSection(
     }
 }
 
-@Composable
-private fun TransactionRow(
-    transaction: Transaction,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val icon = when (transaction.type) {
-        TransactionType.INCOME -> CeroFiaoIcons.Income
-        TransactionType.EXPENSE -> CeroFiaoIcons.Expense
-        TransactionType.TRANSFER -> CeroFiaoIcons.Transfer
-    }
-    val iconColor = when (transaction.type) {
-        TransactionType.INCOME -> Color(0xFF4CAF50)
-        TransactionType.EXPENSE -> Color(0xFFF44336)
-        TransactionType.TRANSFER -> Color(0xFF2196F3)
-    }
-    val sign = when (transaction.type) {
-        TransactionType.INCOME -> "+"
-        TransactionType.EXPENSE -> "-"
-        TransactionType.TRANSFER -> ""
-    }
+// ── Global Balance ──
 
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+@Composable
+private fun GlobalBalanceSection(
+    balance: GlobalBalance?,
+    balanceVisible: Boolean,
+    onToggleVisibility: () -> Unit,
+    monthlyIncome: Double,
+    monthlyExpenses: Double,
+) {
+    val t = CeroFiaoTheme.tokens
+    val totalDisplay = balance?.totalInDisplayCurrency ?: 0.0
+    val currencyCode = balance?.displayCurrencyCode ?: "USD"
+    val symbol = if (currencyCode == "VES") "Bs." else "$"
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Label + eye toggle
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(10.dp),
-                color = iconColor.copy(alpha = 0.12f),
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = transaction.type.name,
-                    tint = iconColor,
-                    modifier = Modifier.padding(8.dp),
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = transaction.note ?: transaction.type.name.lowercase()
-                        .replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                )
-                Text(
-                    text = DateUtils.formatDisplayDate(transaction.date),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
             Text(
-                text = "$sign${CurrencyFormatter.format(transaction.amount, transaction.currencyCode)}",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = iconColor,
+                text = "Balance Total",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = t.textTertiary,
             )
+            Icon(
+                imageVector = if (balanceVisible) CeroFiaoIcons.Eye else CeroFiaoIcons.EyeOff,
+                contentDescription = "Toggle visibility",
+                modifier = Modifier
+                    .size(13.dp)
+                    .clickable(onClick = onToggleVisibility),
+                tint = t.textFaint,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Balance amount
+        Text(
+            text = if (balanceVisible) {
+                "$symbol${CurrencyFormatter.format(totalDisplay, currencyCode)}"
+            } else {
+                "••••••"
+            },
+            fontSize = 48.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = t.text,
+            letterSpacing = (-1.44).sp,
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Income / Expense pills
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // Income pill
+            Surface(
+                shape = CircleShape,
+                color = Color(0x0F00FF66),
+                border = BorderStroke(1.dp, Color(0x1F00FF66)),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        imageVector = CeroFiaoIcons.TrendingUp,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = Color(0xFF00FF66),
+                    )
+                    Text(
+                        text = if (balanceVisible) "$${monthlyIncome.toLong()}" else "••••",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF00FF66),
+                    )
+                }
+            }
+
+            // Expense pill
+            Surface(
+                shape = CircleShape,
+                color = Color(0x0FFF4433),
+                border = BorderStroke(1.dp, Color(0x1FFF4433)),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        imageVector = CeroFiaoIcons.TrendingDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = Color(0xFFFF4433),
+                    )
+                    Text(
+                        text = if (balanceVisible) "$${monthlyExpenses.toLong()}" else "••••",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFFFF4433),
+                    )
+                }
+            }
         }
     }
 }
+
+// ── Quick Actions ──
+
+@Composable
+private fun QuickActionsRow() {
+    val t = CeroFiaoTheme.tokens
+    val actions = listOf(
+        "\uD83D\uDCE4" to "Transferir",
+        "\uD83D\uDD04" to "Cambiar",
+        "\uD83D\uDC37" to "Ahorrar",
+        "\uD83D\uDCCA" to "Analytics",
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+    ) {
+        actions.forEach { (emoji, label) ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = t.surface,
+                    border = BorderStroke(1.dp, t.surfaceBorder),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(text = emoji, fontSize = 20.sp)
+                    }
+                }
+                Text(
+                    text = label,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = t.textTertiary,
+                )
+            }
+        }
+    }
+}
+
+// ── Pocket Cards ──
+
+@Composable
+private fun PocketCardsSection(
+    breakdown: List<CurrencyBalance>,
+    balanceVisible: Boolean,
+) {
+    val t = CeroFiaoTheme.tokens
+    val colors = listOf(
+        Color(0xFF00FF66), Color(0xFF8A2BE2), Color(0xFFFF6B00),
+        Color(0xFF00D4FF), Color(0xFFF0B90B),
+    )
+
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Bolsillos",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = t.text,
+            )
+            Text(
+                text = "Ver cuentas",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = t.textMuted,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            itemsIndexed(breakdown) { index, currency ->
+                val cardColor = colors[index % colors.size]
+                PocketCard(
+                    currency = currency,
+                    color = cardColor,
+                    balanceVisible = balanceVisible,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PocketCard(
+    currency: CurrencyBalance,
+    color: Color,
+    balanceVisible: Boolean,
+) {
+    val t = CeroFiaoTheme.tokens
+    val symbol = if (currency.currencyCode == "VES") "Bs." else "$"
+
+    Surface(
+        modifier = Modifier
+            .width(190.dp)
+            .height(120.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = color.copy(alpha = 0.04f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.10f)),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = "\uD83D\uDCB0", fontSize = 18.sp)
+                Surface(
+                    shape = CircleShape,
+                    color = color.copy(alpha = 0.07f),
+                    border = BorderStroke(1.dp, color.copy(alpha = 0.10f)),
+                ) {
+                    Text(
+                        text = currency.currencyCode,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = color,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    )
+                }
+            }
+
+            Column {
+                Text(
+                    text = currency.currencyCode,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = t.textTertiary,
+                )
+                Text(
+                    text = if (balanceVisible) {
+                        "$symbol${CurrencyFormatter.format(currency.totalInOriginalCurrency, currency.currencyCode)}"
+                    } else "••••",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = t.text,
+                    letterSpacing = (-0.34).sp,
+                )
+            }
+        }
+    }
+}
+
+// ── Exchange Rate Banner ──
 
 @Composable
 private fun ExchangeRateBanner(
     bcvRate: ExchangeRate?,
     usdtRate: ExchangeRate?,
-    modifier: Modifier = Modifier,
 ) {
+    val t = CeroFiaoTheme.tokens
+
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (bcvRate != null) {
-            Surface(
+            GlassCard(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
+                padding = GlassCardPadding.Small,
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column {
                     Text(
                         text = "BCV",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = t.textFaint,
                     )
                     Text(
-                        text = CurrencyFormatter.format(bcvRate.rate, "VES"),
-                        style = MaterialTheme.typography.titleMedium,
+                        text = "Bs.${String.format("%.2f", bcvRate.rate)}",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        color = t.text,
                     )
                     Text(
                         text = "Bs/USD",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        color = t.textMuted,
                     )
                 }
             }
         }
         if (usdtRate != null) {
-            Surface(
+            GlassCard(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                padding = GlassCardPadding.Small,
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column {
                     Text(
                         text = "USDT",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = t.textFaint,
                     )
                     Text(
-                        text = CurrencyFormatter.format(usdtRate.rate, "VES"),
-                        style = MaterialTheme.typography.titleMedium,
+                        text = "Bs.${String.format("%.2f", usdtRate.rate)}",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        color = t.text,
                     )
                     Text(
                         text = "Bs/USD",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        color = t.textMuted,
                     )
                 }
             }
@@ -394,215 +640,204 @@ private fun ExchangeRateBanner(
     }
 }
 
-@Composable
-private fun EuroRateBanner(
-    bcvEurRate: ExchangeRate?,
-    euriRate: ExchangeRate?,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (bcvEurRate != null) {
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f),
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = "BCV",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
-                    )
-                    Text(
-                        text = CurrencyFormatter.format(bcvEurRate.rate, "VES"),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    )
-                    Text(
-                        text = "Bs/EUR",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        }
-        if (euriRate != null) {
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = "EURI",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                    )
-                    Text(
-                        text = CurrencyFormatter.format(euriRate.rate, "VES"),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                    Text(
-                        text = "Bs/EUR",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        }
-    }
-}
+// ── Budgets Section ──
 
 @Composable
-private fun MonthlySummaryCard(
-    monthlyExpenses: Double,
-    monthlyIncome: Double,
-    currencyCode: String = "USD",
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 1.dp,
+private fun BudgetsSection(categoryExpenses: List<CategoryExpense>) {
+    val t = CeroFiaoTheme.tokens
+
+    GlassCard(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+        padding = GlassCardPadding.None,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Resumen del mes",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+        Column {
+            SectionHeader(
+                title = "Presupuestos",
+                actionLabel = "Ver todo",
+                onAction = {},
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                categoryExpenses.forEach { expense ->
+                    BudgetRow(expense = expense)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BudgetRow(expense: CategoryExpense) {
+    val t = CeroFiaoTheme.tokens
+    val pct = expense.percentage.coerceIn(0f, 1f)
+    val barColor = when {
+        pct > 0.8f -> Color(0xFFFF4433)
+        pct > 0.5f -> Color(0xFFFF6B00)
+        else -> Color(0xFF00FF66)
+    }
+
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                // Expenses
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF44336).copy(alpha = 0.08f),
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = "Gastos del mes",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = CurrencyFormatter.format(monthlyExpenses, currencyCode),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFF44336),
-                        )
-                    }
-                }
-                // Income
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF4CAF50).copy(alpha = 0.08f),
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = "Ingresos del mes",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = CurrencyFormatter.format(monthlyIncome, currencyCode),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4CAF50),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TopCategoriesSection(
-    categoryExpenses: List<CategoryExpense>,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 1.dp,
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Top categorías",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            categoryExpenses.forEach { expense ->
-                CategoryExpenseRow(expense = expense)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategoryExpenseRow(
-    expense: CategoryExpense,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Surface(
-            modifier = Modifier.size(32.dp),
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-        ) {
-            Icon(
-                painter = painterResource(CeroFiaoIcons.getCategoryIconRes(expense.iconName)),
-                contentDescription = expense.categoryName,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(6.dp),
-            )
-        }
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+                Icon(
+                    painter = painterResource(CeroFiaoIcons.getCategoryIconRes(expense.iconName)),
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = t.textSecondary,
+                )
                 Text(
                     text = expense.categoryName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                )
-                Text(
-                    text = CurrencyFormatter.format(expense.amount, "USD"),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = t.text,
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            LinearProgressIndicator(
-                progress = { expense.percentage.coerceAtMost(1f) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            Text(
+                text = "$${expense.amount.toLong()}",
+                fontSize = 12.sp,
+                color = t.textTertiary,
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        LinearProgressIndicator(
+            progress = { pct },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(RoundedCornerShape(3.dp)),
+            color = barColor,
+            trackColor = t.progressBg,
+        )
+    }
+}
+
+// ── Transaction Row ──
+
+@Composable
+private fun TransactionRow(
+    transaction: Transaction,
+    onClick: () -> Unit,
+) {
+    val t = CeroFiaoTheme.tokens
+    val isIncome = transaction.type == TransactionType.INCOME
+    val amountColor = if (isIncome) Color(0xFF00FF66) else t.expense
+    val sign = if (isIncome) "+" else "-"
+    val symbol = if (transaction.currencyCode == "VES") "Bs." else "$"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Icon
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(14.dp),
+            color = t.iconBg,
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = when (transaction.type) {
+                        TransactionType.INCOME -> CeroFiaoIcons.ArrowIncome
+                        TransactionType.EXPENSE -> CeroFiaoIcons.ArrowExpense
+                        TransactionType.TRANSFER -> CeroFiaoIcons.Transfer
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(17.dp),
+                    tint = t.textSecondary,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = transaction.note ?: transaction.type.name.lowercase()
+                    .replaceFirstChar { it.uppercase() },
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = t.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = transaction.type.name.lowercase().replaceFirstChar { it.uppercase() },
+                    fontSize = 11.sp,
+                    color = t.textMuted,
+                )
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = if (isIncome) CeroFiaoIcons.ArrowIncome else CeroFiaoIcons.ArrowExpense,
+                contentDescription = null,
+                modifier = Modifier.size(11.dp),
+                tint = if (isIncome) Color(0xFF00FF66) else Color(0xFFFF4433),
+            )
+            Text(
+                text = "$sign$symbol${CurrencyFormatter.format(transaction.amount, transaction.currencyCode)}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = amountColor,
+            )
+        }
+    }
+}
+
+// ── Section Header ──
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+) {
+    val t = CeroFiaoTheme.tokens
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = t.text,
+        )
+        Row(
+            modifier = Modifier.clickable(onClick = onAction),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = actionLabel,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF00FF66),
+            )
+            Icon(
+                imageVector = CeroFiaoIcons.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = Color(0xFF00FF66),
             )
         }
     }

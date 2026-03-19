@@ -2,35 +2,65 @@ package com.schwarckdev.cerofiao.core.designsystem.icon
 
 import androidx.annotation.DrawableRes
 import com.composables.icons.lucide.ArrowDown
+import com.composables.icons.lucide.ArrowDownLeft
 import com.composables.icons.lucide.ArrowLeft
 import com.composables.icons.lucide.ArrowLeftRight
 import com.composables.icons.lucide.ArrowUp
+import com.composables.icons.lucide.ArrowUpRight
+import com.composables.icons.lucide.ChartBar
+import com.composables.icons.lucide.Bell
 import com.composables.icons.lucide.Building
+import com.composables.icons.lucide.Camera
 import com.composables.icons.lucide.Check
+import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.CircleArrowDown
 import com.composables.icons.lucide.CircleArrowUp
+import com.composables.icons.lucide.CircleDollarSign
 import com.composables.icons.lucide.DollarSign
 import com.composables.icons.lucide.Ellipsis
+import com.composables.icons.lucide.Eye
+import com.composables.icons.lucide.EyeOff
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Globe
+import com.composables.icons.lucide.HandCoins
+import com.composables.icons.lucide.CircleHelp
+import com.composables.icons.lucide.House
 import com.composables.icons.lucide.LayoutDashboard
+import com.composables.icons.lucide.Lock
+import com.composables.icons.lucide.LogOut
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Moon
+import com.composables.icons.lucide.Palette
 import com.composables.icons.lucide.Pencil
+import com.composables.icons.lucide.PiggyBank
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Receipt
 import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.Send
 import com.composables.icons.lucide.Settings
+import com.composables.icons.lucide.Shield
+import com.composables.icons.lucide.SlidersHorizontal
+import com.composables.icons.lucide.Smartphone
+import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.Sun
+import com.composables.icons.lucide.Target
 import com.composables.icons.lucide.Trash2
+import com.composables.icons.lucide.TrendingDown
+import com.composables.icons.lucide.TrendingUp
+import com.composables.icons.lucide.LockOpen
 import com.composables.icons.lucide.Users
 import com.composables.icons.lucide.Wallet
+import com.composables.icons.lucide.X
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.oneuiproject.oneui.R as IconsR
 
 object CeroFiaoIcons {
-    // Navigation (Lucide ImageVector)
+    // Navigation (Lucide ImageVector) — Figma 4-tab layout
     val Dashboard: ImageVector = Lucide.LayoutDashboard
+    val NavHome: ImageVector = Lucide.House
     val Transactions: ImageVector = Lucide.Receipt
+    val NavTransactions: ImageVector = Lucide.ArrowLeftRight
     val Accounts: ImageVector = Lucide.Wallet
     val More: ImageVector = Lucide.Ellipsis
     val Settings: ImageVector = Lucide.Settings
@@ -43,11 +73,23 @@ object CeroFiaoIcons {
     val Search: ImageVector = Lucide.Search
     val Check: ImageVector = Lucide.Check
     val ChevronRight: ImageVector = Lucide.ChevronRight
+    val ChevronDown: ImageVector = Lucide.ChevronDown
+    val Close: ImageVector = Lucide.X
+    val Filter: ImageVector = Lucide.SlidersHorizontal
+    val SendIcon: ImageVector = Lucide.Send
+
+    // Visibility
+    val Eye: ImageVector = Lucide.Eye
+    val EyeOff: ImageVector = Lucide.EyeOff
 
     // Transaction types (Lucide ImageVector)
     val Income: ImageVector = Lucide.CircleArrowDown
     val Expense: ImageVector = Lucide.CircleArrowUp
     val Transfer: ImageVector = Lucide.ArrowLeftRight
+    val ArrowIncome: ImageVector = Lucide.ArrowDownLeft
+    val ArrowExpense: ImageVector = Lucide.ArrowUpRight
+    val TrendingUp: ImageVector = Lucide.TrendingUp
+    val TrendingDown: ImageVector = Lucide.TrendingDown
 
     // Account types (Lucide ImageVector)
     val Cash: ImageVector = Lucide.Wallet
@@ -57,13 +99,30 @@ object CeroFiaoIcons {
 
     // Features (Lucide ImageVector)
     val ExchangeRate: ImageVector = Lucide.CircleArrowUp
-    val Savings: ImageVector = Lucide.Wallet
+    val Savings: ImageVector = Lucide.PiggyBank
     val Budget: ImageVector = Lucide.DollarSign
     val Debt: ImageVector = Lucide.Users
+    val Analytics: ImageVector = Lucide.ChartBar
+    val AIChat: ImageVector = Lucide.Sparkles
+    val ScanReceipt: ImageVector = Lucide.Camera
+    val HandCoins: ImageVector = Lucide.HandCoins
+    val Bell: ImageVector = Lucide.Bell
+    val Target: ImageVector = Lucide.Target
+    val Lock: ImageVector = Lucide.Lock
+    val Unlock: ImageVector = Lucide.LockOpen
 
-    // Theme (Lucide ImageVector)
+    // Settings icons
     val DarkMode: ImageVector = Lucide.Moon
     val LightMode: ImageVector = Lucide.Sun
+    val Notifications: ImageVector = Lucide.Bell
+    val Biometric: ImageVector = Lucide.Shield
+    val Haptic: ImageVector = Lucide.Smartphone
+    val Globe: ImageVector = Lucide.Globe
+    val CurrencyIcon: ImageVector = Lucide.CircleDollarSign
+    val Categories: ImageVector = Lucide.Palette
+    val ExportData: ImageVector = Lucide.FileText
+    val Help: ImageVector = Lucide.CircleHelp
+    val Logout: ImageVector = Lucide.LogOut
 
     // ---- Category icons (OneUI @DrawableRes) ----
 
