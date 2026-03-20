@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.goals
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,8 @@ fun GoalsListScreen(
     val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = modifier.fillMaxSize().background(t.bg).statusBarsPadding()) {
+    ConfigureTopBar(variant = TopBarVariant.Standard, title = "Objetivos")
+    Box(modifier = modifier.fillMaxSize().background(t.bg).padding(top = 90.dp)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top Bar
             Row(

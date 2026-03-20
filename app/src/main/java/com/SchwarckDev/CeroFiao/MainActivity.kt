@@ -135,12 +135,22 @@ fun CeroFiaoApp(
 
     val t = CeroFiaoTheme.tokens
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        CeroFiaoNavHost(
-            navController = navController,
-            hasCompletedOnboarding = hasCompletedOnboarding,
-            modifier = Modifier.fillMaxSize(),
-        )
+    val topBarState = remember { com.schwarckdev.cerofiao.core.ui.navigation.CeroFiaoTopBarState() }
+
+    androidx.compose.runtime.CompositionLocalProvider(
+        com.schwarckdev.cerofiao.core.ui.navigation.LocalTopBarState provides topBarState
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CeroFiaoNavHost(
+                navController = navController,
+                hasCompletedOnboarding = hasCompletedOnboarding,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            com.schwarckdev.cerofiao.core.ui.navigation.CeroFiaoTopBar(
+                state = topBarState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
 
         // Floating bottom navigation bar — Figma style
         AnimatedVisibility(
@@ -149,67 +159,38 @@ fun CeroFiaoApp(
             enter = slideInVertically { it },
             exit = slideOutVertically { it },
         ) {
-            Box(
+            val navItems = remember {
+                TopLevelDestination.entries.map { dest ->
+                    com.schwarckdev.cerofiao.core.ui.navigation.FloatingNavItem(
+                        label = dest.label,
+                        icon = dest.icon,
+                        route = dest.route
+                    )
+                }
+            }
+
+            val activeDest = TopLevelDestination.entries.find { dest ->
+                currentDestination?.hasRoute(dest.route::class) == true
+            }
+
+            com.schwarckdev.cerofiao.core.ui.navigation.CeroFiaoFloatingNavBar(
+                items = navItems,
+                activeRouteClass = activeDest?.route?.let { it::class },
+                onTabSelected = { item ->
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
-                    .navigationBarsPadding(),
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = t.navBg,
-                    border = BorderStroke(1.dp, t.navBorder),
-                    shadowElevation = 8.dp,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        TopLevelDestination.entries.forEach { destination ->
-                            val selected = currentDestination?.hasRoute(destination.route::class) == true
-                            val activeColor = t.success
-                            val inactiveColor = t.textMuted
-
-                            Surface(
-                                onClick = {
-                                    navController.navigate(destination.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
-                                shape = RoundedCornerShape(16.dp),
-                                color = androidx.compose.ui.graphics.Color.Transparent,
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = destination.icon,
-                                        contentDescription = destination.label,
-                                        modifier = Modifier.size(22.dp),
-                                        tint = if (selected) activeColor else inactiveColor,
-                                    )
-                                    Text(
-                                        text = destination.label,
-                                        fontSize = 10.sp,
-                                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                        color = if (selected) activeColor else t.textFaint,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                    .navigationBarsPadding()
+            )
         }
-    }
+    } // end Box
+    } // end CompositionLocalProvider
 }

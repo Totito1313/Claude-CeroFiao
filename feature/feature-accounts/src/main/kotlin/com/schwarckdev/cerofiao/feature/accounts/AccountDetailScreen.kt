@@ -1,5 +1,5 @@
 package com.schwarckdev.cerofiao.feature.accounts
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -91,7 +91,7 @@ fun AccountDetailScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding(),
+            .background(t.bg).padding(top = 90.dp),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

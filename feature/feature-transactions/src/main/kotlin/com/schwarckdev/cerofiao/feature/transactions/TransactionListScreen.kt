@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.transactions
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -71,7 +72,7 @@ fun TransactionListScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding(),
+            .background(t.bg).padding(top = 90.dp),
     ) {
         if (uiState.groupedTransactions.isEmpty() && uiState.transactions.isEmpty()) {
             // Empty state centered

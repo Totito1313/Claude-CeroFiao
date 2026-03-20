@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.dashboard
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -75,7 +76,14 @@ fun DashboardScreen(
     val t = CeroFiaoTheme.tokens
     var balanceVisible by remember { mutableStateOf(true) }
 
-    Box(modifier = modifier.fillMaxSize().background(t.bg).statusBarsPadding()) {
+    ConfigureTopBar(
+        variant = TopBarVariant.Home,
+        title = "Inicio",
+        onMenuClick = { /* CornerMenu handled internally */ },
+        onActionClick = {},
+    )
+
+    Box(modifier = modifier.fillMaxSize().background(t.bg).padding(top = 90.dp)) {
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = viewModel::refreshRates,

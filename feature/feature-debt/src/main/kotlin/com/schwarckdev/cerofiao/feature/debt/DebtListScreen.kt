@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.debt
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -81,7 +82,7 @@ fun DebtListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding(),
+            .background(t.bg).padding(top = 90.dp),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

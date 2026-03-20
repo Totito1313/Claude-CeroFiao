@@ -1,5 +1,5 @@
 package com.schwarckdev.cerofiao.feature.transactions
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
-import com.schwarckdev.cerofiao.core.ui.CeroFiaoTopAppBar
+// removed import
 import com.schwarckdev.cerofiao.core.ui.MoneyAmountInput
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
@@ -70,12 +70,13 @@ fun TransactionEntryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding(),
+            .background(t.bg).padding(top = 90.dp),
     ) {
         // Top bar row
-        CeroFiaoTopAppBar(
+        com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar(
+            variant = com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant.Detail,
             title = if (uiState.isEditMode) "Editar transacción" else "Nueva transacción",
-            onNavigationClick = onBack
+            onBackClick = onBack
         )
 
         Column(

@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.settings
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -64,23 +65,19 @@ fun SettingsScreen(
     val prefs by viewModel.preferences.collectAsStateWithLifecycle()
     val t = CeroFiaoTheme.tokens
 
+    ConfigureTopBar(
+        variant = TopBarVariant.Standard,
+        title = "Ajustes",
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding()
+            .background(t.bg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
-            .padding(top = 60.dp, bottom = 100.dp),
+            .padding(top = 90.dp, bottom = 100.dp),
     ) {
-        // Title
-        Text(
-            text = "Ajustes",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = t.text,
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         // Profile card
         GlassCard(

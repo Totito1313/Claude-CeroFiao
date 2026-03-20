@@ -1,5 +1,5 @@
 package com.schwarckdev.cerofiao.feature.billsplitter
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
 import com.schwarckdev.cerofiao.core.ui.GlassCard
 import com.schwarckdev.cerofiao.core.ui.GlassCardPadding
-import com.schwarckdev.cerofiao.core.ui.CeroFiaoTopAppBar
+// removed import
 import com.schwarckdev.cerofiao.core.ui.MoneyAmountInput
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoFAB
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
@@ -41,11 +41,12 @@ fun BillSplitterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding()
+            .background(t.bg).padding(top = 90.dp)
     ) {
-        CeroFiaoTopAppBar(
+        com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar(
+            variant = com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant.Detail,
             title = "Divisor de Cuentas",
-            onNavigationClick = onBack
+            onBackClick = onBack
         )
         
         Column(

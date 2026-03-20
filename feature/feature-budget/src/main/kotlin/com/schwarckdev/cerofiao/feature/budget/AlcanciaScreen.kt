@@ -1,5 +1,5 @@
 package com.schwarckdev.cerofiao.feature.budget
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,7 +41,7 @@ fun AlcanciaScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding()
+            .background(t.bg).padding(top = 90.dp)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {

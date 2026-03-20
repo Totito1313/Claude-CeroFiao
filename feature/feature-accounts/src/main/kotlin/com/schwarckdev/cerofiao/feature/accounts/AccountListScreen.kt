@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.accounts
-import androidx.compose.foundation.layout.statusBarsPadding
+import com.schwarckdev.cerofiao.core.ui.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.ui.navigation.TopBarVariant
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -54,13 +55,14 @@ fun AccountListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val t = CeroFiaoTheme.tokens
 
+    ConfigureTopBar(variant = TopBarVariant.Standard, title = "Cuentas")
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg).statusBarsPadding()
+            .background(t.bg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 100.dp),
+            .padding(top = 90.dp, bottom = 100.dp),
     ) {
         // Header with title and subtitle
         Column(
