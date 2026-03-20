@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.transactions
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +53,7 @@ fun RecurringListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Top bar row
         Row(
@@ -207,3 +208,4 @@ private fun RecurringCard(
         }
     }
 }
+

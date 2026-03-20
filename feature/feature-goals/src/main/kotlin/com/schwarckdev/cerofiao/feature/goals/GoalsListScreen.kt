@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.goals
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +50,7 @@ fun GoalsListScreen(
     val t = CeroFiaoTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = modifier.fillMaxSize().background(t.bg)) {
+    Box(modifier = modifier.fillMaxSize().background(t.bg).statusBarsPadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top Bar
             Row(
@@ -180,3 +181,4 @@ fun GoalItem(
         }
     }
 }
+

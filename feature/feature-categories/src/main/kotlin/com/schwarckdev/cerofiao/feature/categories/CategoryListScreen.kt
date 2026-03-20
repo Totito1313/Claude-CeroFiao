@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.categories
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,7 +58,7 @@ fun CategoryListScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -277,3 +278,4 @@ private fun CategoryRow(
         }
     }
 }
+

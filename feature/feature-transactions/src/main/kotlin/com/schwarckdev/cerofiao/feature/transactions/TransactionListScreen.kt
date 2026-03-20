@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.transactions
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -19,7 +20,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
@@ -70,7 +71,7 @@ fun TransactionListScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         if (uiState.groupedTransactions.isEmpty() && uiState.transactions.isEmpty()) {
             // Empty state centered
@@ -350,11 +351,7 @@ fun TransactionListScreen(
                                     )
                                     // Divider between items (not after last)
                                     if (index < group.transactions.lastIndex) {
-                                        HorizontalDivider(
-                                            color = CeroFiaoTheme.tokens.divider,
-                                            thickness = 1.dp,
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                        )
+                                        CeroFiaoDivider(modifier = Modifier.padding(horizontal = 16.dp))
                                     }
                                 }
                             }
@@ -699,3 +696,4 @@ private fun TransactionRow(
         }
     }
 }
+

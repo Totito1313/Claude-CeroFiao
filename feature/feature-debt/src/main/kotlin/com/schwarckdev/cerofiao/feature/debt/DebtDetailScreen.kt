@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.debt
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
-import androidx.compose.material3.AlertDialog
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,10 +73,10 @@ fun DebtDetailScreen(
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
+        CeroFiaoDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Eliminar deuda") },
-            text = { Text("¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer.") },
+            title = "Eliminar deuda",
+            text = "¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer.",
             confirmButton = {
                 CeroFiaoButton(
                     text = "Eliminar",
@@ -102,7 +103,7 @@ fun DebtDetailScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -356,17 +357,13 @@ private fun PaymentDialog(
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
 
-    AlertDialog(
+    CeroFiaoDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Registrar pago") },
-        text = {
+        title = "Registrar pago",
+        text = "Monto pendiente: ${CurrencyFormatter.format(maxAmount, currencyCode)}",
+        content = {
             Column {
-                Text(
-                    text = "Monto pendiente: ${CurrencyFormatter.format(maxAmount, currencyCode)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = t.textSecondary,
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 CeroFiaoTextField(
                     value = amount,
                     onValueChange = { amount = it },
@@ -401,3 +398,4 @@ private fun PaymentDialog(
         },
     )
 }
+

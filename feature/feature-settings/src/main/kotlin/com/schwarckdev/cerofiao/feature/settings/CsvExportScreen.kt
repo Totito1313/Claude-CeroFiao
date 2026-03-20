@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.settings
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -106,7 +107,7 @@ fun CsvExportScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // CeroFiao top bar
         Row(
@@ -280,3 +281,4 @@ fun CsvExportScreen(
         }
     }
 }
+

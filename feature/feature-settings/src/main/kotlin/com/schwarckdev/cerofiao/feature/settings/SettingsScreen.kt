@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.settings
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -21,7 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,7 +67,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg)
+            .background(t.bg).statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
             .padding(top = 60.dp, bottom = 100.dp),
@@ -481,11 +482,7 @@ private fun SettingRow(
 @Composable
 private fun SettingDivider() {
     val t = CeroFiaoTheme.tokens
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 66.dp),
-        thickness = 0.5.dp,
-        color = t.divider,
-    )
+    CeroFiaoDivider(modifier = Modifier.padding(start = 66.dp))
 }
 
 // ─── Currency Pill ──────────────────────────────────────────────────────────────
@@ -550,3 +547,4 @@ private fun IOSToggle(
         )
     }
 }
+

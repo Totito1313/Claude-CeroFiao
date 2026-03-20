@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.onboarding
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -64,7 +65,7 @@ fun OnboardingScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Animated step content
         AnimatedContent(
@@ -345,7 +346,7 @@ private fun OnboardingBottomBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(t.bg)
+            .background(t.bg).statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         LinearProgressIndicator(
@@ -417,3 +418,4 @@ private fun OptionChip(
         )
     }
 }
+

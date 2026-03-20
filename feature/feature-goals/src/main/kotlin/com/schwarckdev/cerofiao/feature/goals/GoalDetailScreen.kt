@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.goals
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +50,7 @@ fun GoalDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val goal = uiState.goal
 
-    Box(modifier = modifier.fillMaxSize().background(t.bg)) {
+    Box(modifier = modifier.fillMaxSize().background(t.bg).statusBarsPadding()) {
         if (goal == null) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color(0xFF8A2BE2))
             return@Box
@@ -217,3 +218,4 @@ fun GoalDetailHeader(
         }
     }
 }
+

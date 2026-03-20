@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.accounts
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -56,7 +57,7 @@ fun AccountListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg)
+            .background(t.bg).statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
             .padding(top = 16.dp, bottom = 100.dp),
@@ -377,3 +378,4 @@ private fun accountTypeEmoji(type: AccountType): String = when (type) {
     AccountType.CASH -> "\uD83D\uDCB5"
     AccountType.CRYPTO_EXCHANGE -> "\u20BF"
 }
+

@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.billsplitter
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,7 @@ import com.schwarckdev.cerofiao.core.ui.CeroFiaoFAB
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoTextField
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDialog
 
 @Composable
 fun BillSplitterScreen(
@@ -36,26 +38,19 @@ fun BillSplitterScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            CeroFiaoTopAppBar(
-                title = "Divisor de Cuentas",
-                onNavigationClick = onBack
-            )
-        },
-        containerColor = t.bg,
-        floatingActionButton = {
-            CeroFiaoFAB(
-                icon = CeroFiaoIcons.Add,
-                contentDescription = "Agregar Participante",
-                onClick = { showAddDialog = true }
-            )
-        }
-    ) { padding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(t.bg).statusBarsPadding()
+    ) {
+        CeroFiaoTopAppBar(
+            title = "Divisor de Cuentas",
+            onNavigationClick = onBack
+        )
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp)
         ) {
             // Main Input Card
@@ -141,10 +136,11 @@ fun AddParticipantDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
     val t = CeroFiaoTheme.tokens
     
-    AlertDialog(
+    CeroFiaoDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Agregar participante", color = t.text) },
-        text = {
+        title = "Agregar participante",
+        text = "Ingresa el nombre del participante",
+        content = {
             CeroFiaoTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -152,7 +148,6 @@ fun AddParticipantDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
                 singleLine = true
             )
         },
-        containerColor = t.surface,
         confirmButton = {
             CeroFiaoButton(
                 text = "Agregar",
@@ -314,3 +309,4 @@ fun SplitTypeSelector(
         }
     }
 }
+

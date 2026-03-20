@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.transactions
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,7 +70,7 @@ fun TransactionEntryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Top bar row
         CeroFiaoTopAppBar(
@@ -376,3 +377,4 @@ private fun OptionChip(
         }
     }
 }
+

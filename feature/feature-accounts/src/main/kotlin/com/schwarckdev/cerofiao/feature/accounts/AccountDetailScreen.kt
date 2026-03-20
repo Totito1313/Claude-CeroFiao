@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.accounts
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,10 +61,10 @@ fun AccountDetailScreen(
     // We don't auto-navigate here since deleteAccount already calls onBack()
 
     if (showDeleteDialog) {
-        AlertDialog(
+        CeroFiaoDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Eliminar cuenta") },
-            text = { Text("¿Estás seguro de que quieres eliminar esta cuenta? Esta acción no se puede deshacer.") },
+            title = "Eliminar cuenta",
+            text = "¿Estás seguro de que quieres eliminar esta cuenta? Esta acción no se puede deshacer.",
             confirmButton = {
                 CeroFiaoButton(
                     text = "Eliminar",
@@ -90,7 +91,7 @@ fun AccountDetailScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -264,3 +265,4 @@ private fun AccountTransactionRow(
         }
     }
 }
+

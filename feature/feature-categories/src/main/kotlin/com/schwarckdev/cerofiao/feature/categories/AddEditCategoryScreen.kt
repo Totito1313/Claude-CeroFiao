@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.categories
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -79,7 +80,7 @@ fun AddEditCategoryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Top bar row with back button and title
         Row(
@@ -300,3 +301,4 @@ private fun OptionChip(
         )
     }
 }
+

@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.dashboard
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,7 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
@@ -74,7 +75,7 @@ fun DashboardScreen(
     val t = CeroFiaoTheme.tokens
     var balanceVisible by remember { mutableStateOf(true) }
 
-    Box(modifier = modifier.fillMaxSize().background(t.bg)) {
+    Box(modifier = modifier.fillMaxSize().background(t.bg).statusBarsPadding()) {
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = viewModel::refreshRates,
@@ -174,11 +175,7 @@ fun DashboardScreen(
                                         onClick = { onTransactionClick(transaction.id) },
                                     )
                                     if (index < uiState.recentTransactions.lastIndex) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            thickness = 1.dp,
-                                            color = t.divider,
-                                        )
+                                        CeroFiaoDivider(modifier = Modifier.padding(horizontal = 16.dp))
                                     }
                                 }
                             }
@@ -852,3 +849,4 @@ private fun SectionHeader(
         }
     }
 }
+

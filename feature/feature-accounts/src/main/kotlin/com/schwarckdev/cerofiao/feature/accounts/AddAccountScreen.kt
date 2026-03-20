@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.accounts
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -105,7 +106,7 @@ fun AddAccountScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Top bar row with back button and title
         Row(
@@ -256,3 +257,4 @@ fun AddAccountScreen(
         }
     }
 }
+

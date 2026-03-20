@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.settings
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +45,7 @@ fun AssociatedTitlesScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // CeroFiao top bar
         Row(
@@ -121,3 +122,4 @@ fun AssociatedTitlesScreen(
         }
     }
 }
+

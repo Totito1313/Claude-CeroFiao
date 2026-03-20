@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.budget
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.res.painterResource
@@ -61,7 +62,7 @@ fun BudgetListScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Back button
         Surface(
@@ -268,3 +269,4 @@ private fun BudgetCard(
         }
     }
 }
+

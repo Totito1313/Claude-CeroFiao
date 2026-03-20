@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.transactions
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,8 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButton
 import com.schwarckdev.cerofiao.core.ui.CeroFiaoButtonVariant
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,10 +61,10 @@ fun TransactionDetailScreen(
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
+        CeroFiaoDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Eliminar transacción") },
-            text = { Text("¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer.") },
+            title = "Eliminar transacción",
+            text = "¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer.",
             confirmButton = {
                 CeroFiaoButton(
                     text = "Eliminar",
@@ -87,7 +89,7 @@ fun TransactionDetailScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg),
+            .background(t.bg).statusBarsPadding(),
     ) {
         // Top bar row
         Row(
@@ -176,10 +178,7 @@ fun TransactionDetailScreen(
                             },
                         )
 
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = t.surfaceBorder,
-                        )
+                        CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         DetailRow(
                             label = "Cuenta",
@@ -187,10 +186,7 @@ fun TransactionDetailScreen(
                         )
 
                         if (transaction.type == TransactionType.TRANSFER && uiState.transferToAccount != null) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             DetailRow(
                                 label = "Cuenta destino",
                                 value = uiState.transferToAccount?.name ?: "—",
@@ -198,10 +194,7 @@ fun TransactionDetailScreen(
                         }
 
                         if (uiState.category != null) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -232,10 +225,7 @@ fun TransactionDetailScreen(
                             }
                         }
 
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = t.surfaceBorder,
-                        )
+                        CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         DetailRow(
                             label = "Fecha",
@@ -244,10 +234,7 @@ fun TransactionDetailScreen(
 
                         val note = transaction.note
                         if (!note.isNullOrBlank()) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             DetailRow(
                                 label = "Nota",
                                 value = note,
@@ -256,10 +243,7 @@ fun TransactionDetailScreen(
 
                         val commission = transaction.transferCommission
                         if (commission != null && commission > 0) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             DetailRow(
                                 label = "Comisión",
                                 value = CurrencyFormatter.format(
@@ -295,10 +279,7 @@ fun TransactionDetailScreen(
                         )
 
                         if (transaction.currencyCode != "USD") {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             DetailRow(
                                 label = "Tasa usada",
                                 value = "1 USD = ${CurrencyFormatter.format(1.0 / transaction.exchangeRateToUsd, transaction.currencyCode, showSymbol = false)} ${transaction.currencyCode}",
@@ -307,10 +288,7 @@ fun TransactionDetailScreen(
 
                         val rateSource = transaction.exchangeRateSource
                         if (rateSource != null) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = t.surfaceBorder,
-                            )
+                            CeroFiaoDivider(modifier = Modifier.padding(vertical = 8.dp))
                             DetailRow(
                                 label = "Fuente",
                                 value = rateSource.name,
@@ -428,3 +406,4 @@ private fun DetailRow(
         )
     }
 }
+

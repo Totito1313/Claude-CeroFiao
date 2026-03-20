@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.budget
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -23,7 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -73,7 +74,7 @@ fun AnalyticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg)
+            .background(t.bg).statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
@@ -253,11 +254,7 @@ private fun CategoryBreakdownCard(
             } else {
                 categoryBreakdown.forEachIndexed { index, (category, amount) ->
                     if (index > 0) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            thickness = 1.dp,
-                            color = t.divider,
-                        )
+                        CeroFiaoDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     }
 
                     Row(
@@ -500,10 +497,7 @@ private fun BudgetPacingItem(
             exit = shrinkVertically(animationSpec = tween(300)),
         ) {
             Column(modifier = Modifier.padding(top = 12.dp)) {
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = t.divider,
-                )
+                CeroFiaoDivider()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -587,3 +581,4 @@ private fun DetailRow(
         )
     }
 }
+

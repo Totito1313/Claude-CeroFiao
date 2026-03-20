@@ -1,4 +1,5 @@
 package com.schwarckdev.cerofiao.feature.goals
+import androidx.compose.foundation.layout.statusBarsPadding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -70,7 +71,7 @@ fun AddEditGoalScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.bg)
+            .background(t.bg).statusBarsPadding()
     ) {
         // Top Bar
         Row(
@@ -209,3 +210,4 @@ private fun OptionChip(
         )
     }
 }
+
