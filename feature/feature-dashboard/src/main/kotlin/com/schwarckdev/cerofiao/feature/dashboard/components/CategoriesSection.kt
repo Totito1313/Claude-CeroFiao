@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,8 +24,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.ShoppingBag
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.feature.dashboard.CategoryExpense
+
+private val categoryColorPalette = listOf(
+    Color(0xFFA855F7), // purple
+    Color(0xFF3B82F6), // blue
+    Color(0xFFEF4444), // red
+    Color(0xFFF97316), // orange
+    Color(0xFF22C55E), // green
+    Color(0xFF06B6D4), // cyan
+)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -46,15 +57,17 @@ fun CategoriesSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 22.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(11.dp),
                 maxItemsInEachRow = 2,
             ) {
-                categories.forEach { category ->
+                categories.forEachIndexed { index, category ->
+                    val dotColor = categoryColorPalette[index % categoryColorPalette.size]
                     CategorySpendCard(
                         category = category,
                         displayCurrencyCode = displayCurrencyCode,
-                        modifier = Modifier.width(180.dp),
+                        dotColor = dotColor,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -66,10 +79,9 @@ fun CategoriesSection(
 private fun CategorySpendCard(
     category: CategoryExpense,
     displayCurrencyCode: String,
+    dotColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val dotColor = Color(0xFFA855F7) // Default purple
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
@@ -111,6 +123,12 @@ private fun CategorySpendCard(
                     text = "${(category.percentage * 100).toInt()}%",
                     fontSize = 12.sp,
                     color = Color(0xFF9CA3AF),
+                )
+                Icon(
+                    imageVector = Lucide.ShoppingBag,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = Color(0xFF9CA3AF),
                 )
             }
         }

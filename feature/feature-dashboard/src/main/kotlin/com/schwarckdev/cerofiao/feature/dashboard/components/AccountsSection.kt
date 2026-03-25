@@ -22,13 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.composables.icons.lucide.Banknote
+import com.composables.icons.lucide.Landmark
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Wallet
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.model.AccountBalance
 import com.schwarckdev.cerofiao.core.model.AccountType
@@ -71,9 +74,18 @@ private fun AccountCard(
     val currencySymbol = when (account.currencyCode) {
         "USD" -> "$"
         "VES" -> "Bs"
-        "USDT" -> "₮ USDT"
-        "EUR" -> "€"
-        "EURI" -> "€ EURI"
+        "USDT" -> "\u20AE USDT"
+        "EUR" -> "\u20AC"
+        "EURI" -> "\u20AC EURI"
+        else -> account.currencyCode
+    }
+
+    val currencySuffix = when (account.currencyCode) {
+        "USD" -> "$"
+        "VES" -> "Bs"
+        "USDT" -> "\u20AE"
+        "EUR" -> "\u20AC"
+        "EURI" -> "\u20AC"
         else -> account.currencyCode
     }
 
@@ -81,41 +93,42 @@ private fun AccountCard(
         AccountType.CRYPTO_EXCHANGE -> Triple(
             Color(0xFFFBFF00).copy(alpha = 0.2f),
             Color(0xFFAAA700),
-            "CRYPTO"
+            "CRYPTO",
         )
         AccountType.BANK -> Triple(
             Color(0xFF00EAFF).copy(alpha = 0.2f),
             Color(0xFF009CAA),
-            account.platform.displayName
+            account.platform.displayName,
         )
         AccountType.DIGITAL_WALLET -> Triple(
             Color(0xFF00FF51).copy(alpha = 0.1f),
             Color(0xFF0CA523),
-            account.platform.displayName
+            account.platform.displayName,
         )
         AccountType.CASH -> Triple(
             Color(0xFF00FF51).copy(alpha = 0.1f),
             Color(0xFF0CA523),
-            "Efectivo"
+            "Efectivo",
         )
     }
 
     Surface(
         modifier = modifier
-            .width(190.dp)
-            .height(124.dp)
+            .width(200.dp)
+            .height(140.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFFCFCFF),
     ) {
         Column(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Top: currency + name
+            // Top row: currency symbol + platform icon
             Row(
-                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = currencySymbol,
@@ -123,14 +136,18 @@ private fun AccountCard(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                 )
-                Text(
-                    text = account.name.take(8),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black.copy(alpha = 0.5f),
-                )
+                PlatformIcon(accountType = account.type)
             }
-            // Bottom: badge + total
+
+            // Middle: green change amount placeholder
+            Text(
+                text = "+0.00 $currencySuffix",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF0CA523),
+            )
+
+            // Bottom row: badge + total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -164,12 +181,15 @@ private fun AccountCard(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Total",
-                        fontSize = 16.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black.copy(alpha = 0.7f),
+                        color = Color.Black.copy(alpha = 0.5f),
                     )
                     Text(
-                        text = CurrencyFormatter.format(accountBalance.balanceInOriginalCurrency, account.currencyCode),
+                        text = CurrencyFormatter.format(
+                            accountBalance.balanceInOriginalCurrency,
+                            account.currencyCode,
+                        ),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
@@ -181,13 +201,55 @@ private fun AccountCard(
 }
 
 @Composable
+private fun PlatformIcon(
+    accountType: AccountType,
+    modifier: Modifier = Modifier,
+) {
+    when (accountType) {
+        AccountType.CRYPTO_EXCHANGE -> {
+            // Diamond shape using a rotated box
+            Box(
+                modifier = modifier
+                    .size(18.dp)
+                    .rotate(45f)
+                    .background(Color(0xFFAAA700), RoundedCornerShape(3.dp)),
+            )
+        }
+        AccountType.BANK -> {
+            Icon(
+                imageVector = Lucide.Landmark,
+                contentDescription = "Bank",
+                modifier = modifier.size(20.dp),
+                tint = Color(0xFF009CAA),
+            )
+        }
+        AccountType.DIGITAL_WALLET -> {
+            Icon(
+                imageVector = Lucide.Wallet,
+                contentDescription = "Wallet",
+                modifier = modifier.size(20.dp),
+                tint = Color(0xFF0CA523),
+            )
+        }
+        AccountType.CASH -> {
+            Icon(
+                imageVector = Lucide.Banknote,
+                contentDescription = "Cash",
+                modifier = modifier.size(20.dp),
+                tint = Color(0xFF0CA523),
+            )
+        }
+    }
+}
+
+@Composable
 private fun AddAccountCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
-            .height(124.dp)
+            .height(140.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(32.dp),
         color = Color(0xFFFCFCFF),
