@@ -8,12 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
 
 @Composable
 fun BillSplitterScreen(
     onBack: () -> Unit,
     viewModel: BillSplitterViewModel = hiltViewModel(),
 ) {
+    ConfigureTopBar(variant = TopBarVariant.Detail, title = "Dividir Cuenta", onBackClick = onBack)
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

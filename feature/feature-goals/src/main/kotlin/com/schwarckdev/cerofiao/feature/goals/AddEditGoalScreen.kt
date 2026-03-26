@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
 
 @Composable
 fun AddEditGoalScreen(
@@ -16,6 +18,8 @@ fun AddEditGoalScreen(
     modifier: Modifier = Modifier,
     viewModel: AddEditGoalViewModel = hiltViewModel(),
 ) {
+    ConfigureTopBar(variant = TopBarVariant.Detail, title = "Meta", onBackClick = onBack)
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

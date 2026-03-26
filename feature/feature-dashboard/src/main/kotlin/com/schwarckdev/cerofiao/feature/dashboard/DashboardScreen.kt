@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.feature.dashboard.components.AccountsSection
 import com.schwarckdev.cerofiao.feature.dashboard.components.BudgetsSection
@@ -38,6 +40,8 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
+    ConfigureTopBar(variant = TopBarVariant.Home, title = "CeroFiao")
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var balanceVisible by remember { mutableStateOf(true) }
 

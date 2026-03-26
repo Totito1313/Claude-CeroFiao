@@ -86,7 +86,7 @@ fun AdminSettingsScreen(
     var showIconViewer by remember { mutableStateOf(false) }
 
     ConfigureTopBar(
-        variant = TopBarVariant.Standard,
+        variant = TopBarVariant.Detail,
         title = "Admin Settings",
         onBackClick = onNavigateBack
     )
@@ -865,11 +865,6 @@ private fun IconViewerOverlay(
                 }
             }
 
-            ConfigureTopBar(
-                variant = TopBarVariant.Standard,
-                title = "Explorador de Iconos",
-                onBackClick = onDismiss
-            )
         }
     }
 }

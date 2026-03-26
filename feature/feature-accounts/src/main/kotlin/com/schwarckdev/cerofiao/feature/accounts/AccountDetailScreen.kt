@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
 
 @Composable
 fun AccountDetailScreen(
@@ -15,6 +17,8 @@ fun AccountDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AccountDetailViewModel = hiltViewModel(),
 ) {
+    ConfigureTopBar(variant = TopBarVariant.Detail, title = "Detalle de Cuenta", onBackClick = onBack)
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
