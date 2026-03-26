@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.schwarckdev.cerofiao.core.designsystem.theme.BrandGradient
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.designsystem.theme.DangerGradient
 
 enum class CeroFiaoButtonVariant {
@@ -50,32 +50,32 @@ fun CeroFiaoButton(
     shape: Shape = RoundedCornerShape(CeroFiaoShapes.ButtonRadius),
     contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
 ) {
-    val t = CeroFiaoTheme.tokens
-    
+    val t = CeroFiaoDesign.colors
+
     val backgroundModifier = when (variant) {
         CeroFiaoButtonVariant.Primary -> Modifier.background(
-            if (enabled) BrandGradient else Brush.linearGradient(listOf(t.surfaceHover, t.surfaceHover))
+            if (enabled) BrandGradient else Brush.linearGradient(listOf(t.SurfaceVariant, t.SurfaceVariant))
         )
         CeroFiaoButtonVariant.Danger -> Modifier.background(
-            if (enabled) DangerGradient else Brush.linearGradient(listOf(t.surfaceHover, t.surfaceHover))
+            if (enabled) DangerGradient else Brush.linearGradient(listOf(t.SurfaceVariant, t.SurfaceVariant))
         )
         else -> Modifier // Secondary and Text handle backgrounds via Surface color
     }
 
     val contentColor = when (variant) {
-        CeroFiaoButtonVariant.Primary, CeroFiaoButtonVariant.Danger -> if (enabled) Color.White else t.textGhost
-        CeroFiaoButtonVariant.Secondary -> if (enabled) t.text else t.textGhost
-        CeroFiaoButtonVariant.Text -> if (enabled) t.text else t.textGhost
+        CeroFiaoButtonVariant.Primary, CeroFiaoButtonVariant.Danger -> if (enabled) Color.White else t.InactiveColor
+        CeroFiaoButtonVariant.Secondary -> if (enabled) t.TextPrimary else t.InactiveColor
+        CeroFiaoButtonVariant.Text -> if (enabled) t.TextPrimary else t.InactiveColor
     }
 
     val surfaceColor = when (variant) {
-        CeroFiaoButtonVariant.Secondary -> if (enabled) t.surface else t.surface.copy(alpha = 0.02f)
+        CeroFiaoButtonVariant.Secondary -> if (enabled) t.Surface else t.Surface.copy(alpha = 0.02f)
         CeroFiaoButtonVariant.Text -> Color.Transparent
         else -> Color.Transparent
     }
 
     val surfaceBorder = when (variant) {
-        CeroFiaoButtonVariant.Secondary -> BorderStroke(1.dp, if (enabled) t.surfaceBorder else t.surfaceBorder.copy(alpha=0.02f))
+        CeroFiaoButtonVariant.Secondary -> BorderStroke(1.dp, if (enabled) t.CardBorder else t.CardBorder.copy(alpha=0.02f))
         else -> null
     }
 

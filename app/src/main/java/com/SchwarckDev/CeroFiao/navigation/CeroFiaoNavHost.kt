@@ -38,6 +38,7 @@ import com.schwarckdev.cerofiao.feature.categories.categoryListScreen
 import com.schwarckdev.cerofiao.feature.categories.navigateToAddEditCategory
 import com.schwarckdev.cerofiao.feature.categories.navigateToCategories
 import com.schwarckdev.cerofiao.feature.dashboard.DashboardRoute
+import com.schwarckdev.cerofiao.feature.dashboard.adminSettingsScreen
 import com.schwarckdev.cerofiao.feature.dashboard.dashboardScreen
 import com.schwarckdev.cerofiao.feature.exchangerates.exchangeRateScreen
 import com.schwarckdev.cerofiao.feature.exchangerates.navigateToExchangeRates
@@ -91,6 +92,10 @@ fun CeroFiaoNavHost(
             onTransactionClick = { transactionId ->
                 navController.navigateToTransactionDetail(transactionId)
             },
+        )
+
+        adminSettingsScreen(
+            onBack = { navController.popBackStack() },
         )
 
         // Transactions (top-level tab)

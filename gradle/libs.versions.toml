@@ -63,6 +63,12 @@ lucideIcons = "1.0.0"
 # CSV
 opencsv = "5.9"
 
+# Reorderable
+reorderable = "2.4.1"
+
+# Haze (Glassmorphism blur)
+haze = "1.5.3"
+
 [libraries]
 # AndroidX Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -136,6 +142,12 @@ lucide-icons = { group = "com.composables", name = "icons-lucide", version.ref =
 
 # CSV
 opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
+
+# Reorderable
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
+
+# Haze (Glassmorphism blur)
+haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

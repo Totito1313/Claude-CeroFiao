@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -16,14 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.feature.dashboard.components.AccountsSection
 import com.schwarckdev.cerofiao.feature.dashboard.components.BudgetsSection
 import com.schwarckdev.cerofiao.feature.dashboard.components.CategoriesSection
-import com.schwarckdev.cerofiao.feature.dashboard.components.DashboardTopBar
 import com.schwarckdev.cerofiao.feature.dashboard.components.ExchangeRatesSection
 import com.schwarckdev.cerofiao.feature.dashboard.components.GlobalBalanceHero
 import com.schwarckdev.cerofiao.feature.dashboard.components.QuickActionsCard
@@ -44,13 +44,12 @@ fun DashboardScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF1F1F3))
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 110.dp),
+            .padding(bottom = 110.dp, top = 90.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        DashboardTopBar(userName = "Alan Schwarck")
 
         GlobalBalanceHero(
             totalBalance = uiState.globalBalance?.totalInDisplayCurrency ?: 0.0,
@@ -62,15 +61,19 @@ fun DashboardScreen(
             onIncome = onAddTransaction,
         )
 
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             // Quick Actions
-            SectionHeader(title = "Acciones rápidas")
+            SectionHeader(
+                title = "Acciones rápidas",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
             Spacer(Modifier.height(16.dp))
             QuickActionsCard(
                 onAddTransaction = onAddTransaction,
                 onTransfer = { /* TODO */ },
                 onCategories = { /* TODO */ },
                 onExchangeRates = { /* TODO */ },
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -82,6 +85,7 @@ fun DashboardScreen(
                 bcvEurRate = uiState.bcvEurRate,
                 usdtRate = uiState.usdtRate,
                 onViewAll = { /* TODO: navigate to exchange rates */ },
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -92,6 +96,7 @@ fun DashboardScreen(
                 onViewAll = { /* TODO: navigate to accounts */ },
                 onAddAccount = { /* TODO */ },
                 onAccountClick = { /* TODO */ },
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -101,6 +106,7 @@ fun DashboardScreen(
                 budgets = uiState.budgetsWithSpending,
                 onViewAll = { /* TODO */ },
                 onAddBudget = { /* TODO */ },
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -110,6 +116,7 @@ fun DashboardScreen(
                 categories = uiState.topCategoryExpenses,
                 displayCurrencyCode = uiState.displayCurrencyCode,
                 onViewAll = { /* TODO */ },
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -119,6 +126,7 @@ fun DashboardScreen(
                 transactions = uiState.enrichedTransactions,
                 onViewAll = onViewAllTransactions,
                 onTransactionClick = onTransactionClick,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
     }

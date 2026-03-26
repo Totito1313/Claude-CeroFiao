@@ -22,7 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 @Composable
 fun CeroFiaoTextField(
@@ -37,13 +37,13 @@ fun CeroFiaoTextField(
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val t = CeroFiaoTheme.tokens
+    val t = CeroFiaoDesign.colors
 
     Column(modifier = modifier) {
         if (label != null) {
             Text(
                 text = label,
-                color = t.textSecondary,
+                color = t.TextSecondary,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
             )
@@ -51,8 +51,8 @@ fun CeroFiaoTextField(
 
         Surface(
             shape = RoundedCornerShape(CeroFiaoShapes.SmallCardRadius),
-            color = t.inputBg,
-            border = BorderStroke(1.dp, t.inputBorder)
+            color = t.SurfaceVariant,
+            border = BorderStroke(1.dp, t.CardBorder)
         ) {
             Row(
                 modifier = Modifier
@@ -72,11 +72,11 @@ fun CeroFiaoTextField(
                     if (value.isEmpty() && placeholder != null) {
                         Text(
                             text = placeholder,
-                            color = t.placeholder,
+                            color = t.TextSecondary,
                             fontSize = 15.sp
                         )
                     }
-                    
+
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -85,10 +85,10 @@ fun CeroFiaoTextField(
                         minLines = minLines,
                         keyboardOptions = keyboardOptions,
                         textStyle = TextStyle(
-                            color = t.text,
+                            color = t.TextPrimary,
                             fontSize = 15.sp
                         ),
-                        cursorBrush = SolidColor(t.text)
+                        cursorBrush = SolidColor(t.TextPrimary)
                     )
                 }
 

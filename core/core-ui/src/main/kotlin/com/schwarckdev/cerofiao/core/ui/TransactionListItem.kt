@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.schwarckdev.cerofiao.core.designsystem.icon.CeroFiaoIcons
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.theme.ExpenseRed
 import com.schwarckdev.cerofiao.core.designsystem.theme.IncomeGreen
 import com.schwarckdev.cerofiao.core.designsystem.theme.TransferBlue

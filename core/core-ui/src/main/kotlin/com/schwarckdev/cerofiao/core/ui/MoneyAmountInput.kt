@@ -24,7 +24,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Box
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 @Composable
 fun MoneyAmountInput(
@@ -34,10 +34,10 @@ fun MoneyAmountInput(
     onCurrencyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val t = CeroFiaoTheme.tokens
+    val t = CeroFiaoDesign.colors
 
     Row(
-        verticalAlignment = Alignment.CenterVertically, 
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.fillMaxWidth()
     ) {
         BasicTextField(
@@ -47,7 +47,7 @@ fun MoneyAmountInput(
             textStyle = TextStyle(
                 fontSize = 40.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = t.text,
+                color = t.TextPrimary,
                 textAlign = TextAlign.Start,
                 letterSpacing = (-1.2).sp
             ),
@@ -63,7 +63,7 @@ fun MoneyAmountInput(
                             text = "0.00",
                             fontSize = 40.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = t.textFaint,
+                            color = t.InactiveColor,
                             letterSpacing = (-1.2).sp
                         )
                     }

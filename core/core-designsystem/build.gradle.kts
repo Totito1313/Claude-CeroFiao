@@ -12,4 +12,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     api(libs.lucide.icons)
     api(libs.oneui.icons)
+    api(libs.haze)
+    implementation(libs.datastore.preferences)
 }

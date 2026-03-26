@@ -1,7 +1,6 @@
 package com.schwarckdev.cerofiao.feature.dashboard.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,10 +16,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 @Composable
 fun QuickActionsCard(
@@ -30,10 +29,11 @@ fun QuickActionsCard(
     onExchangeRates: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(50.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Box {
             Row(
@@ -54,7 +54,7 @@ fun QuickActionsCard(
                     .padding(bottom = 4.dp)
                     .width(50.dp)
                     .height(4.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(2.dp)),
+                    .background(colors.TextSecondary, RoundedCornerShape(2.dp)),
             )
         }
     }
@@ -66,18 +66,22 @@ private fun QuickActionIcon(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(56.dp)
-            .clickable(onClick = onClick)
-            .background(Color(0xFFB4B4B4).copy(alpha = 0.2f), CircleShape),
-        contentAlignment = Alignment.Center,
+    val colors = CeroFiaoDesign.colors
+    Surface(
+        onClick = onClick,
+        modifier = modifier.size(56.dp),
+        shape = CircleShape,
+        color = colors.SurfaceVariant,
     ) {
-        Icon(
-            imageVector = Lucide.Plus,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(24.dp),
-            tint = Color.Black.copy(alpha = 0.6f),
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Lucide.Plus,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(24.dp),
+                tint = colors.TextSecondary,
+            )
+        }
     }
 }

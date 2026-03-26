@@ -8,4 +8,5 @@ android {
 
 dependencies {
     implementation(libs.vico.compose.m3)
+    implementation(libs.reorderable)
 }

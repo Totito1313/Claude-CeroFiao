@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 /**
  * CeroFiao themed dialog — replaces M3 AlertDialog with glass-card styling.
@@ -31,11 +31,11 @@ fun CeroFiaoDialog(
     dismissButton: @Composable (() -> Unit)? = null,
     content: @Composable (() -> Unit)? = null,
 ) {
-    val t = CeroFiaoTheme.tokens
+    val t = CeroFiaoDesign.colors
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = t.surface,
+            color = t.Surface,
             tonalElevation = 6.dp,
         ) {
             Column(
@@ -47,13 +47,13 @@ fun CeroFiaoDialog(
                     text = title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = t.text,
+                    color = t.TextPrimary,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = text,
                     fontSize = 14.sp,
-                    color = t.textSecondary,
+                    color = t.TextSecondary,
                     lineHeight = 20.sp,
                 )
                 if (content != null) {

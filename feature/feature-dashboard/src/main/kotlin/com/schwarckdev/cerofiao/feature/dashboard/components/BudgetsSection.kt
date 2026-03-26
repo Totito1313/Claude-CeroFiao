@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.feature.dashboard.BudgetWithSpending
 
 @Composable
@@ -39,18 +42,26 @@ fun BudgetsSection(
     onViewAll: () -> Unit,
     onAddBudget: () -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
 ) {
     Column(modifier = modifier) {
-        SectionHeader(title = "Presupuestos", onViewAll = onViewAll)
+        SectionHeader(
+            title = "Presupuestos",
+            onViewAll = onViewAll,
+            modifier = Modifier.padding(contentPadding)
+        )
         Spacer(Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = contentPadding,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            budgets.forEach { item ->
+            items(budgets) { item ->
                 BudgetCard(item = item)
             }
-            AddBudgetCard(onClick = onAddBudget)
+            item {
+                AddBudgetCard(onClick = onAddBudget)
+            }
         }
     }
 }
@@ -60,6 +71,7 @@ private fun BudgetCard(
     item: BudgetWithSpending,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     val hasLimit = item.budget.limitAmount > 0
     val progress = if (hasLimit && item.budget.limitAmount > 0) {
         (item.spentAmount / item.budget.limitAmount).toFloat().coerceIn(0f, 1f)
@@ -70,7 +82,7 @@ private fun BudgetCard(
             .width(288.dp)
             .height(182.dp),
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Box {
             // Decorative blur circle
@@ -105,14 +117,14 @@ private fun BudgetCard(
                             text = if (hasLimit) "LIMITADO" else "SIN LÍMITE",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black.copy(alpha = 0.4f),
+                            color = colors.InactiveColor,
                             letterSpacing = 1.1.sp,
                         )
                         Text(
                             text = item.categoryName ?: item.budget.name,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black,
+                            color = colors.TextPrimary,
                         )
                     }
                 }
@@ -125,14 +137,14 @@ private fun BudgetCard(
                                 text = CurrencyFormatter.format(item.spentAmount, item.budget.anchorCurrencyCode),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Black.copy(alpha = 0.7f),
+                                color = colors.TextSecondary,
                             )
-                            Text(text = "/", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                            Text(text = "/", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colors.TextPrimary)
                             Text(
                                 text = CurrencyFormatter.format(item.budget.limitAmount, item.budget.anchorCurrencyCode),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Black,
+                                color = colors.TextPrimary,
                             )
                         }
                         // Progress bar
@@ -141,7 +153,7 @@ private fun BudgetCard(
                                 .fillMaxWidth()
                                 .height(4.dp)
                                 .clip(RoundedCornerShape(9999.dp))
-                                .background(Color.Black.copy(alpha = 0.1f)),
+                                .background(colors.SurfaceVariant),
                         ) {
                             Box(
                                 modifier = Modifier
@@ -157,7 +169,7 @@ private fun BudgetCard(
                             text = CurrencyFormatter.format(item.spentAmount, item.budget.anchorCurrencyCode),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black,
+                            color = colors.TextPrimary,
                         )
                     }
                 }
@@ -171,13 +183,14 @@ private fun AddBudgetCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     Surface(
+        onClick = onClick,
         modifier = modifier
             .width(288.dp)
-            .height(182.dp)
-            .clickable(onClick = onClick),
+            .height(182.dp),
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -187,14 +200,14 @@ private fun AddBudgetCard(
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color.Black.copy(alpha = 0.05f), CircleShape),
+                    .background(colors.SurfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Lucide.Plus,
                     contentDescription = "Add budget",
                     modifier = Modifier.size(14.dp),
-                    tint = Color.Black.copy(alpha = 0.4f),
+                    tint = colors.TextSecondary,
                 )
             }
             Spacer(Modifier.height(10.dp))
@@ -202,7 +215,7 @@ private fun AddBudgetCard(
                 text = "CREAR PRESUPUESTO",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black.copy(alpha = 0.4f),
+                color = colors.TextSecondary,
                 letterSpacing = 1.2.sp,
             )
         }

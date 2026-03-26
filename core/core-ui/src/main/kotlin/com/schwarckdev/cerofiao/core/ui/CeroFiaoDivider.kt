@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 /**
  * CeroFiao themed divider — replaces M3 HorizontalDivider.
@@ -18,6 +18,6 @@ fun CeroFiaoDivider(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(CeroFiaoTheme.tokens.divider)
+            .background(CeroFiaoDesign.colors.CardBorder)
     )
 }

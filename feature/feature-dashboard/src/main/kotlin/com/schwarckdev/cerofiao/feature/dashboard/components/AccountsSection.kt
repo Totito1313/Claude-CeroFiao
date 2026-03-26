@@ -1,19 +1,19 @@
 package com.schwarckdev.cerofiao.feature.dashboard.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -23,16 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import com.composables.icons.lucide.Banknote
 import com.composables.icons.lucide.Landmark
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Wallet
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.AccountBalance
 import com.schwarckdev.cerofiao.core.model.AccountType
 
@@ -43,23 +44,29 @@ fun AccountsSection(
     onAddAccount: () -> Unit,
     onAccountClick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
 ) {
     Column(modifier = modifier) {
-        SectionHeader(title = "Cuentas", onViewAll = onViewAll)
+        SectionHeader(
+            title = "Cuentas",
+            onViewAll = onViewAll,
+            modifier = Modifier.padding(contentPadding)
+        )
         Spacer(Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = contentPadding,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            accounts.forEach { accountBalance ->
+            items(accounts) { accountBalance ->
                 AccountCard(
                     accountBalance = accountBalance,
                     onClick = { onAccountClick(accountBalance.account.id) },
                 )
             }
-            AddAccountCard(onClick = onAddAccount)
+            item {
+                AddAccountCard(onClick = onAddAccount)
+            }
         }
     }
 }
@@ -70,6 +77,7 @@ private fun AccountCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     val account = accountBalance.account
     val currencySymbol = when (account.currencyCode) {
         "USD" -> "$"
@@ -91,42 +99,46 @@ private fun AccountCard(
 
     val (badgeBg, badgeText, badgeLabel) = when (account.type) {
         AccountType.CRYPTO_EXCHANGE -> Triple(
-            Color(0xFFFBFF00).copy(alpha = 0.2f),
-            Color(0xFFAAA700),
+            AccountBadgeColors.CryptoBg,
+            AccountBadgeColors.CryptoText,
             "CRYPTO",
         )
         AccountType.BANK -> Triple(
-            Color(0xFF00EAFF).copy(alpha = 0.2f),
-            Color(0xFF009CAA),
+            AccountBadgeColors.BankBg,
+            AccountBadgeColors.BankText,
             account.platform.displayName,
         )
         AccountType.DIGITAL_WALLET -> Triple(
-            Color(0xFF00FF51).copy(alpha = 0.1f),
-            Color(0xFF0CA523),
+            AccountBadgeColors.WalletBg,
+            AccountBadgeColors.WalletText,
             account.platform.displayName,
         )
         AccountType.CASH -> Triple(
-            Color(0xFF00FF51).copy(alpha = 0.1f),
-            Color(0xFF0CA523),
+            AccountBadgeColors.CashBg,
+            AccountBadgeColors.CashText,
             "Efectivo",
         )
     }
 
     Surface(
+        onClick = onClick,
         modifier = modifier
             .width(200.dp)
-            .height(140.dp)
-            .clickable(onClick = onClick),
+            .height(124.dp),
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             // Top row: currency symbol + platform icon
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -134,34 +146,32 @@ private fun AccountCard(
                     text = currencySymbol,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                    color = colors.TextPrimary,
                 )
                 PlatformIcon(accountType = account.type)
             }
 
-            // Middle: green change amount placeholder
-            Text(
-                text = "+0.00 $currencySuffix",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF0CA523),
-            )
-
-            // Bottom row: badge + total
+            // Bottom row: transaction badge + total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom,
             ) {
-                // Platform badge
+                // Transaction Info Badge
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = Color(0xFFF1F1F3),
+                    color = colors.Background,
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 5.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
+                        Text(
+                            text = "+0.00 $currencySuffix",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.TextPrimary,
+                        )
                         Surface(
                             shape = RoundedCornerShape(16.dp),
                             color = badgeBg,
@@ -177,13 +187,14 @@ private fun AccountCard(
                         }
                     }
                 }
-                // Total
+
+                // Total Box
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Total",
-                        fontSize = 12.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black.copy(alpha = 0.5f),
+                        color = colors.TextSecondary,
                     )
                     Text(
                         text = CurrencyFormatter.format(
@@ -192,7 +203,7 @@ private fun AccountCard(
                         ),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = colors.TextPrimary,
                     )
                 }
             }
@@ -212,7 +223,7 @@ private fun PlatformIcon(
                 modifier = modifier
                     .size(18.dp)
                     .rotate(45f)
-                    .background(Color(0xFFAAA700), RoundedCornerShape(3.dp)),
+                    .background(AccountBadgeColors.CryptoText, RoundedCornerShape(3.dp)),
             )
         }
         AccountType.BANK -> {
@@ -220,7 +231,7 @@ private fun PlatformIcon(
                 imageVector = Lucide.Landmark,
                 contentDescription = "Bank",
                 modifier = modifier.size(20.dp),
-                tint = Color(0xFF009CAA),
+                tint = AccountBadgeColors.BankText,
             )
         }
         AccountType.DIGITAL_WALLET -> {
@@ -228,7 +239,7 @@ private fun PlatformIcon(
                 imageVector = Lucide.Wallet,
                 contentDescription = "Wallet",
                 modifier = modifier.size(20.dp),
-                tint = Color(0xFF0CA523),
+                tint = AccountBadgeColors.WalletText,
             )
         }
         AccountType.CASH -> {
@@ -236,7 +247,7 @@ private fun PlatformIcon(
                 imageVector = Lucide.Banknote,
                 contentDescription = "Cash",
                 modifier = modifier.size(20.dp),
-                tint = Color(0xFF0CA523),
+                tint = AccountBadgeColors.CashText,
             )
         }
     }
@@ -247,36 +258,40 @@ private fun AddAccountCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     Surface(
+        onClick = onClick,
         modifier = modifier
-            .height(140.dp)
-            .clickable(onClick = onClick),
+            .width(200.dp)
+            .height(124.dp),
         shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 40.dp, vertical = 22.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 40.dp, vertical = 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color.Black.copy(alpha = 0.05f), CircleShape),
+                    .background(colors.SurfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Lucide.Plus,
                     contentDescription = "Add account",
                     modifier = Modifier.size(14.dp),
-                    tint = Color.Black.copy(alpha = 0.4f),
+                    tint = colors.TextSecondary,
                 )
             }
             Text(
                 text = "CREAR CUENTA",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black.copy(alpha = 0.4f),
+                color = colors.TextSecondary,
                 letterSpacing = 1.2.sp,
             )
         }

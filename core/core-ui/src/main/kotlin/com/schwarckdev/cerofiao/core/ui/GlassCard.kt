@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
-import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 
 /**
  * Glassmorphism card matching the Figma CeroFiao design.
@@ -27,7 +27,7 @@ fun GlassCard(
     cornerRadius: Dp = CeroFiaoShapes.CardRadius,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val t = CeroFiaoTheme.tokens
+    val t = CeroFiaoDesign.colors
     val shape = RoundedCornerShape(cornerRadius)
 
     Surface(
@@ -38,8 +38,8 @@ fun GlassCard(
                 else Modifier,
             ),
         shape = shape,
-        color = t.surface,
-        border = BorderStroke(1.dp, t.surfaceBorder),
+        color = t.Surface,
+        border = BorderStroke(1.dp, t.CardBorder),
     ) {
         Box(
             modifier = Modifier.padding(padding.value),

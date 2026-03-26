@@ -1,6 +1,5 @@
 package com.schwarckdev.cerofiao.feature.dashboard.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,6 +27,8 @@ import com.composables.icons.lucide.ArrowLeftRight
 import com.composables.icons.lucide.ArrowUpRight
 import com.composables.icons.lucide.Lucide
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.AccountType
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.feature.dashboard.EnrichedTransaction
@@ -63,6 +63,7 @@ private fun TransactionItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     val tx = enriched.transaction
     val dateFormat = SimpleDateFormat("MMM dd, hh:mm a", Locale.US)
     val dateText = dateFormat.format(Date(tx.date))
@@ -80,10 +81,10 @@ private fun TransactionItem(
     }
 
     val (badgeBg, badgeText) = when (enriched.accountType) {
-        AccountType.CRYPTO_EXCHANGE -> Color(0xFFFBFF00).copy(alpha = 0.2f) to Color(0xFFAAA700)
-        AccountType.BANK -> Color(0xFF00EAFF).copy(alpha = 0.2f) to Color(0xFF009CAA)
-        AccountType.DIGITAL_WALLET -> Color(0xFFFF6E84).copy(alpha = 0.1f) to Color(0xFFD73357)
-        AccountType.CASH -> Color(0xFF00FF51).copy(alpha = 0.1f) to Color(0xFF0CA523)
+        AccountType.CRYPTO_EXCHANGE -> AccountBadgeColors.CryptoBg to AccountBadgeColors.CryptoText
+        AccountType.BANK -> AccountBadgeColors.BankBg to AccountBadgeColors.BankText
+        AccountType.DIGITAL_WALLET -> AccountBadgeColors.WalletBg to AccountBadgeColors.WalletText
+        AccountType.CASH -> AccountBadgeColors.CashBg to AccountBadgeColors.CashText
     }
     val badgeLabel = when (enriched.accountType) {
         AccountType.CRYPTO_EXCHANGE -> "CRYPTO"
@@ -92,11 +93,10 @@ private fun TransactionItem(
     }
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(100.dp),
-        color = Color(0xFFFCFCFF),
+        color = colors.Foreground,
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -110,14 +110,14 @@ private fun TransactionItem(
                 Surface(
                     modifier = Modifier.size(48.dp),
                     shape = CircleShape,
-                    color = Color(0xFFF1F1F3),
+                    color = colors.Background,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = Color.Black.copy(alpha = 0.6f),
+                            tint = colors.TextSecondary,
                         )
                     }
                 }
@@ -127,14 +127,14 @@ private fun TransactionItem(
                         text = tx.note ?: enriched.categoryName ?: "Transacción",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.Black,
+                        color = colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = dateText,
                         fontSize = 12.sp,
-                        color = Color(0xFFADAAAA),
+                        color = colors.TextSecondary,
                     )
                 }
             }
@@ -143,7 +143,7 @@ private fun TransactionItem(
                     text = "$amountPrefix${CurrencyFormatter.format(tx.amount, tx.currencyCode)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                    color = colors.TextPrimary,
                 )
                 Surface(
                     shape = RoundedCornerShape(16.dp),

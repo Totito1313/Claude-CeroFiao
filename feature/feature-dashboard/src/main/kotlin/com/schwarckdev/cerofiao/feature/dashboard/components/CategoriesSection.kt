@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.ShoppingBag
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.feature.dashboard.CategoryExpense
 
 private val categoryColorPalette = listOf(
@@ -46,12 +47,13 @@ fun CategoriesSection(
     onViewAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     Column(modifier = modifier) {
         SectionHeader(title = "Categorias", onViewAll = onViewAll)
         Spacer(Modifier.height(16.dp))
         Surface(
             shape = RoundedCornerShape(48.dp),
-            color = Color(0xFFFCFCFF),
+            color = colors.Foreground,
         ) {
             FlowRow(
                 modifier = Modifier
@@ -67,7 +69,7 @@ fun CategoriesSection(
                         category = category,
                         displayCurrencyCode = displayCurrencyCode,
                         dotColor = dotColor,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(0.48f),
                     )
                 }
             }
@@ -82,10 +84,11 @@ private fun CategorySpendCard(
     dotColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    val colors = CeroFiaoDesign.colors
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        color = Color(0xFFF1F1F3),
+        color = colors.Background,
         shadowElevation = 1.dp,
     ) {
         Column(
@@ -112,7 +115,7 @@ private fun CategorySpendCard(
                 text = CurrencyFormatter.format(category.amount, displayCurrencyCode),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF111827),
+                color = colors.TextPrimary,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -122,13 +125,13 @@ private fun CategorySpendCard(
                 Text(
                     text = "${(category.percentage * 100).toInt()}%",
                     fontSize = 12.sp,
-                    color = Color(0xFF9CA3AF),
+                    color = colors.TextSecondary,
                 )
                 Icon(
                     imageVector = Lucide.ShoppingBag,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
-                    tint = Color(0xFF9CA3AF),
+                    tint = colors.TextSecondary,
                 )
             }
         }
