@@ -51,7 +51,7 @@ fun DashboardScreen(
             .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 110.dp, top = 90.dp),
+            .padding(bottom = 110.dp, top = 70.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 

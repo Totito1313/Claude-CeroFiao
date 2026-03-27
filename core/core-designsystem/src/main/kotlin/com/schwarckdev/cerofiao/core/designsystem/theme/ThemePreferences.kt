@@ -64,6 +64,29 @@ enum class BodyFontOption(
     }
 }
 
+/** Available subtitle font options */
+enum class SubtitleFontOption(
+    val label: String,
+    val id: String
+) {
+    OneUiSans("One UI Sans", "oneui"),
+    Quicksand("Quicksand", "quicksand"),
+    Barlow("Barlow", "barlow"),
+    Inter("Inter", "inter");
+
+    companion object {
+        fun fromId(id: String): SubtitleFontOption =
+            entries.find { it.id == id } ?: OneUiSans
+    }
+
+    fun toFontFamily(): FontFamily = when (this) {
+        OneUiSans -> OneUiSansFontFamily
+        Quicksand -> QuicksandFontFamily
+        Barlow -> BarlowFontFamily
+        Inter -> InterFontFamily
+    }
+}
+
 /** Preset accent colors for the color picker */
 enum class AccentPreset(
     val label: String,
@@ -134,16 +157,51 @@ data class FloatMenuConfig(
     }
 }
 
+/** Color overrides — sparse map of token name → ARGB long */
+data class ColorOverrides(
+    val lightOverrides: Map<String, Long> = emptyMap(),
+    val darkOverrides: Map<String, Long> = emptyMap(),
+    val gradientOverrides: Map<String, Long> = emptyMap()
+) {
+    companion object {
+        val Empty = ColorOverrides()
+    }
+}
+
+/** Registry of all color tokens organized by category */
+object ColorTokenRegistry {
+    data class TokenGroup(val label: String, val tokens: List<String>)
+
+    val groups = listOf(
+        TokenGroup("Primarios", listOf("Primary", "OnPrimary")),
+        TokenGroup("Fondos", listOf("Background", "Surface", "SurfaceVariant", "Foreground")),
+        TokenGroup("Navegación", listOf("NavBackground", "NavBackgroundTransparent", "ActiveItemBackground", "InactiveColor")),
+        TokenGroup("Texto", listOf("TextPrimary", "TextSecondary", "TextOnDark")),
+        TokenGroup("Acentos", listOf("GradientAccent", "SecondaryAccent", "AccentGreen", "AccentBlue", "AccentOrange", "AccentRed", "AccentPurple", "AccentUser")),
+        TokenGroup("Financieros", listOf("IncomeColor", "ExpenseColor", "InternalTransferColor")),
+        TokenGroup("Tarjetas", listOf("CardBackground", "CardBorder")),
+        TokenGroup("Error", listOf("Error")),
+        TokenGroup("Sombras", listOf("ShadowColor", "ShadowColorLight")),
+        TokenGroup("Cristal", listOf("GlassBackground", "GlassBackgroundDark", "GlassBorder", "fondoMenus")),
+        TokenGroup("Monedas", listOf("UsdColor", "BsColor", "UsdtColor")),
+        TokenGroup("Categorías", listOf("CategoryFood", "CategoryCoffee", "CategoryTransport", "CategoryHome", "CategoryServices", "CategoryEntertainment", "CategoryTech", "CategoryWork", "CategoryHealth", "CategoryOther"))
+    )
+
+    val gradients = listOf("BrandGradient", "DangerGradient", "SuccessGradient", "ExpenseGradient", "TransferGradient", "IncomeGradient")
+}
+
 /** Aggregated user preferences state */
 data class UserPreferences(
     val themeMode: ThemeMode = ThemeMode.Auto,
     val accentPreset: AccentPreset = AccentPreset.Cyan,
     val titleFont: FontOption = FontOption.Anton,
     val bodyFont: BodyFontOption = BodyFontOption.OneUiSans,
+    val subtitleFont: SubtitleFontOption = SubtitleFontOption.OneUiSans,
     val shadowConfig: ShadowConfig = ShadowConfig.Default,
     val glassConfig: GlassConfig = GlassConfig.Default,
     val cardConfig: CardConfig = CardConfig.Default,
     val floatMenuConfig: FloatMenuConfig = FloatMenuConfig.Default,
+    val colorOverrides: ColorOverrides = ColorOverrides.Empty,
     val isOnboardingCompleted: Boolean = false
 ) {
     fun toConfigDump(): String = buildString {
@@ -153,6 +211,7 @@ data class UserPreferences(
         appendLine("Accent: ${accentPreset.id} (light=${accentPreset.lightColor}, dark=${accentPreset.darkColor})")
         appendLine("Title Font: ${titleFont.id}")
         appendLine("Body Font: ${bodyFont.id}")
+        appendLine("Subtitle Font: ${subtitleFont.id}")
         appendLine()
         appendLine("─── Shadows ───")
         appendLine("Enabled: ${shadowConfig.enabled}")
@@ -175,6 +234,11 @@ data class UserPreferences(
         appendLine("─── Floating Menus ───")
         appendLine("Contextual Nav X/Y: ${floatMenuConfig.contextualNavBarOffsetX} / ${floatMenuConfig.contextualNavBarOffsetY}")
         appendLine("Corner Menu X/Y: ${floatMenuConfig.cornerMenuOffsetX} / ${floatMenuConfig.cornerMenuOffsetY}")
+        appendLine()
+        appendLine("─── Colores ───")
+        appendLine("Light overrides: ${colorOverrides.lightOverrides.size}")
+        appendLine("Dark overrides: ${colorOverrides.darkOverrides.size}")
+        appendLine("Gradient overrides: ${colorOverrides.gradientOverrides.size}")
         appendLine()
         appendLine("─── Onboarding ───")
         appendLine("Completed: $isOnboardingCompleted")

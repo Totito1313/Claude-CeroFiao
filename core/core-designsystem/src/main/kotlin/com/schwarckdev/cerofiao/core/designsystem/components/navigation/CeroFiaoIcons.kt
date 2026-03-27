@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.*
@@ -2481,34 +2482,7 @@ object CeroFiaoIcons {
         }.build()
 
     /** Exchange / swap arrows icon */
-    val Chages: ImageVector
-        get() = ImageVector.Builder(
-            name = "Chages",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 1.5f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                // Arrow pointing right
-                moveTo(4f, 8f)
-                horizontalLineTo(20f)
-                moveTo(17f, 5f)
-                lineTo(20f, 8f)
-                lineTo(17f, 11f)
-                // Arrow pointing left
-                moveTo(20f, 16f)
-                horizontalLineTo(4f)
-                moveTo(7f, 13f)
-                lineTo(4f, 16f)
-                lineTo(7f, 19f)
-            }
-        }.build()
+
 
     /** Back arrow (chevron left) */
     val Back: ImageVector
@@ -2716,6 +2690,78 @@ object CeroFiaoIcons {
 
     // ── Feature icons (Lucide) ──
     val ExchangeRate: ImageVector get() = Lucide.CircleArrowUp
+    val Changes: ImageVector
+        get() = ImageVector.Builder(
+            name = "CambioDeTasas",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 1.2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(11.777f, 5.68161f)
+                verticalLineTo(2.59961f)
+                curveTo(11.777f, 1.49461f, 10.881f, 0.599609f, 9.77698f, 0.599609f)
+                horizontalLineTo(3.09998f)
+                curveTo(1.71898f, 0.599609f, 0.599976f, 1.71861f, 0.599976f, 3.09961f)
+                verticalLineTo(9.77761f)
+                curveTo(0.599976f, 10.8816f, 1.49498f, 11.7776f, 2.59998f, 11.7776f)
+                horizontalLineTo(3.11898f)
+
+                moveTo(5.92247f, 5.14941f)
+                verticalLineTo(14.5994f)
+                curveTo(5.92247f, 15.9804f, 7.04147f, 17.0994f, 8.42247f, 17.0994f)
+                horizontalLineTo(14.5995f)
+                curveTo(15.9805f, 17.0994f, 17.0995f, 15.9804f, 17.0995f, 14.5994f)
+                verticalLineTo(8.95441f)
+                curveTo(17.0995f, 7.84941f, 16.2045f, 6.95441f, 15.0995f, 6.95441f)
+                horizontalLineTo(14.6725f)
+
+                moveTo(3.60218f, 6.57521f)
+                lineTo(5.56918f, 4.60821f)
+                curveTo(5.76418f, 4.41321f, 6.08118f, 4.41321f, 6.27618f, 4.60821f)
+                lineTo(8.24318f, 6.57521f)
+
+                moveTo(14.0973f, 3.43551f)
+                lineTo(12.1303f, 5.40251f)
+                curveTo(11.9353f, 5.59651f, 11.6183f, 5.59651f, 11.4233f, 5.40251f)
+                lineTo(9.45627f, 3.43551f)
+
+                moveTo(9.55017f, 13.0277f)
+                curveTo(9.56476f, 13.2931f, 9.62923f, 13.5284f, 9.74311f, 13.735f)
+                curveTo(9.85746f, 13.9407f, 10.0123f, 14.1148f, 10.2085f, 14.2564f)
+                curveTo(10.4048f, 14.3981f, 10.6349f, 14.5063f, 10.8979f, 14.5811f)
+                curveTo(11.1619f, 14.6555f, 11.4499f, 14.6927f, 11.7633f, 14.6927f)
+                curveTo(12.0386f, 14.6927f, 12.3045f, 14.6616f, 12.5601f, 14.5981f)
+                curveTo(12.8161f, 14.535f, 13.0433f, 14.4404f, 13.241f, 14.3143f)
+                curveTo(13.4386f, 14.1882f, 13.5968f, 14.0315f, 13.7153f, 13.8447f)
+                curveTo(13.8339f, 13.6583f, 13.8932f, 13.44f, 13.8932f, 13.1901f)
+                curveTo(13.8932f, 12.943f, 13.8396f, 12.7346f, 13.7328f, 12.5647f)
+                curveTo(13.6259f, 12.3943f, 13.4824f, 12.2508f, 13.3026f, 12.1341f)
+                curveTo(13.1224f, 12.0169f, 12.9158f, 11.919f, 12.6833f, 11.8404f)
+                curveTo(12.4504f, 11.7619f, 10.9925f, 11.3383f, 10.7596f, 11.2597f)
+                curveTo(10.5271f, 11.1811f, 10.321f, 11.0833f, 10.1408f, 10.9661f)
+                curveTo(9.96052f, 10.8489f, 9.81699f, 10.7054f, 9.71064f, 10.5355f)
+                curveTo(9.60335f, 10.3656f, 9.55017f, 10.1567f, 9.55017f, 9.90962f)
+                curveTo(9.55017f, 9.6602f, 9.60946f, 9.44185f, 9.72805f, 9.25503f)
+                curveTo(9.84664f, 9.0682f, 10.0048f, 8.91197f, 10.2024f, 8.78538f)
+                curveTo(10.4001f, 8.65973f, 10.6269f, 8.56515f, 10.8829f, 8.50162f)
+                curveTo(11.1389f, 8.43856f, 11.4048f, 8.4075f, 11.6796f, 8.4075f)
+                curveTo(11.993f, 8.4075f, 12.2815f, 8.44468f, 12.545f, 8.51903f)
+                curveTo(12.8085f, 8.59385f, 13.0382f, 8.70209f, 13.2344f, 8.84326f)
+                curveTo(13.4306f, 8.98538f, 13.5855f, 9.15903f, 13.6998f, 9.36515f)
+                curveTo(13.8142f, 9.57126f, 13.8782f, 9.80656f, 13.8932f, 10.072f)
+
+                moveTo(11.7216f, 7.5498f)
+                verticalLineTo(15.5498f)
+            }
+        }.build()
+
     val Savings: ImageVector get() = Lucide.PiggyBank
     val Budget: ImageVector get() = Lucide.DollarSign
     val Debt: ImageVector get() = Lucide.Users
@@ -2742,6 +2788,8 @@ object CeroFiaoIcons {
     val ArrowExpense: ImageVector get() = Lucide.ArrowUpRight
     val TrendingUp: ImageVector get() = Lucide.TrendingUp
     val TrendingDown: ImageVector get() = Lucide.TrendingDown
+    val ChevronUp: ImageVector get() = Lucide.ChevronUp
+    val ChevronDown: ImageVector get() = Lucide.ChevronDown
 
     // ── Category icons (OneUI @DrawableRes) ──
     val categoryIconMap: Map<String, Int> = mapOf(

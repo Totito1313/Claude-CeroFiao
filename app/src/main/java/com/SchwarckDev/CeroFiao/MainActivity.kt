@@ -9,6 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiao
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoTopBarState
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.LocalTopBarState
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoTheme
+import com.schwarckdev.cerofiao.core.designsystem.theme.FloatMenuConfig
 import com.schwarckdev.cerofiao.core.designsystem.theme.ThemePreferencesManager
 import com.schwarckdev.cerofiao.core.designsystem.theme.UserPreferences as ThemeUserPreferences
 import com.schwarckdev.cerofiao.core.model.ThemeMode
@@ -81,14 +83,17 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = preferences.useDynamicColor,
                 titleFontFamily = themePrefs.titleFont.toFontFamily(),
                 bodyFontFamily = themePrefs.bodyFont.toFontFamily(),
+                subtitleFontFamily = themePrefs.subtitleFont.toFontFamily(),
                 accentColor = accentColor,
                 shadowConfig = themePrefs.shadowConfig,
                 glassConfig = themePrefs.glassConfig,
                 cardConfig = themePrefs.cardConfig,
+                colorOverrides = themePrefs.colorOverrides,
             ) {
                 CeroFiaoApp(
                     hasCompletedOnboarding = preferences.hasCompletedOnboarding,
                     shortcutAction = shortcutAction,
+                    floatMenuConfig = themePrefs.floatMenuConfig,
                 )
             }
         }
@@ -123,6 +128,7 @@ enum class ShortcutAction {
 fun CeroFiaoApp(
     hasCompletedOnboarding: Boolean,
     shortcutAction: ShortcutAction? = null,
+    floatMenuConfig: FloatMenuConfig = FloatMenuConfig.Default,
 ) {
     val navController = rememberNavController()
 
@@ -168,7 +174,7 @@ fun CeroFiaoApp(
             },
             bottomBar = {
                 if (isTopLevelRoute && hasCompletedOnboarding) {
-                    Box(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Box(modifier = Modifier.offset(y = 12.dp)) {
                         CeroFiaoFloatingNavBar(
                             activeTab = activeTab,
                             isMenuOpen = isMenuOpen,
@@ -199,27 +205,29 @@ fun CeroFiaoApp(
                         .haze(state = hazeState)
                 )
 
-                if (isMenuOpen && isTopLevelRoute) {
-                    CeroFiaoCornerMenu(
-                        hazeState = hazeState,
-                        onMenuItemLongClick = { item ->
-                            isMenuOpen = false
-                            if (item == "Ajustes") navController.navigateToAdminSettings()
-                        },
-                        onMenuItemClick = { item ->
-                            isMenuOpen = false
-                            when (item) {
-                                "Cuenta" -> navController.navigateToAccountList()
-                                "Tasas" -> navController.navigateToExchangeRates()
-                                "Deudas" -> navController.navigateToDebtList()
-                                "Ajustes" -> navController.navigateToSettings()
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 100.dp)
-                    )
-                }
+                CeroFiaoCornerMenu(
+                    hazeState = hazeState,
+                    visible = isMenuOpen && isTopLevelRoute,
+                    onMenuItemLongClick = { item ->
+                        isMenuOpen = false
+                        if (item == "Ajustes") navController.navigateToAdminSettings()
+                    },
+                    onMenuItemClick = { item ->
+                        isMenuOpen = false
+                        when (item) {
+                            "Cuenta" -> navController.navigateToAccountList()
+                            "Tasas" -> navController.navigateToExchangeRates()
+                            "Deudas" -> navController.navigateToDebtList()
+                            "Ajustes" -> navController.navigateToSettings()
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(
+                            end = 16.dp,
+                            bottom = floatMenuConfig.cornerMenuOffsetY
+                        )
+                )
             }
         }
     }

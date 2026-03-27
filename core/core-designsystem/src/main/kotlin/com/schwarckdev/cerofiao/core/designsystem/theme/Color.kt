@@ -83,11 +83,136 @@ data class CeroFiaoColors(
     val CategoryHealth: Color,
     val CategoryOther: Color
 ) {
+    // ── Semantic status colors (derived from accent tokens) ──
+    val Success: Color get() = AccentGreen
+    val Warning: Color get() = AccentOrange
+    val SuccessSoft: Color get() = AccentGreen.copy(alpha = 0.12f)
+    val WarningSoft: Color get() = AccentOrange.copy(alpha = 0.12f)
+    val DangerSoft: Color get() = Error.copy(alpha = 0.12f)
+    val AccentSoft: Color get() = Primary.copy(alpha = 0.12f)
     // ── Backward-compatible aliases (only where names don't clash on JVM) ──
     val income: Color get() = IncomeColor
     val expense: Color get() = ExpenseColor
     val incomeSoft: Color get() = IncomeColor.copy(alpha = 0.12f)
     val expenseSoft: Color get() = ExpenseColor.copy(alpha = 0.12f)
+
+    /** Get a color token by its string name */
+    fun getByName(name: String): Color = when (name) {
+        "Primary" -> Primary
+        "OnPrimary" -> OnPrimary
+        "Background" -> Background
+        "Surface" -> Surface
+        "SurfaceVariant" -> SurfaceVariant
+        "NavBackground" -> NavBackground
+        "NavBackgroundTransparent" -> NavBackgroundTransparent
+        "ActiveItemBackground" -> ActiveItemBackground
+        "InactiveColor" -> InactiveColor
+        "TextPrimary" -> TextPrimary
+        "TextSecondary" -> TextSecondary
+        "TextOnDark" -> TextOnDark
+        "Foreground" -> Foreground
+        "GradientAccent" -> GradientAccent
+        "SecondaryAccent" -> SecondaryAccent
+        "IncomeColor" -> IncomeColor
+        "ExpenseColor" -> ExpenseColor
+        "InternalTransferColor" -> InternalTransferColor
+        "AccentGreen" -> AccentGreen
+        "AccentBlue" -> AccentBlue
+        "AccentOrange" -> AccentOrange
+        "AccentRed" -> AccentRed
+        "AccentPurple" -> AccentPurple
+        "AccentUser" -> AccentUser
+        "CardBackground" -> CardBackground
+        "CardBorder" -> CardBorder
+        "Error" -> Error
+        "ShadowColor" -> ShadowColor
+        "ShadowColorLight" -> ShadowColorLight
+        "GlassBackground" -> GlassBackground
+        "GlassBackgroundDark" -> GlassBackgroundDark
+        "GlassBorder" -> GlassBorder
+        "fondoMenus" -> fondoMenus
+        "UsdColor" -> UsdColor
+        "BsColor" -> BsColor
+        "UsdtColor" -> UsdtColor
+        "CategoryFood" -> CategoryFood
+        "CategoryCoffee" -> CategoryCoffee
+        "CategoryTransport" -> CategoryTransport
+        "CategoryHome" -> CategoryHome
+        "CategoryServices" -> CategoryServices
+        "CategoryEntertainment" -> CategoryEntertainment
+        "CategoryTech" -> CategoryTech
+        "CategoryWork" -> CategoryWork
+        "CategoryHealth" -> CategoryHealth
+        "CategoryOther" -> CategoryOther
+        "Success" -> Success
+        "Warning" -> Warning
+        "SuccessSoft" -> SuccessSoft
+        "WarningSoft" -> WarningSoft
+        "DangerSoft" -> DangerSoft
+        "AccentSoft" -> AccentSoft
+        else -> Color.Magenta
+    }
+
+    /** Apply a map of overrides to produce a new CeroFiaoColors */
+    fun copyWithOverrides(overrides: Map<String, Long>): CeroFiaoColors {
+        if (overrides.isEmpty()) return this
+        var result = this
+        overrides.forEach { (name, argb) ->
+            val color = Color(argb.toULong())
+            result = result.overrideToken(name, color)
+        }
+        return result
+    }
+
+    private fun overrideToken(name: String, color: Color): CeroFiaoColors = when (name) {
+        "Primary" -> copy(Primary = color)
+        "OnPrimary" -> copy(OnPrimary = color)
+        "Background" -> copy(Background = color)
+        "Surface" -> copy(Surface = color)
+        "SurfaceVariant" -> copy(SurfaceVariant = color)
+        "NavBackground" -> copy(NavBackground = color)
+        "NavBackgroundTransparent" -> copy(NavBackgroundTransparent = color)
+        "ActiveItemBackground" -> copy(ActiveItemBackground = color)
+        "InactiveColor" -> copy(InactiveColor = color)
+        "TextPrimary" -> copy(TextPrimary = color)
+        "TextSecondary" -> copy(TextSecondary = color)
+        "TextOnDark" -> copy(TextOnDark = color)
+        "Foreground" -> copy(Foreground = color)
+        "GradientAccent" -> copy(GradientAccent = color)
+        "SecondaryAccent" -> copy(SecondaryAccent = color)
+        "IncomeColor" -> copy(IncomeColor = color)
+        "ExpenseColor" -> copy(ExpenseColor = color)
+        "InternalTransferColor" -> copy(InternalTransferColor = color)
+        "AccentGreen" -> copy(AccentGreen = color)
+        "AccentBlue" -> copy(AccentBlue = color)
+        "AccentOrange" -> copy(AccentOrange = color)
+        "AccentRed" -> copy(AccentRed = color)
+        "AccentPurple" -> copy(AccentPurple = color)
+        "AccentUser" -> copy(AccentUser = color)
+        "CardBackground" -> copy(CardBackground = color)
+        "CardBorder" -> copy(CardBorder = color)
+        "Error" -> copy(Error = color)
+        "ShadowColor" -> copy(ShadowColor = color)
+        "ShadowColorLight" -> copy(ShadowColorLight = color)
+        "GlassBackground" -> copy(GlassBackground = color)
+        "GlassBackgroundDark" -> copy(GlassBackgroundDark = color)
+        "GlassBorder" -> copy(GlassBorder = color)
+        "fondoMenus" -> copy(fondoMenus = color)
+        "UsdColor" -> copy(UsdColor = color)
+        "BsColor" -> copy(BsColor = color)
+        "UsdtColor" -> copy(UsdtColor = color)
+        "CategoryFood" -> copy(CategoryFood = color)
+        "CategoryCoffee" -> copy(CategoryCoffee = color)
+        "CategoryTransport" -> copy(CategoryTransport = color)
+        "CategoryHome" -> copy(CategoryHome = color)
+        "CategoryServices" -> copy(CategoryServices = color)
+        "CategoryEntertainment" -> copy(CategoryEntertainment = color)
+        "CategoryTech" -> copy(CategoryTech = color)
+        "CategoryWork" -> copy(CategoryWork = color)
+        "CategoryHealth" -> copy(CategoryHealth = color)
+        "CategoryOther" -> copy(CategoryOther = color)
+        else -> this
+    }
 }
 
 val LightCeroFiaoColors = CeroFiaoColors(
@@ -281,6 +406,27 @@ val SuccessGradient = Brush.linearGradient(listOf(Color(0xFF00FF66), Color(0xFF0
 val ExpenseGradient = Brush.horizontalGradient(listOf(Color(0xFF8A2BE2), Color(0xFFFF6B00)))
 val TransferGradient = Brush.horizontalGradient(listOf(Color(0xFF66A1F3), Color(0xFF22C9A6)))
 val IncomeGradient = Brush.horizontalGradient(listOf(Color(0x8085F366), Color(0x8022C9A6)))
+
+/** Default gradient start/end colors for dynamic gradient building */
+data class GradientDef(val start: Color, val end: Color, val isHorizontal: Boolean)
+
+val DefaultGradients = mapOf(
+    "BrandGradient" to GradientDef(Color(0xFF8A2BE2), Color(0xFFFF6B00), false),
+    "DangerGradient" to GradientDef(Color(0xFFFF4433), Color(0xFFCC2211), false),
+    "SuccessGradient" to GradientDef(Color(0xFF00FF66), Color(0xFF00CC52), false),
+    "ExpenseGradient" to GradientDef(Color(0xFF8A2BE2), Color(0xFFFF6B00), true),
+    "TransferGradient" to GradientDef(Color(0xFF66A1F3), Color(0xFF22C9A6), true),
+    "IncomeGradient" to GradientDef(Color(0x8085F366), Color(0x8022C9A6), true)
+)
+
+/** Build a gradient with optional overrides */
+fun buildGradient(name: String, overrides: Map<String, Long> = emptyMap()): Brush {
+    val def = DefaultGradients[name] ?: return BrandGradient
+    val start = overrides["${name}_start"]?.let { Color(it.toULong()) } ?: def.start
+    val end = overrides["${name}_end"]?.let { Color(it.toULong()) } ?: def.end
+    return if (def.isHorizontal) Brush.horizontalGradient(listOf(start, end))
+    else Brush.linearGradient(listOf(start, end))
+}
 
 // ── Account Type Badge Colors ──
 object AccountBadgeColors {

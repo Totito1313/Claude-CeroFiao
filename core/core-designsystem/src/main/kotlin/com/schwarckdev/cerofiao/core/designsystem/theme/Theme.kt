@@ -26,6 +26,7 @@ val LocalIconSize = staticCompositionLocalOf { IconSize }
 val LocalComponentSize = staticCompositionLocalOf { ComponentSize }
 val LocalTitleFontFamily = staticCompositionLocalOf { AntonFontFamily }
 val LocalBodyFontFamily = staticCompositionLocalOf { OneUiSansFontFamily }
+val LocalSubtitleFontFamily = staticCompositionLocalOf { OneUiSansFontFamily }
 val LocalBlurEnabled = staticCompositionLocalOf { false }
 val LocalShadowConfig = staticCompositionLocalOf { ShadowConfig.Default }
 val LocalGlassConfig = staticCompositionLocalOf { GlassConfig.Default }
@@ -37,23 +38,32 @@ fun CeroFiaoTheme(
     dynamicColor: Boolean = false,
     titleFontFamily: FontFamily = AntonFontFamily,
     bodyFontFamily: FontFamily = OneUiSansFontFamily,
+    subtitleFontFamily: FontFamily = OneUiSansFontFamily,
     accentColor: Color? = null,
     shadowConfig: ShadowConfig = ShadowConfig.Default,
     glassConfig: GlassConfig = GlassConfig.Default,
     cardConfig: CardConfig = CardConfig.Default,
+    colorOverrides: ColorOverrides = ColorOverrides.Empty,
     content: @Composable () -> Unit
 ) {
     val baseCeroFiaoColors = if (darkTheme) DarkCeroFiaoColors else LightCeroFiaoColors
 
-    // Apply accent color override if provided
-    val ceroFiaoColors = if (accentColor != null) {
-        baseCeroFiaoColors.copy(
-            Primary = accentColor,
-            GradientAccent = accentColor,
-            AccentUser = accentColor
-        )
-    } else {
-        baseCeroFiaoColors
+    // Apply accent color override if provided, then color overrides
+    val ceroFiaoColors = run {
+        var colors = if (accentColor != null) {
+            baseCeroFiaoColors.copy(
+                Primary = accentColor,
+                GradientAccent = accentColor,
+                AccentUser = accentColor
+            )
+        } else {
+            baseCeroFiaoColors
+        }
+        val tokenOverrides = if (darkTheme) colorOverrides.darkOverrides else colorOverrides.lightOverrides
+        if (tokenOverrides.isNotEmpty()) {
+            colors = colors.copyWithOverrides(tokenOverrides)
+        }
+        colors
     }
 
     val ceroFiaoEffects = if (darkTheme) DarkCeroFiaoEffects else LightCeroFiaoEffects
@@ -61,7 +71,7 @@ fun CeroFiaoTheme(
     // Disable blur on older devices for performance/compatibility
     val isBlurEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     
-    val typography = getCeroFiaoTypography(titleFontFamily, bodyFontFamily)
+    val typography = getCeroFiaoTypography(titleFontFamily, bodyFontFamily, subtitleFontFamily)
 
     // Update Material 3 generic scheme to match our custom tokens roughly
     val materialColorScheme = if (darkTheme) {
@@ -109,6 +119,7 @@ fun CeroFiaoTheme(
         LocalComponentSize provides ComponentSize,
         LocalTitleFontFamily provides titleFontFamily,
         LocalBodyFontFamily provides bodyFontFamily,
+        LocalSubtitleFontFamily provides subtitleFontFamily,
         LocalBlurEnabled provides isBlurEnabled,
         LocalShadowConfig provides shadowConfig,
         LocalGlassConfig provides glassConfig,
@@ -155,6 +166,10 @@ object CeroFiaoDesign {
     val blurEnabled: Boolean
         @Composable
         get() = LocalBlurEnabled.current
+
+    val subtitleFontFamily: FontFamily
+        @Composable
+        get() = LocalSubtitleFontFamily.current
 
     val shadowConfig: ShadowConfig
         @Composable

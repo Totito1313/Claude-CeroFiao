@@ -51,7 +51,8 @@ val InterFontFamily = FontFamily(
 
 fun getCeroFiaoTypography(
     titleFontFamily: FontFamily,
-    bodyFontFamily: FontFamily
+    bodyFontFamily: FontFamily,
+    subtitleFontFamily: FontFamily = bodyFontFamily
 ): Typography {
     return Typography(
         displayLarge = TextStyle(
@@ -97,21 +98,21 @@ fun getCeroFiaoTypography(
             letterSpacing = if (titleFontFamily == AntonFontFamily) 1.sp else 0.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = bodyFontFamily,
+            fontFamily = subtitleFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
             lineHeight = 28.sp,
             letterSpacing = 0.sp
         ),
         titleMedium = TextStyle(
-            fontFamily = bodyFontFamily,
+            fontFamily = subtitleFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
             lineHeight = 24.sp,
             letterSpacing = 0.15.sp
         ),
         titleSmall = TextStyle(
-            fontFamily = bodyFontFamily,
+            fontFamily = subtitleFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             lineHeight = 20.sp,

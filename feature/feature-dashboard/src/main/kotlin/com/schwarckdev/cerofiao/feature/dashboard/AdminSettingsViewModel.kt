@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.designsystem.theme.AccentPreset
 import com.schwarckdev.cerofiao.core.designsystem.theme.BodyFontOption
 import com.schwarckdev.cerofiao.core.designsystem.theme.FontOption
+import com.schwarckdev.cerofiao.core.designsystem.theme.SubtitleFontOption
 import com.schwarckdev.cerofiao.core.designsystem.theme.ThemeMode
 import com.schwarckdev.cerofiao.core.designsystem.theme.ThemePreferencesManager
 import com.schwarckdev.cerofiao.core.designsystem.theme.UserPreferences
@@ -31,6 +32,7 @@ class AdminSettingsViewModel @Inject constructor(
     fun setAccentPreset(preset: AccentPreset) { viewModelScope.launch { preferencesManager.setAccentPreset(preset) } }
     fun setTitleFont(font: FontOption) { viewModelScope.launch { preferencesManager.setTitleFont(font) } }
     fun setBodyFont(font: BodyFontOption) { viewModelScope.launch { preferencesManager.setBodyFont(font) } }
+    fun setSubtitleFont(font: SubtitleFontOption) { viewModelScope.launch { preferencesManager.setSubtitleFont(font) } }
 
     // ─── Shadow ───
     fun setShadowEnabled(enabled: Boolean) { viewModelScope.launch { preferencesManager.setShadowEnabled(enabled) } }
@@ -55,6 +57,23 @@ class AdminSettingsViewModel @Inject constructor(
     fun setContextualNavBarOffsetY(offsetY: Float) { viewModelScope.launch { preferencesManager.setContextualNavBarOffsetY(offsetY) } }
     fun setCornerMenuOffsetX(offsetX: Float) { viewModelScope.launch { preferencesManager.setCornerMenuOffsetX(offsetX) } }
     fun setCornerMenuOffsetY(offsetY: Float) { viewModelScope.launch { preferencesManager.setCornerMenuOffsetY(offsetY) } }
+
+    // ─── Color Overrides ───
+    fun setColorOverride(token: String, argb: Long, isDark: Boolean) {
+        viewModelScope.launch { preferencesManager.setColorOverride(token, argb, isDark) }
+    }
+    fun removeColorOverride(token: String, isDark: Boolean) {
+        viewModelScope.launch { preferencesManager.removeColorOverride(token, isDark) }
+    }
+    fun setGradientOverride(gradientKey: String, argb: Long) {
+        viewModelScope.launch { preferencesManager.setGradientOverride(gradientKey, argb) }
+    }
+    fun removeGradientOverride(gradientKey: String) {
+        viewModelScope.launch { preferencesManager.removeGradientOverride(gradientKey) }
+    }
+    fun resetAllColorOverrides() {
+        viewModelScope.launch { preferencesManager.resetAllColorOverrides() }
+    }
 
     // ─── Reset ───
     fun resetToDefaults() { viewModelScope.launch { preferencesManager.resetToDefaults() } }

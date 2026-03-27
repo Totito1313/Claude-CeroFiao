@@ -154,7 +154,7 @@ fun CeroFiaoFloatingNavBar(
                             isActive = activeTab == 1 && !isMenuOpen,
                             onClick = { onTabSelected(1) }
                         ) { color ->
-                            Icon(imageVector = CeroFiaoIcons.ManageStorage, contentDescription = null, tint = color)
+                            Icon(imageVector = CeroFiaoIcons.Analytics, contentDescription = null, tint = color)
                         }
                         NavItem(
                             label = "Historial",
@@ -171,7 +171,7 @@ fun CeroFiaoFloatingNavBar(
                             isActive = activeTab == 3 && !isMenuOpen,
                             onClick = { onTabSelected(3) }
                         ) { color ->
-                            Icon(imageVector = CeroFiaoIcons.Chages, contentDescription = null, tint = color)
+                            Icon(imageVector = CeroFiaoIcons.Changes, contentDescription = null, tint = color)
                         }
 
                         NavItem(
@@ -179,7 +179,7 @@ fun CeroFiaoFloatingNavBar(
                             isActive = isMenuOpen,
                             onClick = { onMenuClick() }
                         ) { color ->
-                            Icon(imageVector = CeroFiaoIcons.Apps, contentDescription = null, tint = color)
+                            Icon(imageVector = CeroFiaoIcons.ManageStorage, contentDescription = null, tint = color)
                         }
                     }
                 }

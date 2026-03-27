@@ -843,11 +843,11 @@ fun StandardHeaderContainer(
                 .then(
                     if (hazeState != null) {
                         Modifier.hazeChild(
-                            state = hazeState, 
+                            state = hazeState,
                             style = dev.chrisbanes.haze.HazeStyle(
                                 backgroundColor = LocalCeroFiaoColors.current.Background,
                                 blurRadius = 80.dp,
-                                tint = HazeTint(LocalCeroFiaoColors.current.Background.copy(alpha = 0.6f))
+                                tint = HazeTint(LocalCeroFiaoColors.current.Background.copy(alpha = 0.3f))
                             )
                         )
                     } else {
@@ -856,10 +856,10 @@ fun StandardHeaderContainer(
                 )
                 .background(
                     brush = Brush.verticalGradient(
-                        0.0f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.8f else 1f),
-                        0.65f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.8f else 1f),
-                        0.85f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.6f else 0.8f),
-                        1.5f to LocalCeroFiaoColors.current.Background.copy(alpha = 0f) 
+                        0.0f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.4f else 1f),
+                        0.55f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.3f else 0.9f),
+                        0.80f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.15f else 0.5f),
+                        1.0f to LocalCeroFiaoColors.current.Background.copy(alpha = 0f)
                     )
                 )
         )
@@ -869,9 +869,9 @@ fun StandardHeaderContainer(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp) 
+                    .height(64.dp)
                     .padding(start = startPadding)
-                    .padding(horizontal = 18.dp, vertical = 4.dp), 
+                    .padding(horizontal = 18.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 content = content
@@ -927,7 +927,7 @@ fun StandardHeader(
                 .then(
                     if (hazeState != null) {
                         Modifier.hazeChild(
-                            state = hazeState, 
+                            state = hazeState,
                             style = dev.chrisbanes.haze.HazeStyle(
                                 backgroundColor = LocalCeroFiaoColors.current.Background,
                                 blurRadius = 30.dp,
@@ -940,10 +940,10 @@ fun StandardHeader(
                 )
                 .background(
                     brush = Brush.verticalGradient(
-                        0.0f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.8f else 1f),
-                        0.65f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.8f else 1f),
-                        0.85f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.6f else 0.8f),
-                        1.5f to LocalCeroFiaoColors.current.Background.copy(alpha = 0f) 
+                        0.0f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.4f else 1f),
+                        0.55f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.3f else 0.9f),
+                        0.80f to LocalCeroFiaoColors.current.Background.copy(alpha = if (hazeState != null) 0.15f else 0.5f),
+                        1.0f to LocalCeroFiaoColors.current.Background.copy(alpha = 0f)
                     )
                 )
         )

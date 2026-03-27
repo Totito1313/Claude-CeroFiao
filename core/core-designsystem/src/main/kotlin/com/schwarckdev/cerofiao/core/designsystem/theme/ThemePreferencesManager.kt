@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,6 +29,7 @@ class ThemePreferencesManager(private val context: Context) {
         val ACCENT_PRESET = stringPreferencesKey("accent_preset")
         val TITLE_FONT = stringPreferencesKey("title_font")
         val BODY_FONT = stringPreferencesKey("body_font")
+        val SUBTITLE_FONT = stringPreferencesKey("subtitle_font")
         // Shadow
         val SHADOW_ENABLED = booleanPreferencesKey("shadow_enabled")
         val SHADOW_ALPHA = floatPreferencesKey("shadow_alpha")
@@ -48,9 +50,23 @@ class ThemePreferencesManager(private val context: Context) {
         val FLOAT_CONTEXTUAL_OFFSET_Y = floatPreferencesKey("float_contextual_offset_y")
         val FLOAT_CORNER_OFFSET_X = floatPreferencesKey("float_corner_offset_x")
         val FLOAT_CORNER_OFFSET_Y = floatPreferencesKey("float_corner_offset_y")
+        // Color Overrides
+        val COLOR_OVERRIDES_LIGHT = stringSetPreferencesKey("color_overrides_light")
+        val COLOR_OVERRIDES_DARK = stringSetPreferencesKey("color_overrides_dark")
+        val GRADIENT_OVERRIDES = stringSetPreferencesKey("gradient_overrides")
         // Onboarding
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
+
+    private fun encodeColorMap(map: Map<String, Long>): Set<String> =
+        map.entries.map { "${it.key}:${it.value}" }.toSet()
+
+    private fun decodeColorMap(set: Set<String>?): Map<String, Long> =
+        set?.mapNotNull { entry ->
+            val parts = entry.split(":", limit = 2)
+            if (parts.size == 2) parts[0] to parts[1].toLongOrNull()
+            else null
+        }?.filter { it.second != null }?.associate { it.first to it.second!! } ?: emptyMap()
 
     val preferencesFlow: Flow<UserPreferences> = context.themeDataStore.data.map { prefs ->
         UserPreferences(
@@ -58,6 +74,7 @@ class ThemePreferencesManager(private val context: Context) {
             accentPreset = AccentPreset.fromId(prefs[Keys.ACCENT_PRESET] ?: "cyan"),
             titleFont = FontOption.fromId(prefs[Keys.TITLE_FONT] ?: "anton"),
             bodyFont = BodyFontOption.fromId(prefs[Keys.BODY_FONT] ?: "oneui"),
+            subtitleFont = SubtitleFontOption.fromId(prefs[Keys.SUBTITLE_FONT] ?: "oneui"),
             shadowConfig = ShadowConfig(
                 enabled = prefs[Keys.SHADOW_ENABLED] ?: true,
                 alpha = prefs[Keys.SHADOW_ALPHA] ?: 0.25f,
@@ -82,6 +99,11 @@ class ThemePreferencesManager(private val context: Context) {
                 cornerMenuOffsetX = (prefs[Keys.FLOAT_CORNER_OFFSET_X] ?: 16f).dp,
                 cornerMenuOffsetY = (prefs[Keys.FLOAT_CORNER_OFFSET_Y] ?: 80f).dp
             ),
+            colorOverrides = ColorOverrides(
+                lightOverrides = decodeColorMap(prefs[Keys.COLOR_OVERRIDES_LIGHT]),
+                darkOverrides = decodeColorMap(prefs[Keys.COLOR_OVERRIDES_DARK]),
+                gradientOverrides = decodeColorMap(prefs[Keys.GRADIENT_OVERRIDES])
+            ),
             isOnboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false
         )
     }
@@ -101,6 +123,10 @@ class ThemePreferencesManager(private val context: Context) {
 
     suspend fun setBodyFont(font: BodyFontOption) {
         context.themeDataStore.edit { it[Keys.BODY_FONT] = font.id }
+    }
+
+    suspend fun setSubtitleFont(font: SubtitleFontOption) {
+        context.themeDataStore.edit { it[Keys.SUBTITLE_FONT] = font.id }
     }
 
     // ─── Shadow ───
@@ -174,6 +200,49 @@ class ThemePreferencesManager(private val context: Context) {
     // ─── Onboarding ───
     suspend fun setOnboardingCompleted(completed: Boolean) {
         context.themeDataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
+    }
+
+    // ─── Color Overrides ───
+    suspend fun setColorOverride(token: String, argb: Long, isDark: Boolean) {
+        val key = if (isDark) Keys.COLOR_OVERRIDES_DARK else Keys.COLOR_OVERRIDES_LIGHT
+        context.themeDataStore.edit { prefs ->
+            val current = decodeColorMap(prefs[key]).toMutableMap()
+            current[token] = argb
+            prefs[key] = encodeColorMap(current)
+        }
+    }
+
+    suspend fun removeColorOverride(token: String, isDark: Boolean) {
+        val key = if (isDark) Keys.COLOR_OVERRIDES_DARK else Keys.COLOR_OVERRIDES_LIGHT
+        context.themeDataStore.edit { prefs ->
+            val current = decodeColorMap(prefs[key]).toMutableMap()
+            current.remove(token)
+            prefs[key] = encodeColorMap(current)
+        }
+    }
+
+    suspend fun setGradientOverride(gradientKey: String, argb: Long) {
+        context.themeDataStore.edit { prefs ->
+            val current = decodeColorMap(prefs[Keys.GRADIENT_OVERRIDES]).toMutableMap()
+            current[gradientKey] = argb
+            prefs[Keys.GRADIENT_OVERRIDES] = encodeColorMap(current)
+        }
+    }
+
+    suspend fun removeGradientOverride(gradientKey: String) {
+        context.themeDataStore.edit { prefs ->
+            val current = decodeColorMap(prefs[Keys.GRADIENT_OVERRIDES]).toMutableMap()
+            current.remove(gradientKey)
+            prefs[Keys.GRADIENT_OVERRIDES] = encodeColorMap(current)
+        }
+    }
+
+    suspend fun resetAllColorOverrides() {
+        context.themeDataStore.edit {
+            it.remove(Keys.COLOR_OVERRIDES_LIGHT)
+            it.remove(Keys.COLOR_OVERRIDES_DARK)
+            it.remove(Keys.GRADIENT_OVERRIDES)
+        }
     }
 
     // ─── Reset ───

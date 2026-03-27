@@ -18,6 +18,8 @@ open class ResolveExchangeRateUseCase @Inject constructor(
     data class RateResult(
         val rate: Double,
         val source: ExchangeRateSource,
+        val isParityLoss: Boolean = false,
+        val baseToVesRate: Double? = null,
     )
 
     /**
@@ -32,25 +34,33 @@ open class ResolveExchangeRateUseCase @Inject constructor(
         val baseFrom = Currencies.baseCurrency(from)
         val baseTo = Currencies.baseCurrency(to)
 
-        // Identity (e.g., USDT→USD, EURI→EUR, USD→USD)
-        if (baseFrom == baseTo) return RateResult(1.0, preferredSource)
+        // Identity strictly equal
+        if (from == to) return RateResult(1.0, preferredSource)
 
-        val sourceFrom = Currencies.implicitSource(from) ?: preferredSource
-        val sourceTo = Currencies.implicitSource(to) ?: preferredSource
+        val implicitFrom = Currencies.implicitSource(from)
+        val implicitTo = Currencies.implicitSource(to)
+        val sourceFrom = implicitFrom ?: preferredSource
+        val sourceTo = implicitTo ?: preferredSource
 
-        // Try direct lookup: baseFrom → baseTo
-        val direct = exchangeRateRepository.getLatestRateBySource(baseFrom, baseTo, sourceFrom)
+        // For direct lookups, prefer the implicit source (most specific) from either currency
+        val directSource = implicitFrom ?: implicitTo ?: preferredSource
+
+        val isParityLoss = baseFrom == baseTo && from != to
+
+        // Try direct lookup using the most specific source first
+        val direct = exchangeRateRepository.getLatestRateBySource(baseFrom, baseTo, directSource)
             ?: exchangeRateRepository.getLatestRate(baseFrom, baseTo)
-        if (direct != null) return RateResult(direct.rate, direct.source)
+        if (direct != null && !isParityLoss) return RateResult(direct.rate, direct.source)
 
         // Cross-rate via VES: baseFrom → VES → baseTo
+        // Each leg uses the source of its corresponding currency
         val toVes = (exchangeRateRepository.getLatestRateBySource(baseFrom, "VES", sourceFrom)
             ?: exchangeRateRepository.getLatestRate(baseFrom, "VES"))?.rate
         val fromVes = (exchangeRateRepository.getLatestRateBySource("VES", baseTo, sourceTo)
             ?: exchangeRateRepository.getLatestRate("VES", baseTo))?.rate
 
         if (toVes != null && fromVes != null) {
-            return RateResult(MoneyCalculator.convert(toVes, fromVes), sourceFrom)
+            return RateResult(MoneyCalculator.convert(toVes, fromVes), sourceFrom, isParityLoss, toVes)
         }
 
         return RateResult(1.0, ExchangeRateSource.MANUAL)

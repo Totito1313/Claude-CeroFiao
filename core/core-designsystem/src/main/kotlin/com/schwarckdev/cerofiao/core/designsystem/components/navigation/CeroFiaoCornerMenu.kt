@@ -1,6 +1,14 @@
 package com.schwarckdev.cerofiao.core.designsystem.components.navigation
 
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -18,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.schwarckdev.cerofiao.core.designsystem.components.advancedShadow
@@ -43,6 +52,7 @@ import dev.chrisbanes.haze.hazeChild
 fun CeroFiaoCornerMenu(
     hazeState: HazeState,
     modifier: Modifier = Modifier,
+    visible: Boolean = true,
     onMenuItemLongClick: ((String) -> Unit)? = null,
     onMenuItemClick: (String) -> Unit
 ) {
@@ -53,10 +63,27 @@ fun CeroFiaoCornerMenu(
     val isBlurEnabled = LocalBlurEnabled.current
     val bgAlpha = if (isBlurEnabled) glassConfig.tintAlpha else 1f
     
-    Box(
+    AnimatedVisibility(
+        visible = visible,
+        enter = scaleIn(
+            initialScale = 0.8f,
+            transformOrigin = TransformOrigin(1f, 1f),
+            animationSpec = spring(
+                dampingRatio = 0.7f,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        ) + fadeIn(tween(200)),
+        exit = scaleOut(
+            targetScale = 0.8f,
+            transformOrigin = TransformOrigin(1f, 1f),
+            animationSpec = tween(150)
+        ) + fadeOut(tween(150)),
         modifier = modifier
-            .graphicsLayer { clip = false }
     ) {
+        Box(
+            modifier = Modifier
+                .graphicsLayer { clip = false }
+        ) {
         Box(
             modifier = Modifier
                 .width(CeroFiaoDesign.componentSize.cornerMenuWidth) // ComponentSize.cornerMenuWidth
@@ -103,7 +130,7 @@ fun CeroFiaoCornerMenu(
 
             CornerMenuItem(
                 label = "Tasas de Cambio",
-                iconData = CeroFiaoIcons.Chages,
+                iconData = CeroFiaoIcons.Changes,
                 onClick = { onMenuItemClick("Tasas") }
             )
 
@@ -124,6 +151,7 @@ fun CeroFiaoCornerMenu(
         }
             }
         }
+    }
     }
 }
 

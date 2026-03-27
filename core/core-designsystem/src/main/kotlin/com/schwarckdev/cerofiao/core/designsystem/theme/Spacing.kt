@@ -107,4 +107,17 @@ object ComponentSize {
     val cornerMenuPaddingHorizontal: Dp = 14.dp
     
     val minTouchTarget: Dp = 48.dp
+
+    // HeroUI component sizes
+    val buttonHeightLarge: Dp = 56.dp
+    val avatarSmall: Dp = 32.dp
+    val avatarMedium: Dp = 40.dp
+    val avatarLarge: Dp = 56.dp
+    val spinnerSmall: Dp = 16.dp
+    val spinnerMedium: Dp = 24.dp
+    val spinnerLarge: Dp = 40.dp
+    val closeButtonSize: Dp = 32.dp
+    val accordionItemHeight: Dp = 56.dp
+    val listItemHeight: Dp = 56.dp
+    val toastMaxWidth: Dp = 400.dp
 }
