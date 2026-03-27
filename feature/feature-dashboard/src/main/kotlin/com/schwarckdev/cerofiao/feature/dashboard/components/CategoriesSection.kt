@@ -41,7 +41,7 @@ fun CategoriesSection(
 ) {
     val colors = CeroFiaoDesign.colors
     val cardConfig = LocalCardConfig.current
-    val categoryColorPalette = listOf(
+    val fallbackPalette = listOf(
         colors.AccentPurple,
         colors.AccentBlue,
         colors.AccentRed,
@@ -65,7 +65,15 @@ fun CategoriesSection(
                 maxItemsInEachRow = 2,
             ) {
                 categories.forEachIndexed { index, category ->
-                    val dotColor = categoryColorPalette[index % categoryColorPalette.size]
+                    val dotColor = if (category.colorHex.isNotBlank()) {
+                        try {
+                            Color(android.graphics.Color.parseColor(category.colorHex))
+                        } catch (_: Exception) {
+                            fallbackPalette[index % fallbackPalette.size]
+                        }
+                    } else {
+                        fallbackPalette[index % fallbackPalette.size]
+                    }
                     CategorySpendCard(
                         category = category,
                         displayCurrencyCode = displayCurrencyCode,

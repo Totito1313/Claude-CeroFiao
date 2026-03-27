@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,6 +95,7 @@ fun CurrencyCalculatorSection(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
 
     var swapClicks by remember { mutableIntStateOf(0) }
     val rotation by animateFloatAsState(
@@ -107,8 +109,8 @@ fun CurrencyCalculatorSection(
             .fillMaxWidth()
             .animateContentSize(),
         shape = RoundedCornerShape(38.dp),
-        color = colors.Foreground,
-        shadowElevation = 8.dp, // Clean, elegant shadow
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
+         // Clean, elegant shadow
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),

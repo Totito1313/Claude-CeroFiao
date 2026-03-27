@@ -139,7 +139,6 @@ fun ExchangeRatesSection(
                         Surface(
                             shape = RoundedCornerShape(30.dp),
                             color = Color.Transparent,
-                            shadowElevation = elevation,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .longPressDraggableHandle(
@@ -177,8 +176,8 @@ private fun ExchangeRateCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        color = colors.Background.copy(alpha = cardConfig.backgroundOpacity),
-        shadowElevation = 0.dp,
+        color = colors.Background,
+
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),

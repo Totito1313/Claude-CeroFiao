@@ -21,7 +21,23 @@
       "Bash(for dir:*)",
       "Bash(do touch:*)",
       "Bash(done)",
-      "WebFetch(domain:ve.dolarapi.com)"
+      "WebFetch(domain:ve.dolarapi.com)",
+      "Bash(find C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao/core/core-ui -name *.kt)",
+      "Bash(grep -r com.schwarckdev.cerofiao.core.ui. C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao --include=*.kt -l)",
+      "Bash(grep -rn 'import com.schwarckdev.cerofiao.core.ui' C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao --include=*.kt)",
+      "Bash(grep -rn cerofiao.core.uib C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao --include=*.kt)",
+      "Bash(grep -rn \"core-ui\\\\|core.ui\" C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao/feature --include=*.gradle.kts --include=*.toml)",
+      "Bash(grep -rn \"core.ui\\\\|core-ui\" C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao/build-logic --include=*.kt --include=*.kts)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :feature:feature-dashboard:compileDebugKotlin)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :core:core-designsystem:compileDebugKotlin)",
+      "Bash(find C:/Users/Schwa/OneDrive/Desktop/SchwarckDev/CeroFiao -path */composables/icons/lucide* -name *.kt)",
+      "Bash(cd /tmp)",
+      "Bash(jar tf:*)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :core:core-designsystem:bundleLibCompileToJarDebug)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :core:core-designsystem:bundleLibCompileToJarDebug --info)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :core:core-designsystem:clean)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew :feature:feature-dashboard:compileDebugKotlin :core:core-designsystem:compileDebugKotlin :core:core-ui:compileDebugKotlin)"
     ]
   }
 }

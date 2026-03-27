@@ -33,7 +33,7 @@ import com.composables.icons.lucide.CreditCard
 import com.composables.icons.lucide.GitFork
 import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.MoreHorizontal
+
 import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.ThumbsUp
@@ -88,6 +88,7 @@ import com.schwarckdev.cerofiao.core.designsystem.components.layout.CeroFiaoSurf
 import com.schwarckdev.cerofiao.core.designsystem.components.media.AvatarSize
 import com.schwarckdev.cerofiao.core.designsystem.components.media.CeroFiaoAvatar
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoAccordion
+import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoListGroup
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoTabs
 import com.schwarckdev.cerofiao.core.designsystem.components.overlays.CeroFiaoBottomSheet
@@ -209,7 +210,7 @@ fun ComponentOverviewSection() {
                         items = listOf(
                             ButtonGroupItem(key = "photos", icon = Lucide.Image, text = "Photos", onClick = {}),
                             ButtonGroupItem(key = "videos", icon = Lucide.Video, text = "Videos", onClick = {}),
-                            ButtonGroupItem(key = "more", icon = Lucide.MoreHorizontal, onClick = {}),
+                            ButtonGroupItem(key = "more", icon = CeroFiaoIcons.More, onClick = {}),
                         ),
                     )
                     // "Left | Center | Right"

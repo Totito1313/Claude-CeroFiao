@@ -6,8 +6,12 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
 import com.schwarckdev.cerofiao.core.model.Account
+import com.schwarckdev.cerofiao.core.model.Category
+import com.schwarckdev.cerofiao.core.model.AccountPlatform
+import com.schwarckdev.cerofiao.core.model.AccountType
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +30,8 @@ data class TransactionWithCategory(
     val categoryIconName: String,
     val categoryColorHex: String,
     val accountName: String,
+    val accountType: AccountType = AccountType.CASH,
+    val accountPlatform: AccountPlatform = AccountPlatform.NONE,
 )
 
 data class TransactionDateGroup(
@@ -34,15 +40,26 @@ data class TransactionDateGroup(
     val dayNetUsd: Double,
 )
 
+enum class SortOrder {
+    DATE_DESC,
+    DATE_ASC,
+    AMOUNT_DESC,
+    AMOUNT_ASC,
+}
+
 data class TransactionListUiState(
     val groupedTransactions: List<TransactionDateGroup> = emptyList(),
     val accounts: List<Account> = emptyList(),
     val selectedTypeFilter: TransactionType? = null,
     val selectedAccountId: String? = null,
     val selectedCurrencyFilter: String? = null,
+    val selectedCategoryId: String? = null,
     val searchQuery: String = "",
+    val sortOrder: SortOrder = SortOrder.DATE_DESC,
     val totalIncomeUsd: Double = 0.0,
     val totalExpenseUsd: Double = 0.0,
+    val monthOverMonthPercent: Double? = null,
+    val categories: List<Category> = emptyList(),
     // Keep flat list for compatibility
     val transactions: List<Transaction> = emptyList(),
 )
@@ -51,6 +68,7 @@ data class TransactionListUiState(
 class TransactionListViewModel @Inject constructor(
     getTransactionsUseCase: GetTransactionsUseCase,
     getAccountsUseCase: GetAccountsUseCase,
+    getCategoriesUseCase: GetCategoriesUseCase,
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
@@ -60,27 +78,32 @@ class TransactionListViewModel @Inject constructor(
     val uiState: StateFlow<TransactionListUiState> = combine(
         getTransactionsUseCase(),
         getAccountsUseCase(),
+        getCategoriesUseCase(),
         filters,
-    ) { transactions, accounts, filter ->
+    ) { transactions, accounts, allCategories, filter ->
         val filtered = transactions.filter { tx ->
             val matchType = filter.typeFilter == null || tx.type == filter.typeFilter
             val matchAccount = filter.accountId == null || tx.accountId == filter.accountId
             val matchCurrency = filter.currencyFilter == null || tx.currencyCode == filter.currencyFilter
+            val matchCategory = filter.categoryId == null || tx.categoryId == filter.categoryId
             val matchSearch = filter.searchQuery.isBlank() ||
                 (tx.note ?: "").contains(filter.searchQuery, ignoreCase = true)
-            matchType && matchAccount && matchCurrency && matchSearch
+            matchType && matchAccount && matchCurrency && matchCategory && matchSearch
         }
 
         val accountMap = accounts.associateBy { it.id }
 
         val withCategories = filtered.map { tx ->
             val category = tx.categoryId?.let { categoryRepository.getCategoryById(it) }
+            val account = accountMap[tx.accountId]
             TransactionWithCategory(
                 transaction = tx,
                 categoryName = category?.name ?: "Sin categoría",
                 categoryIconName = category?.iconName ?: "Apps",
                 categoryColorHex = category?.colorHex ?: "#9E9E9E",
-                accountName = accountMap[tx.accountId]?.name ?: "",
+                accountName = account?.name ?: "",
+                accountType = account?.type ?: AccountType.CASH,
+                accountPlatform = account?.platform ?: AccountPlatform.NONE,
             )
         }
 
@@ -97,9 +120,15 @@ class TransactionListViewModel @Inject constructor(
                         TransactionType.TRANSFER -> 0.0
                     }
                 }
+                val sortedTxs = when (filter.sortOrder) {
+                    SortOrder.DATE_DESC -> txs.sortedByDescending { it.transaction.date }
+                    SortOrder.DATE_ASC -> txs.sortedBy { it.transaction.date }
+                    SortOrder.AMOUNT_DESC -> txs.sortedByDescending { it.transaction.amount }
+                    SortOrder.AMOUNT_ASC -> txs.sortedBy { it.transaction.amount }
+                }
                 TransactionDateGroup(
                     dateMillis = dayMillis,
-                    transactions = txs.sortedByDescending { it.transaction.date },
+                    transactions = sortedTxs,
                     dayNetUsd = dayNet,
                 )
             }
@@ -111,15 +140,40 @@ class TransactionListViewModel @Inject constructor(
             .filter { it.type == TransactionType.EXPENSE }
             .sumOf { it.amountInUsd }
 
+        // Month-over-month percentage change
+        val (curStart, curEnd) = DateUtils.getCurrentMonthRange()
+        // Previous month: go back 32 days from current month start, then get that month's range
+        val prevMonthSomeDay = curStart - 32L * 24 * 60 * 60 * 1000
+        val prevMonthStart = DateUtils.startOfMonth(prevMonthSomeDay)
+        val prevMonthEnd = DateUtils.endOfMonth(prevMonthSomeDay)
+
+        val currentMonthTotal = transactions
+            .filter { it.date in curStart..curEnd }
+            .filter { filter.typeFilter == null || it.type == filter.typeFilter }
+            .sumOf { it.amountInUsd }
+
+        val prevMonthTotal = transactions
+            .filter { it.date in prevMonthStart..prevMonthEnd }
+            .filter { filter.typeFilter == null || it.type == filter.typeFilter }
+            .sumOf { it.amountInUsd }
+
+        val monthPercent = if (prevMonthTotal > 0) {
+            ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100.0
+        } else null
+
         TransactionListUiState(
             groupedTransactions = grouped,
             accounts = accounts,
             selectedTypeFilter = filter.typeFilter,
             selectedAccountId = filter.accountId,
             selectedCurrencyFilter = filter.currencyFilter,
+            selectedCategoryId = filter.categoryId,
             searchQuery = filter.searchQuery,
+            sortOrder = filter.sortOrder,
             totalIncomeUsd = totalIncome,
             totalExpenseUsd = totalExpense,
+            monthOverMonthPercent = monthPercent,
+            categories = allCategories,
             transactions = filtered,
         )
     }.stateIn(
@@ -140,8 +194,16 @@ class TransactionListViewModel @Inject constructor(
         filters.update { it.copy(currencyFilter = currency) }
     }
 
+    fun setCategoryFilter(categoryId: String?) {
+        filters.update { it.copy(categoryId = categoryId) }
+    }
+
     fun setSearchQuery(query: String) {
         filters.update { it.copy(searchQuery = query) }
+    }
+
+    fun setSortOrder(order: SortOrder) {
+        filters.update { it.copy(sortOrder = order) }
     }
 
     fun deleteTransaction(transactionId: String) {
@@ -154,6 +216,8 @@ class TransactionListViewModel @Inject constructor(
         val typeFilter: TransactionType? = null,
         val accountId: String? = null,
         val currencyFilter: String? = null,
+        val categoryId: String? = null,
         val searchQuery: String = "",
+        val sortOrder: SortOrder = SortOrder.DATE_DESC,
     )
 }

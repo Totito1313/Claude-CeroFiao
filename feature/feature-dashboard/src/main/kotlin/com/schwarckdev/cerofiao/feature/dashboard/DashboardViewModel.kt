@@ -13,6 +13,7 @@ import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RefreshExchangeRatesUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountBalance
+import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.AccountType
 import com.schwarckdev.cerofiao.core.model.Budget
@@ -32,6 +33,7 @@ import javax.inject.Inject
 data class CategoryExpense(
     val categoryName: String,
     val iconName: String,
+    val colorHex: String = "",
     val amount: Double,
     val percentage: Float,
 )
@@ -113,6 +115,8 @@ class DashboardViewModel @Inject constructor(
 
     private val accountsFlow = accountRepository.getActiveAccounts()
 
+    private val expenseCategoriesFlow = categoryRepository.getCategoriesByType("EXPENSE")
+
     val uiState: StateFlow<DashboardUiState> = combine(
         combine(
             getGlobalBalanceUseCase(),
@@ -125,7 +129,8 @@ class DashboardViewModel @Inject constructor(
         },
         budgetsFlow,
         accountsFlow,
-    ) { fiveWay, budgets, accounts ->
+        expenseCategoriesFlow,
+    ) { fiveWay, budgets, accounts, expenseCategories ->
         val balance = fiveWay.balance
         val transactions = fiveWay.transactions
         val rates = fiveWay.rates
@@ -133,22 +138,28 @@ class DashboardViewModel @Inject constructor(
         val (monthlyExpenses, monthlyIncome, categoryExpenses) = fiveWay.monthlySummary
 
         val totalExpenses = if (monthlyExpenses > 0.0) monthlyExpenses else 1.0
-        val topCategories = categoryExpenses
-            .sortedByDescending { it.second }
-            .take(5)
-            .map { (categoryId, amount) ->
-                val category = categoryRepository.getCategoryById(categoryId)
+        // Build a map of categoryId→amount from transaction data
+        val expenseMap = categoryExpenses.associate { it.first to it.second }
+
+        // Build top categories from all DB categories, merging with spending data
+        val topCategories = expenseCategories
+            .map { category ->
+                val amount = expenseMap[category.id] ?: 0.0
                 CategoryExpense(
-                    categoryName = category?.name ?: "Sin categoría",
-                    iconName = category?.iconName ?: "Category",
+                    categoryName = category.name,
+                    iconName = category.iconName,
+                    colorHex = category.colorHex,
                     amount = amount,
                     percentage = (amount / totalExpenses).toFloat(),
                 )
             }
+            .sortedByDescending { it.amount }
+            .take(5)
 
         val enriched = transactions.map { tx ->
             val acct = accounts.find { it.id == tx.accountId }
-            val cat = categoryRepository.getCategoryById(tx.categoryId ?: "")
+            val cat = expenseCategories.find { it.id == tx.categoryId }
+                ?: tx.categoryId?.let { categoryRepository.getCategoryById(it) }
             EnrichedTransaction(
                 transaction = tx,
                 accountName = acct?.name ?: "",
@@ -160,8 +171,9 @@ class DashboardViewModel @Inject constructor(
         }
 
         val budgetsWithSpending = budgets.map { budget ->
-            val cat = budget.categoryId?.let { categoryRepository.getCategoryById(it) }
-            val spent = monthlyExpenses * (topCategories.find { it.categoryName == cat?.name }?.percentage?.toDouble() ?: 0.0)
+            val cat = expenseCategories.find { it.id == budget.categoryId }
+                ?: budget.categoryId?.let { categoryRepository.getCategoryById(it) }
+            val spent = expenseMap[budget.categoryId] ?: 0.0
             BudgetWithSpending(
                 budget = budget,
                 spentAmount = spent,

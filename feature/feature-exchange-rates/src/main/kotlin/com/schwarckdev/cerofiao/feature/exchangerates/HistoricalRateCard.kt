@@ -57,7 +57,7 @@ fun HistoricalRateCard(
         modifier = modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(30.dp),
         color = colors.Background,
-        shadowElevation = 5.dp,
+
     ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp),

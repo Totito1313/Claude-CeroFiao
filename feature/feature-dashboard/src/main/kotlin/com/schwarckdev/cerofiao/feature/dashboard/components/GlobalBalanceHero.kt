@@ -53,7 +53,7 @@ fun GlobalBalanceHero(
         Text(
             text = "BALANCE TOTAL",
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = colors.TextSecondary,
             letterSpacing = 2.4.sp,
         )
@@ -75,7 +75,7 @@ fun GlobalBalanceHero(
                 Text(
                     text = symbol,
                     fontSize = 60.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     color = colors.TextSecondary,
                     letterSpacing = (-3).sp,
                 )
@@ -86,7 +86,7 @@ fun GlobalBalanceHero(
                         "••••••"
                     },
                     fontSize = 60.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     color = colors.TextPrimary,
                     letterSpacing = (-3).sp,
                 )

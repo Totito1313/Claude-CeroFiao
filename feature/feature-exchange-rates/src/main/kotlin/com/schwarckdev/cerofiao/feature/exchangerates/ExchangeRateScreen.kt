@@ -39,6 +39,7 @@ import com.composables.icons.lucide.TrendingUp
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.core.designsystem.theme.RateColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.TransferGradient
 
@@ -52,6 +53,7 @@ fun ExchangeRateScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
 
     Column(
         modifier = modifier
@@ -92,8 +94,7 @@ fun ExchangeRateScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(38.dp),
-            color = colors.Foreground,
-            shadowElevation = 8.dp,
+            color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity)
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
@@ -177,7 +178,6 @@ private fun ExchangeRateCard(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
         color = colors.Background,
-        shadowElevation = 1.dp,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 17.dp, vertical = 9.dp),
