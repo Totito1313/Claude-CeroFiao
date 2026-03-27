@@ -201,7 +201,7 @@ fun CeroFiaoButtonGroup(
                             if (effectiveEnabled)
                                 Modifier.pressableFeedback(
                                     onClick = item.onClick,
-                                    variant = FeedbackVariant.Highlight,
+                                    variant = FeedbackVariant.ScaleHighlight,
                                 )
                             else
                                 Modifier.clickable(enabled = false, onClick = {})
