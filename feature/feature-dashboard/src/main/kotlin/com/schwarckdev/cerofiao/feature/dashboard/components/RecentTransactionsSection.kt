@@ -29,6 +29,7 @@ import com.composables.icons.lucide.Lucide
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.core.model.AccountType
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.feature.dashboard.EnrichedTransaction
@@ -64,6 +65,7 @@ private fun TransactionItem(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     val tx = enriched.transaction
     val dateFormat = SimpleDateFormat("MMM dd, hh:mm a", Locale.US)
     val dateText = dateFormat.format(Date(tx.date))
@@ -96,7 +98,7 @@ private fun TransactionItem(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(100.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

@@ -269,7 +269,14 @@ fun AdminSettingsScreen(
                 }
             }
 
-            // ═══ 10. Reset ═══
+            // ═══ 10. Component Overview ═══
+            item {
+                SectionTitle(title = "Componentes HeroUI")
+                Spacer(modifier = Modifier.height(8.dp))
+                ComponentOverviewSection()
+            }
+
+            // ═══ 11. Reset ═══
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
@@ -1065,7 +1072,7 @@ private fun ColorEditorSection(
 
                         group.tokens.forEach { token ->
                             val overriddenArgb = currentOverrides[token]
-                            val displayColor = if (overriddenArgb != null) Color(overriddenArgb.toULong()) else baseColors.getByName(token)
+                            val displayColor = if (overriddenArgb != null) Color(overriddenArgb.toInt()) else baseColors.getByName(token)
                             val isOverridden = overriddenArgb != null
 
                             ColorTokenRow(
@@ -1095,8 +1102,8 @@ private fun ColorEditorSection(
                         val def = DefaultGradients[gradientName] ?: return@forEach
                         val startKey = "${gradientName}_start"
                         val endKey = "${gradientName}_end"
-                        val startColor = colorOverrides.gradientOverrides[startKey]?.let { Color(it.toULong()) } ?: def.start
-                        val endColor = colorOverrides.gradientOverrides[endKey]?.let { Color(it.toULong()) } ?: def.end
+                        val startColor = colorOverrides.gradientOverrides[startKey]?.let { Color(it.toInt()) } ?: def.start
+                        val endColor = colorOverrides.gradientOverrides[endKey]?.let { Color(it.toInt()) } ?: def.end
                         val startOverridden = colorOverrides.gradientOverrides.containsKey(startKey)
                         val endOverridden = colorOverrides.gradientOverrides.containsKey(endKey)
 
@@ -1267,8 +1274,8 @@ private fun ColorPickerDialog(
         try {
             val hex = hexInput.removePrefix("#").trim()
             when (hex.length) {
-                6 -> Color(("FF$hex").toLong(16).toULong())
-                8 -> Color(hex.toLong(16).toULong())
+                6 -> Color(("FF$hex").toLong(16).toInt())
+                8 -> Color(hex.toLong(16).toInt())
                 else -> null
             }
         } catch (_: Exception) { null }

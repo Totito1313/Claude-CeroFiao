@@ -27,25 +27,44 @@ fun CeroFiaoTextField(
     singleLine: Boolean = true,
     minLines: Int = 1,
     enabled: Boolean = true,
-    variant: InputVariant = InputVariant.Primary,
+    displayVariant: InputDisplayVariant = InputDisplayVariant.Flat,
+    color: InputColor = InputColor.Default,
+    size: InputSize = InputSize.Md,
+    labelPlacement: InputLabelPlacement = InputLabelPlacement.Outside,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null
 ) {
     Column(modifier = modifier) {
-        if (label != null) {
+        if (label != null && labelPlacement == InputLabelPlacement.Outside) {
             CeroFiaoLabel(
                 text = label,
                 isRequired = isRequired,
-                modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                color = when (color) {
+                    InputColor.Default -> LabelColor.Default
+                    InputColor.Primary -> LabelColor.Primary
+                    InputColor.Success -> LabelColor.Success
+                    InputColor.Warning -> LabelColor.Warning
+                    InputColor.Danger -> LabelColor.Danger
+                },
+                size = when (size) {
+                    InputSize.Sm -> LabelSize.Sm
+                    InputSize.Md -> LabelSize.Md
+                    InputSize.Lg -> LabelSize.Lg
+                },
+                modifier = Modifier.padding(bottom = 6.dp, start = 4.dp),
             )
         }
 
         CeroFiaoInput(
             value = value,
             onValueChange = onValueChange,
-            variant = variant,
+            label = if (labelPlacement == InputLabelPlacement.Inside) label else null,
+            labelPlacement = labelPlacement,
+            displayVariant = displayVariant,
+            color = color,
+            size = size,
             placeholder = placeholder,
             singleLine = singleLine,
             minLines = minLines,

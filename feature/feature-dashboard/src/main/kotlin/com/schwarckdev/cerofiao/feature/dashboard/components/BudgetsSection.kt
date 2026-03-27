@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +33,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.feature.dashboard.BudgetWithSpending
 
 @Composable
@@ -72,6 +72,7 @@ private fun BudgetCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     val hasLimit = item.budget.limitAmount > 0
     val progress = if (hasLimit && item.budget.limitAmount > 0) {
         (item.spentAmount / item.budget.limitAmount).toFloat().coerceIn(0f, 1f)
@@ -82,7 +83,7 @@ private fun BudgetCard(
             .width(288.dp)
             .height(182.dp),
         shape = RoundedCornerShape(32.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Box {
             // Decorative blur circle
@@ -96,8 +97,8 @@ private fun BudgetCard(
                     )
                     .blur(30.dp)
                     .background(
-                        if (hasLimit) Color(0xFFCA98FF).copy(alpha = 0.2f)
-                        else Color(0xFF00FE66).copy(alpha = 0.1f),
+                        if (hasLimit) colors.AccentPurple.copy(alpha = 0.2f)
+                        else colors.AccentGreen.copy(alpha = 0.1f),
                         CircleShape
                     ),
             )
@@ -159,7 +160,7 @@ private fun BudgetCard(
                                 modifier = Modifier
                                     .fillMaxWidth(progress)
                                     .height(4.dp)
-                                    .background(Color(0xFFCA98FF), RoundedCornerShape(9999.dp)),
+                                    .background(colors.AccentPurple, RoundedCornerShape(9999.dp)),
                             )
                         }
                     }
@@ -184,13 +185,14 @@ private fun AddBudgetCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     Surface(
         onClick = onClick,
         modifier = modifier
             .width(288.dp)
             .height(182.dp),
         shape = RoundedCornerShape(32.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Column(
             modifier = Modifier.padding(24.dp),

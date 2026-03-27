@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.TrendingUp
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.core.designsystem.theme.RateColors
 import com.schwarckdev.cerofiao.core.model.ExchangeRate
 import sh.calvin.reorderable.ReorderableItem
@@ -63,6 +64,7 @@ fun ExchangeRatesSection(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     val prefs = remember { context.getSharedPreferences("dashboard_prefs", Context.MODE_PRIVATE) }
@@ -115,7 +117,7 @@ fun ExchangeRatesSection(
         Spacer(Modifier.height(16.dp))
         Surface(
             shape = RoundedCornerShape(34.dp),
-            color = colors.Foreground,
+            color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -171,10 +173,11 @@ private fun ExchangeRateCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        color = colors.Background,
+        color = colors.Background.copy(alpha = cardConfig.backgroundOpacity),
         shadowElevation = 0.dp,
     ) {
         Column(

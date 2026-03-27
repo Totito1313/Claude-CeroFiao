@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 
 @Composable
 fun QuickActionsCard(
@@ -30,10 +31,11 @@ fun QuickActionsCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(50.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Box {
             Row(

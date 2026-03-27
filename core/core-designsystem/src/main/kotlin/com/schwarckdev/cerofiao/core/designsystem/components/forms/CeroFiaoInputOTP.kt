@@ -37,13 +37,14 @@ fun CeroFiaoInputOTP(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
+    autoFocus: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 ) {
     val t = CeroFiaoDesign.colors
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) runCatching { focusRequester.requestFocus() }
     }
 
     Box(modifier = modifier) {

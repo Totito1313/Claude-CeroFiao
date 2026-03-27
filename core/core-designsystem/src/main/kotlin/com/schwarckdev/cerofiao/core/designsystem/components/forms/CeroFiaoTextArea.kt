@@ -30,7 +30,7 @@ fun CeroFiaoTextArea(
     maxLines: Int = Int.MAX_VALUE,
     maxLength: Int? = null,
     enabled: Boolean = true,
-    variant: InputVariant = InputVariant.Primary
+    displayVariant: InputDisplayVariant = InputDisplayVariant.Flat
 ) {
     val effectiveOnValueChange: (String) -> Unit = if (maxLength != null) {
         { newValue -> if (newValue.length <= maxLength) onValueChange(newValue) }
@@ -50,7 +50,7 @@ fun CeroFiaoTextArea(
         CeroFiaoInput(
             value = value,
             onValueChange = effectiveOnValueChange,
-            variant = variant,
+            displayVariant = displayVariant,
             placeholder = placeholder,
             singleLine = false,
             minLines = minLines,

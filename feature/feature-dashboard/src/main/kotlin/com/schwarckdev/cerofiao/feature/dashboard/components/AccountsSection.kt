@@ -34,6 +34,7 @@ import com.composables.icons.lucide.Wallet
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.core.model.AccountBalance
 import com.schwarckdev.cerofiao.core.model.AccountType
 
@@ -78,6 +79,7 @@ private fun AccountCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     val account = accountBalance.account
     val currencySymbol = when (account.currencyCode) {
         "USD" -> "$"
@@ -126,7 +128,7 @@ private fun AccountCard(
             .width(200.dp)
             .height(124.dp),
         shape = RoundedCornerShape(32.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Column(
             modifier = Modifier
@@ -259,13 +261,14 @@ private fun AddAccountCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     Surface(
         onClick = onClick,
         modifier = modifier
             .width(200.dp)
             .height(124.dp),
         shape = RoundedCornerShape(32.dp),
-        color = colors.Foreground,
+        color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
     ) {
         Column(
             modifier = Modifier

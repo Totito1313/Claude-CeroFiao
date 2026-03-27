@@ -158,7 +158,7 @@ data class CeroFiaoColors(
         if (overrides.isEmpty()) return this
         var result = this
         overrides.forEach { (name, argb) ->
-            val color = Color(argb.toULong())
+            val color = Color(argb.toInt())
             result = result.overrideToken(name, color)
         }
         return result
@@ -393,7 +393,7 @@ val TransferBlue: Color = Color(0xFF8E8E93)
 object CeroFiaoShapes {
     val CardRadius = 20.dp
     val SmallCardRadius = 16.dp
-    val ButtonRadius = 25.dp
+    val ButtonRadius = 24.dp
     val ChipRadius = 16.dp
     val BottomSheetRadius = 28.dp
     val IconRadius = 14.dp
@@ -422,8 +422,8 @@ val DefaultGradients = mapOf(
 /** Build a gradient with optional overrides */
 fun buildGradient(name: String, overrides: Map<String, Long> = emptyMap()): Brush {
     val def = DefaultGradients[name] ?: return BrandGradient
-    val start = overrides["${name}_start"]?.let { Color(it.toULong()) } ?: def.start
-    val end = overrides["${name}_end"]?.let { Color(it.toULong()) } ?: def.end
+    val start = overrides["${name}_start"]?.let { Color(it.toInt()) } ?: def.start
+    val end = overrides["${name}_end"]?.let { Color(it.toInt()) } ?: def.end
     return if (def.isHorizontal) Brush.horizontalGradient(listOf(start, end))
     else Brush.linearGradient(listOf(start, end))
 }

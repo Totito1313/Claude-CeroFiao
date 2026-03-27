@@ -28,16 +28,8 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.ShoppingBag
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
+import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.feature.dashboard.CategoryExpense
-
-private val categoryColorPalette = listOf(
-    Color(0xFFA855F7), // purple
-    Color(0xFF3B82F6), // blue
-    Color(0xFFEF4444), // red
-    Color(0xFFF97316), // orange
-    Color(0xFF22C55E), // green
-    Color(0xFF06B6D4), // cyan
-)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -48,12 +40,21 @@ fun CategoriesSection(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
+    val categoryColorPalette = listOf(
+        colors.AccentPurple,
+        colors.AccentBlue,
+        colors.AccentRed,
+        colors.AccentOrange,
+        colors.AccentGreen,
+        colors.AccentUser,
+    )
     Column(modifier = modifier) {
         SectionHeader(title = "Categorias", onViewAll = onViewAll)
         Spacer(Modifier.height(16.dp))
         Surface(
             shape = RoundedCornerShape(48.dp),
-            color = colors.Foreground,
+            color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
         ) {
             FlowRow(
                 modifier = Modifier
@@ -85,10 +86,11 @@ private fun CategorySpendCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
+    val cardConfig = LocalCardConfig.current
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        color = colors.Background,
+        color = colors.Background.copy(alpha = cardConfig.backgroundOpacity),
         shadowElevation = 1.dp,
     ) {
         Column(

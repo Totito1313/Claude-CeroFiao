@@ -3,8 +3,6 @@ package com.schwarckdev.cerofiao.core.designsystem.components.buttons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,8 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,10 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.schwarckdev.cerofiao.core.designsystem.components.utilities.FeedbackVariant
 import com.schwarckdev.cerofiao.core.designsystem.components.utilities.pressableFeedback
-import com.schwarckdev.cerofiao.core.designsystem.theme.BrandGradient
+import com.schwarckdev.cerofiao.core.designsystem.theme.DangerGradient
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoShapes
-import com.schwarckdev.cerofiao.core.designsystem.theme.DangerGradient
 
 enum class ButtonVariant {
     Primary,
@@ -58,7 +53,7 @@ enum class ButtonSize {
 
 /**
  * CeroFiao unified button — 7 variants, 3 sizes, icon-only mode, loading state.
- * Replaces HeroUI's Button component + existing CeroFiaoButton and CeroFiaoPrimaryButton.
+ * Sizes and padding match HeroUI Figma Kit V3 specs.
  */
 @Composable
 fun CeroFiaoButton(
@@ -77,22 +72,25 @@ fun CeroFiaoButton(
 ) {
     val t = CeroFiaoDesign.colors
 
+    // Figma: Primary=40px, Small=36px (ButtonGroup), Large=56px
     val height = when (size) {
         ButtonSize.Small -> 36.dp
-        ButtonSize.Medium -> 48.dp
+        ButtonSize.Medium -> 40.dp
         ButtonSize.Large -> 56.dp
     }
 
+    // Figma: Primary=16sp medium, Small=14sp medium, Large=18sp medium
     val fontSize = when (size) {
-        ButtonSize.Small -> 13.sp
-        ButtonSize.Medium -> 15.sp
-        ButtonSize.Large -> 17.sp
+        ButtonSize.Small -> 14.sp
+        ButtonSize.Medium -> 16.sp
+        ButtonSize.Large -> 18.sp
     }
 
+    // Figma: icon 16px for all button sizes
     val iconSize = when (size) {
         ButtonSize.Small -> 16.dp
-        ButtonSize.Medium -> 18.dp
-        ButtonSize.Large -> 22.dp
+        ButtonSize.Medium -> 16.dp
+        ButtonSize.Large -> 18.dp
     }
 
     val isIconOnly = text == null && icon != null && content == null
@@ -103,22 +101,21 @@ fun CeroFiaoButton(
         RoundedCornerShape(CeroFiaoShapes.ButtonRadius)
     }
 
+    // Figma: padding 8px vertical / 16px horizontal for Medium
     val effectivePadding = contentPadding ?: if (isIconOnly) {
         PaddingValues(0.dp)
     } else {
         when (size) {
             ButtonSize.Small -> PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ButtonSize.Medium -> PaddingValues(horizontal = 24.dp, vertical = 14.dp)
-            ButtonSize.Large -> PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+            ButtonSize.Medium -> PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ButtonSize.Large -> PaddingValues(horizontal = 24.dp, vertical = 12.dp)
         }
     }
 
     val disabledBrush = Brush.linearGradient(listOf(t.SurfaceVariant, t.SurfaceVariant))
 
+    // Figma: Primary uses solid Primary color (not gradient)
     val backgroundModifier = when (variant) {
-        ButtonVariant.Primary -> Modifier.background(
-            if (enabled) BrandGradient else disabledBrush
-        )
         ButtonVariant.Danger -> Modifier.background(
             if (enabled) DangerGradient else disabledBrush
         )
@@ -129,7 +126,8 @@ fun CeroFiaoButton(
     }
 
     val contentColor = when (variant) {
-        ButtonVariant.Primary, ButtonVariant.Danger -> if (enabled) Color.White else t.InactiveColor
+        ButtonVariant.Primary -> if (enabled) t.OnPrimary else t.InactiveColor
+        ButtonVariant.Danger -> if (enabled) Color.White else t.InactiveColor
         ButtonVariant.Secondary -> if (enabled) t.TextPrimary else t.InactiveColor
         ButtonVariant.Tertiary -> if (enabled) t.TextSecondary else t.InactiveColor
         ButtonVariant.Outline -> if (enabled) t.TextPrimary else t.InactiveColor
@@ -138,9 +136,10 @@ fun CeroFiaoButton(
     }
 
     val surfaceColor = when (variant) {
+        ButtonVariant.Primary -> if (enabled) t.Primary else t.SurfaceVariant
         ButtonVariant.Secondary -> if (enabled) t.Surface else t.Surface.copy(alpha = 0.02f)
         ButtonVariant.Tertiary -> if (enabled) t.SurfaceVariant else t.SurfaceVariant.copy(alpha = 0.5f)
-        ButtonVariant.Ghost, ButtonVariant.Primary, ButtonVariant.Danger -> Color.Transparent
+        ButtonVariant.Ghost, ButtonVariant.Danger -> Color.Transparent
         ButtonVariant.Outline -> Color.Transparent
         ButtonVariant.DangerSoft -> Color.Transparent
     }
@@ -205,7 +204,12 @@ fun CeroFiaoButton(
                             text = text,
                             color = contentColor,
                             fontSize = fontSize,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = when (size) {
+                                ButtonSize.Small -> 20.sp
+                                ButtonSize.Medium -> 24.sp
+                                ButtonSize.Large -> 28.sp
+                            },
                         )
                     }
                 }
