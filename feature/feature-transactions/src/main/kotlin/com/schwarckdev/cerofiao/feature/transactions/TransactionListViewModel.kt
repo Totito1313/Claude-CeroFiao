@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
+import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.DeleteTransactionUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
@@ -19,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -60,8 +64,21 @@ data class TransactionListUiState(
     val totalExpenseUsd: Double = 0.0,
     val monthOverMonthPercent: Double? = null,
     val categories: List<Category> = emptyList(),
-    // Keep flat list for compatibility
     val transactions: List<Transaction> = emptyList(),
+    // Display currency — resolved via ResolveExchangeRateUseCase triangulation
+    val displayCurrencyCode: String = "USD",
+    val displayFormatCode: String = "USD",
+    val displaySymbol: String = "$",
+    val displayLabel: String = "USD",
+    val displayRate: Double = 1.0,
+)
+
+private data class DisplayCurrencySettings(
+    val code: String = "USD",
+    val formatCode: String = "USD",
+    val symbol: String = "$",
+    val label: String = "USD",
+    val rate: Double = 1.0,
 )
 
 @HiltViewModel
@@ -70,17 +87,22 @@ class TransactionListViewModel @Inject constructor(
     getAccountsUseCase: GetAccountsUseCase,
     getCategoriesUseCase: GetCategoriesUseCase,
     private val transactionRepository: TransactionRepository,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val categoryRepository: CategoryRepository,
+    private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val filters = MutableStateFlow(Filters())
+    private val _displayCurrency = MutableStateFlow(DisplayCurrencySettings())
 
     val uiState: StateFlow<TransactionListUiState> = combine(
         getTransactionsUseCase(),
         getAccountsUseCase(),
         getCategoriesUseCase(),
         filters,
-    ) { transactions, accounts, allCategories, filter ->
+        _displayCurrency,
+    ) { transactions, accounts, allCategories, filter, displayCurrency ->
         val filtered = transactions.filter { tx ->
             val matchType = filter.typeFilter == null || tx.type == filter.typeFilter
             val matchAccount = filter.accountId == null || tx.accountId == filter.accountId
@@ -107,11 +129,16 @@ class TransactionListViewModel @Inject constructor(
             )
         }
 
-        // Group by date (day)
+        // Group by date, respecting sort order for group ordering
         val grouped = withCategories
             .groupBy { DateUtils.startOfDay(it.transaction.date) }
             .entries
-            .sortedByDescending { it.key }
+            .let { entries ->
+                when (filter.sortOrder) {
+                    SortOrder.DATE_ASC -> entries.sortedBy { it.key }
+                    else -> entries.sortedByDescending { it.key }
+                }
+            }
             .map { (dayMillis, txs) ->
                 val dayNet = txs.sumOf { twc ->
                     when (twc.transaction.type) {
@@ -140,9 +167,7 @@ class TransactionListViewModel @Inject constructor(
             .filter { it.type == TransactionType.EXPENSE }
             .sumOf { it.amountInUsd }
 
-        // Month-over-month percentage change
         val (curStart, curEnd) = DateUtils.getCurrentMonthRange()
-        // Previous month: go back 32 days from current month start, then get that month's range
         val prevMonthSomeDay = curStart - 32L * 24 * 60 * 60 * 1000
         val prevMonthStart = DateUtils.startOfMonth(prevMonthSomeDay)
         val prevMonthEnd = DateUtils.endOfMonth(prevMonthSomeDay)
@@ -175,6 +200,11 @@ class TransactionListViewModel @Inject constructor(
             monthOverMonthPercent = monthPercent,
             categories = allCategories,
             transactions = filtered,
+            displayCurrencyCode = displayCurrency.code,
+            displayFormatCode = displayCurrency.formatCode,
+            displaySymbol = displayCurrency.symbol,
+            displayLabel = displayCurrency.label,
+            displayRate = displayCurrency.rate,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -206,9 +236,52 @@ class TransactionListViewModel @Inject constructor(
         filters.update { it.copy(sortOrder = order) }
     }
 
+    /**
+     * Sets the display currency for the hero amounts using VES-intermediary triangulation.
+     *
+     * Uses [ResolveExchangeRateUseCase] which handles:
+     * - USD→VES rates from BCV official source
+     * - USD→VES rates from USDT parallel source
+     * - EUR→VES rates from BCV and EURI sources
+     * - Cross-currency via VES: e.g., USD→USDT = (USD→VES_bcv) × (VES→USD_usdt) ≈ 0.95
+     *
+     * This ensures that 100 USD ≠ 100 USDT (the parallel market premium is reflected).
+     */
+    fun setDisplayCurrency(code: String) {
+        viewModelScope.launch {
+            if (code == "USD") {
+                _displayCurrency.update {
+                    DisplayCurrencySettings("USD", "USD", "$", "USD", 1.0)
+                }
+                return@launch
+            }
+
+            val prefs = userPreferencesRepository.userPreferences.first()
+            val result = resolveExchangeRate.resolve("USD", code, prefs.preferredRateSource)
+
+            val (formatCode, symbol, label) = when (code) {
+                "VES" -> Triple("VES", "Bs.", "Bs")
+                "USDT" -> Triple("USDT", "₮", "USDT")
+                "EUR" -> Triple("EUR", "€", "EUR")
+                "EURI" -> Triple("EURI", "€", "EURI")
+                else -> Triple(code, code, code)
+            }
+
+            _displayCurrency.update {
+                DisplayCurrencySettings(
+                    code = code,
+                    formatCode = formatCode,
+                    symbol = symbol,
+                    label = label,
+                    rate = result.rate,
+                )
+            }
+        }
+    }
+
     fun deleteTransaction(transactionId: String) {
         viewModelScope.launch {
-            transactionRepository.deleteTransaction(transactionId)
+            deleteTransactionUseCase(transactionId)
         }
     }
 

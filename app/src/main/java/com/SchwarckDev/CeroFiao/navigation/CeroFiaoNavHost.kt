@@ -92,6 +92,14 @@ fun CeroFiaoNavHost(
             onTransactionClick = { transactionId ->
                 navController.navigateToTransactionDetail(transactionId)
             },
+            onNavigateToTransfer = { navController.navigateToTransfer() },
+            onNavigateToCategories = { navController.navigateToCategories() },
+            onNavigateToExchangeRates = { navController.navigateToExchangeRates() },
+            onNavigateToAccounts = { navController.navigateToAccountList() },
+            onNavigateToAddAccount = { navController.navigateToAddAccount() },
+            onNavigateToAccountDetail = { accountId -> navController.navigateToAccountDetail(accountId) },
+            onNavigateToBudgets = { navController.navigateToBudgetList() },
+            onNavigateToAddBudget = { navController.navigateToAddBudget() },
         )
 
         adminSettingsScreen(

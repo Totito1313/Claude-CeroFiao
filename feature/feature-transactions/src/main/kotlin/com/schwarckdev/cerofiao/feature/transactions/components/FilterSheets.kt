@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +25,8 @@ import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ArrowUp
 import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.Check
+import com.composables.icons.lucide.CircleCheck
+import com.composables.icons.lucide.Circle
 import com.composables.icons.lucide.CircleDollarSign
 import com.composables.icons.lucide.Lucide
 import com.schwarckdev.cerofiao.core.designsystem.components.overlays.CeroFiaoBottomSheet
@@ -37,8 +38,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.clip as clipShape
-import androidx.compose.ui.graphics.toArgb
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,14 +50,15 @@ fun AccountFilterSheet(
     val colors = CeroFiaoDesign.colors
 
     CeroFiaoBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+            // Subtle header matching design
             Text(
-                text = "Filtrar por cuenta",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.TextPrimary,
+                text = "Cuentas",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.TextSecondary,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             )
-            Spacer(Modifier.height(16.dp))
 
             // "All" option
             SheetOption(
@@ -81,7 +81,7 @@ fun AccountFilterSheet(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
@@ -96,14 +96,14 @@ fun SortOrderSheet(
     val colors = CeroFiaoDesign.colors
 
     CeroFiaoBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
             Text(
                 text = "Ordenar por",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.TextPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.TextSecondary,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             )
-            Spacer(Modifier.height(16.dp))
 
             SortOrder.entries.forEach { order ->
                 val (label, icon) = when (order) {
@@ -130,7 +130,7 @@ fun SortOrderSheet(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
@@ -148,16 +148,16 @@ fun CategoryFilterSheet(
     CeroFiaoBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
             Text(
-                text = "Filtrar por categoría",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.TextPrimary,
+                text = "Categoría",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.TextSecondary,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             )
-            Spacer(Modifier.height(16.dp))
 
             SheetOption(
                 label = "Todas las categorías",
@@ -200,7 +200,7 @@ fun CategoryFilterSheet(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
@@ -218,9 +218,9 @@ private fun SheetOption(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 14.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -234,13 +234,12 @@ private fun SheetOption(
             color = if (isSelected) colors.Primary else colors.TextPrimary,
             modifier = Modifier.weight(1f),
         )
-        if (isSelected) {
-            Icon(
-                imageVector = Lucide.Check,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = colors.Primary,
-            )
-        }
+        // Circle check / empty circle
+        Icon(
+            imageVector = if (isSelected) Lucide.CircleCheck else Lucide.Circle,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = if (isSelected) colors.Primary else colors.CardBorder,
+        )
     }
 }

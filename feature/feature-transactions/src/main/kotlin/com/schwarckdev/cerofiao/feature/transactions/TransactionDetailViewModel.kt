@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
+import com.schwarckdev.cerofiao.core.domain.usecase.DeleteTransactionUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.Transaction
@@ -38,6 +39,7 @@ class TransactionDetailViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<TransactionDetailRoute>()
@@ -81,7 +83,7 @@ class TransactionDetailViewModel @Inject constructor(
 
     fun deleteTransaction() {
         viewModelScope.launch {
-            transactionRepository.deleteTransaction(transactionId)
+            deleteTransactionUseCase(transactionId)
         }
     }
 }

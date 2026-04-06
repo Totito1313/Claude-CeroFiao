@@ -1,9 +1,11 @@
 package com.schwarckdev.cerofiao.feature.transactions.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,21 +36,24 @@ fun TransactionFilterChips(
     onSortClick: () -> Unit,
     onCategoryClick: () -> Unit,
     modifier: Modifier = Modifier,
+    accountsDropdownContent: @Composable BoxScope.() -> Unit = {},
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        FilterChipItem(
-            label = "Cuentas",
-            icon = Lucide.Wallet,
-            isActive = hasAccountFilter,
-            onClick = onAccountsClick,
-        )
+        Box {
+            FilterChipItem(
+                label = "Cuentas",
+                icon = Lucide.Wallet,
+                isActive = hasAccountFilter,
+                onClick = onAccountsClick,
+            )
+            accountsDropdownContent()
+        }
         FilterChipItem(
             label = "Ordenar",
             icon = Lucide.ArrowUpDown,
-            isActive = false,
             onClick = onSortClick,
         )
         FilterChipItem(
@@ -64,28 +69,25 @@ fun TransactionFilterChips(
 private fun FilterChipItem(
     label: String,
     icon: ImageVector,
-    isActive: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isActive: Boolean = false,
 ) {
-    val colors = CeroFiaoDesign.colors
     val haptic = LocalHapticFeedback.current
-    val bgColor = if (isActive) colors.Primary.copy(alpha = 0.12f) else colors.Surface
-    val contentColor = if (isActive) colors.Primary else colors.TextSecondary
-    val border = if (isActive) null else BorderStroke(1.dp, colors.CardBorder)
+    val colors = CeroFiaoDesign.colors
+    val contentColor = if (isActive) colors.Primary else colors.TextPrimary
 
     Surface(
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onClick()
         },
-        modifier = modifier,
-        shape = RoundedCornerShape(100.dp),
-        color = bgColor,
-        border = border,
+        modifier = modifier.height(36.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = if (isActive) colors.Primary.copy(alpha = 0.12f) else colors.SurfaceVariant,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -98,7 +100,7 @@ private fun FilterChipItem(
             Text(
                 text = label,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                 color = contentColor,
             )
         }

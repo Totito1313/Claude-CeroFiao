@@ -46,6 +46,9 @@ interface TransactionDao {
         endDate: Long,
     ): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId AND isDeleted = 0 ORDER BY date DESC LIMIT 1")
+    suspend fun getLastTransactionForAccount(accountId: String): TransactionEntity?
+
     @Query("SELECT * FROM transactions WHERE id = :id AND isDeleted = 0")
     fun getTransactionById(id: String): Flow<TransactionEntity?>
 

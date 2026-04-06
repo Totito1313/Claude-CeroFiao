@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import java.text.SimpleDateFormat
@@ -20,6 +21,7 @@ import java.util.Locale
 @Composable
 fun TransactionDateHeader(
     dateMillis: Long,
+    dayNetUsd: Double = 0.0,
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
@@ -29,19 +31,29 @@ fun TransactionDateHeader(
     val isToday = DateUtils.isToday(dateMillis)
     val displayDate = if (isToday) "Hoy" else dateText
 
+    val textColor = colors.TextSecondary.copy(alpha = 0.5f)
+
+    val amountPrefix = if (dayNetUsd >= 0) "" else "-"
+    val formattedAmount = "$amountPrefix${CurrencyFormatter.format(kotlin.math.abs(dayNetUsd), "USD")}"
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.Start,
+            .padding(vertical = 4.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = displayDate,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = colors.TextSecondary,
-            letterSpacing = (-0.2).sp,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = textColor,
+        )
+        Text(
+            text = formattedAmount,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = textColor,
         )
     }
 }

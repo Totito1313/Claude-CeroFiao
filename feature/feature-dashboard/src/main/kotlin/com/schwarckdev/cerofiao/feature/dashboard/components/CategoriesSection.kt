@@ -53,13 +53,13 @@ fun CategoriesSection(
         SectionHeader(title = "Categorias", onViewAll = onViewAll)
         Spacer(Modifier.height(16.dp))
         Surface(
-            shape = RoundedCornerShape(48.dp),
+            shape = RoundedCornerShape(34.dp),
             color = colors.Foreground.copy(alpha = cardConfig.backgroundOpacity),
         ) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 22.dp),
+                    .padding(horizontal = 10.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(11.dp),
                 maxItemsInEachRow = 2,
@@ -99,7 +99,7 @@ private fun CategorySpendCard(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
         color = colors.Background.copy(alpha = cardConfig.backgroundOpacity),
-        shadowElevation = 1.dp,
+
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 17.dp, vertical = 9.dp),

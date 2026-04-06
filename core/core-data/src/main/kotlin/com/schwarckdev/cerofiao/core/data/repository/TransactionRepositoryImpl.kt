@@ -65,6 +65,9 @@ class TransactionRepositoryImpl @Inject constructor(
     override suspend fun getTransactionByIdOnce(id: String): Transaction? =
         transactionDao.getTransactionByIdOnce(id)?.toModel()
 
+    override suspend fun getLastTransactionForAccount(accountId: String): Transaction? =
+        transactionDao.getLastTransactionForAccount(accountId)?.toModel()
+
     override suspend fun insertTransaction(transaction: Transaction) {
         transactionDao.insert(transaction.toEntity())
         logTransaction(transaction, TransactionLogAction.CREATED)

@@ -44,12 +44,14 @@ CeroFiao is a multi-currency expense tracking Android app for Venezuela. Support
 - **Smart casts:** Use local variables for nullable properties from cross-module data classes (e.g., `val note = debt.note; if (!note.isNullOrBlank())`)
 
 ## Currencies & Exchange Rates
-- **Supported currencies:** USD, VES, USDT, EUR
+- **Supported currencies:** USD, VES, USDT, EUR, EURI
 - **Exchange rate sources (ExchangeRateSource enum):** BCV, PARALLEL, USDT, EURI, BINANCE_P2P, MANUAL
 - **API:** dolarapi.com — USD rates (`/v1/dolares`), EUR rates (`/v1/euros`), historical data
 - **Source mapping:** USD: "oficial" → BCV, "paralelo" → USDT; EUR: "oficial" → BCV, "paralelo" → EURI
 - **Dashboard shows:** BCV + USDT (Bs/USD) and BCV + EURI (Bs/EUR) banners
 - **Cache:** 4h TTL for exchange rates
+- **Triangulation:** All cross-currency conversions go through VES as intermediary. USD ≠ USDT, EUR ≠ EURI. Use `ResolveExchangeRateUseCase` for all conversions — never raw repository lookups. Full spec: `docs/SKILL_LOGICA_CAMBIARIA.md`
+- **Tests:** `./gradlew :feature:feature-transactions:testDebugUnitTest` — 17 tests covering triangulation logic
 
 ## Build System
 - AGP 9.1.0, Compile SDK 36, Min SDK 34, Target SDK 36

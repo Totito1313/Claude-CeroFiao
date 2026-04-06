@@ -37,6 +37,14 @@ fun DashboardScreen(
     onAddTransaction: () -> Unit,
     onViewAllTransactions: () -> Unit,
     onTransactionClick: (String) -> Unit,
+    onNavigateToTransfer: () -> Unit,
+    onNavigateToCategories: () -> Unit,
+    onNavigateToExchangeRates: () -> Unit,
+    onNavigateToAccounts: () -> Unit,
+    onNavigateToAddAccount: () -> Unit,
+    onNavigateToAccountDetail: (String) -> Unit,
+    onNavigateToBudgets: () -> Unit,
+    onNavigateToAddBudget: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
@@ -61,7 +69,7 @@ fun DashboardScreen(
             balanceVisible = balanceVisible,
             onToggleVisibility = { balanceVisible = !balanceVisible },
             onExpense = onAddTransaction,
-            onTransfer = { /* TODO: navigate to transfer */ },
+            onTransfer = onNavigateToTransfer,
             onIncome = onAddTransaction,
         )
 
@@ -74,9 +82,9 @@ fun DashboardScreen(
             Spacer(Modifier.height(16.dp))
             QuickActionsCard(
                 onAddTransaction = onAddTransaction,
-                onTransfer = { /* TODO */ },
-                onCategories = { /* TODO */ },
-                onExchangeRates = { /* TODO */ },
+                onTransfer = onNavigateToTransfer,
+                onCategories = onNavigateToCategories,
+                onExchangeRates = onNavigateToExchangeRates,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -88,7 +96,7 @@ fun DashboardScreen(
                 euriRate = uiState.euriRate,
                 bcvEurRate = uiState.bcvEurRate,
                 usdtRate = uiState.usdtRate,
-                onViewAll = { /* TODO: navigate to exchange rates */ },
+                onViewAll = onNavigateToExchangeRates,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -97,9 +105,9 @@ fun DashboardScreen(
             // Accounts
             AccountsSection(
                 accounts = uiState.globalBalance?.breakdownByAccount ?: emptyList(),
-                onViewAll = { /* TODO: navigate to accounts */ },
-                onAddAccount = { /* TODO */ },
-                onAccountClick = { /* TODO */ },
+                onViewAll = onNavigateToAccounts,
+                onAddAccount = onNavigateToAddAccount,
+                onAccountClick = { onNavigateToAccountDetail(it) },
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
             )
 
@@ -108,8 +116,8 @@ fun DashboardScreen(
             // Budgets
             BudgetsSection(
                 budgets = uiState.budgetsWithSpending,
-                onViewAll = { /* TODO */ },
-                onAddBudget = { /* TODO */ },
+                onViewAll = onNavigateToBudgets,
+                onAddBudget = onNavigateToAddBudget,
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
             )
 
@@ -119,7 +127,7 @@ fun DashboardScreen(
             CategoriesSection(
                 categories = uiState.topCategoryExpenses,
                 displayCurrencyCode = uiState.displayCurrencyCode,
-                onViewAll = { /* TODO */ },
+                onViewAll = onNavigateToCategories,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 

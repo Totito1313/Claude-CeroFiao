@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,7 +32,6 @@ import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
 import com.schwarckdev.cerofiao.core.model.AccountType
-import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.feature.transactions.TransactionWithCategory
 import java.text.SimpleDateFormat
@@ -84,24 +82,25 @@ fun TransactionItem(
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        color = Color.Transparent,
+        shape = RoundedCornerShape(100.dp),
+        color = colors.CardBackground,
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 10.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Category icon circle
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
-                    .background(iconColor.copy(alpha = 0.10f)),
+                    .background(colors.SurfaceVariant),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(16.dp),
                     tint = iconColor,
                 )
             }
@@ -112,7 +111,7 @@ fun TransactionItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = tx.note ?: item.categoryName,
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = colors.TextPrimary,
                     maxLines = 1,
@@ -120,7 +119,7 @@ fun TransactionItem(
                 )
                 Text(
                     text = dateText,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = colors.TextSecondary,
                 )
             }
@@ -133,14 +132,14 @@ fun TransactionItem(
                 if (tx.type == TransactionType.TRANSFER && tx.currencyCode != "USD") {
                     Text(
                         text = "${CurrencyFormatter.format(tx.amount, tx.currencyCode)} = ${CurrencyFormatter.format(tx.amountInUsd, "USD")}",
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.TextPrimary,
                     )
                 } else {
                     Text(
                         text = "$amountPrefix${CurrencyFormatter.format(tx.amount, tx.currencyCode)}",
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.TextPrimary,
                     )

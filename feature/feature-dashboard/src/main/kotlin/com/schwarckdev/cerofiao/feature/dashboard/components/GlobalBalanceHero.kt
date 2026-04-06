@@ -150,14 +150,14 @@ private fun GradientPillButton(
         Icon(
             imageVector = Lucide.Plus,
             contentDescription = null,
-            modifier = Modifier.size(8.dp),
-            tint = colors.TextPrimary,
+            modifier = Modifier.size(10.dp),
+            tint = colors.TextOnDark,
         )
         Text(
             text = label,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = colors.TextPrimary,
+            color = colors.TextOnDark,
         )
     }
 }

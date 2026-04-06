@@ -52,7 +52,7 @@ import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVa
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import com.schwarckdev.cerofiao.core.ui.EmptyState
-import com.schwarckdev.cerofiao.feature.transactions.components.AccountFilterSheet
+import com.schwarckdev.cerofiao.feature.transactions.components.AccountFilterDropdown
 import com.schwarckdev.cerofiao.feature.transactions.components.CategoryFilterSheet
 import com.schwarckdev.cerofiao.feature.transactions.components.SortOrderSheet
 import com.schwarckdev.cerofiao.feature.transactions.components.TransactionDateHeader
@@ -92,6 +92,12 @@ fun TransactionListScreen(
             totalExpenseUsd = uiState.totalExpenseUsd,
             selectedTypeFilter = uiState.selectedTypeFilter,
             monthOverMonthPercent = uiState.monthOverMonthPercent,
+            displayCurrencyCode = uiState.displayCurrencyCode,
+            displayFormatCode = uiState.displayFormatCode,
+            displaySymbol = uiState.displaySymbol,
+            displayLabel = uiState.displayLabel,
+            displayRate = uiState.displayRate,
+            onCurrencyChange = { viewModel.setDisplayCurrency(it) },
         )
 
         // Type filter tabs
@@ -113,9 +119,18 @@ fun TransactionListScreen(
             TransactionFilterChips(
                 hasAccountFilter = uiState.selectedAccountId != null,
                 hasCategoryFilter = uiState.selectedCategoryId != null,
-                onAccountsClick = { showAccountSheet = true },
+                onAccountsClick = { showAccountSheet = !showAccountSheet },
                 onSortClick = { showSortSheet = true },
                 onCategoryClick = { showCategorySheet = true },
+                accountsDropdownContent = {
+                    AccountFilterDropdown(
+                        expanded = showAccountSheet,
+                        accounts = uiState.accounts,
+                        selectedAccountId = uiState.selectedAccountId,
+                        onAccountSelected = { viewModel.setAccountFilter(it) },
+                        onDismiss = { showAccountSheet = false },
+                    )
+                },
             )
         }
 
@@ -152,10 +167,14 @@ fun TransactionListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     uiState.groupedTransactions.forEach { group ->
                         item(key = "header_${group.dateMillis}") {
-                            TransactionDateHeader(dateMillis = group.dateMillis)
+                            TransactionDateHeader(
+                                dateMillis = group.dateMillis,
+                                dayNetUsd = group.dayNetUsd,
+                            )
                         }
                         items(
                             items = group.transactions,
@@ -195,15 +214,6 @@ fun TransactionListScreen(
     }
 
     // Bottom sheets for filters
-    if (showAccountSheet) {
-        AccountFilterSheet(
-            accounts = uiState.accounts,
-            selectedAccountId = uiState.selectedAccountId,
-            onAccountSelected = { viewModel.setAccountFilter(it) },
-            onDismiss = { showAccountSheet = false },
-        )
-    }
-
     if (showSortSheet) {
         SortOrderSheet(
             currentOrder = uiState.sortOrder,
@@ -246,7 +256,7 @@ private fun SwipeableTransactionItem(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(100.dp))
                     .background(colors.ExpenseColor),
                 contentAlignment = Alignment.CenterEnd,
             ) {
@@ -271,12 +281,10 @@ private fun SwipeableTransactionItem(
             }
         },
     ) {
-        Box(modifier = Modifier.background(colors.Background)) {
-            TransactionItem(
-                item = item,
-                onClick = onClick,
-            )
-        }
+        TransactionItem(
+            item = item,
+            onClick = onClick,
+        )
     }
 }
 

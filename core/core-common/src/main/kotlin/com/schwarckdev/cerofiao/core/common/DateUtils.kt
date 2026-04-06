@@ -76,6 +76,18 @@ object DateUtils {
         }
     }
 
+    fun relativeDate(epochMillis: Long): String {
+        val today = Clock.System.now().toLocalDateTime(tz).date
+        val date = toLocalDate(epochMillis)
+        val daysDiff = today.toEpochDays() - date.toEpochDays()
+        return when {
+            daysDiff == 0 -> "Hoy"
+            daysDiff == 1 -> "Ayer"
+            daysDiff in 2..6 -> "Hace $daysDiff días"
+            else -> formatDisplayDate(epochMillis)
+        }
+    }
+
     fun getCurrentMonthRange(): Pair<Long, Long> {
         val now = now()
         return startOfMonth(now) to endOfMonth(now)

@@ -230,7 +230,7 @@ val LightCeroFiaoColors = CeroFiaoColors(
     
     TextPrimary = Color(0xFF000000),
     TextSecondary = Color(0xFF99999D),
-    TextOnDark = Color(0xFFFFFFFF),
+    TextOnDark = Color(0xFF000000),
     
     Foreground = Color(0xFFFCFCFF),
     GradientAccent = Color(0xFF00B8D4),
@@ -292,7 +292,7 @@ val DarkCeroFiaoColors = CeroFiaoColors(
     
     TextPrimary = Color(0xFFFFFFFF),
     TextSecondary = Color(0xFF9A9A9E),
-    TextOnDark = Color(0xFFFFFFFF),
+    TextOnDark = Color(0xFF000000),
     
     Foreground = Color(0xFF2E2E30),
     GradientAccent = Color(0xFF00E5FF),
@@ -405,7 +405,7 @@ val DangerGradient = Brush.linearGradient(listOf(Color(0xFFFF4433), Color(0xFFCC
 val SuccessGradient = Brush.linearGradient(listOf(Color(0xFF00FF66), Color(0xFF00CC52)))
 val ExpenseGradient = Brush.horizontalGradient(listOf(Color(0xFF8A2BE2), Color(0xFFFF6B00)))
 val TransferGradient = Brush.horizontalGradient(listOf(Color(0xFF66A1F3), Color(0xFF22C9A6)))
-val IncomeGradient = Brush.horizontalGradient(listOf(Color(0x8085F366), Color(0x8022C9A6)))
+val IncomeGradient = Brush.horizontalGradient(listOf(Color(0xFF85F366), Color(0xFF22C9A6)))
 
 /** Default gradient start/end colors for dynamic gradient building */
 data class GradientDef(val start: Color, val end: Color, val isHorizontal: Boolean)
@@ -416,7 +416,7 @@ val DefaultGradients = mapOf(
     "SuccessGradient" to GradientDef(Color(0xFF00FF66), Color(0xFF00CC52), false),
     "ExpenseGradient" to GradientDef(Color(0xFF8A2BE2), Color(0xFFFF6B00), true),
     "TransferGradient" to GradientDef(Color(0xFF66A1F3), Color(0xFF22C9A6), true),
-    "IncomeGradient" to GradientDef(Color(0x8085F366), Color(0x8022C9A6), true)
+    "IncomeGradient" to GradientDef(Color(0xFF85F366), Color(0xFF22C9A6), true)
 )
 
 /** Build a gradient with optional overrides */
