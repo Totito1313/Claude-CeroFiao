@@ -2,6 +2,7 @@ package com.schwarckdev.cerofiao.feature.accounts
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -49,8 +50,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -380,8 +385,12 @@ private fun CurrencyButtonGroup(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val colors = CeroFiaoDesign.colors
+    val density = LocalDensity.current
+    var anchorHeightPx by remember { mutableStateOf(0) }
+    val dropdownState = remember { MutableTransitionState(false) }
+    dropdownState.targetState = expanded
 
-    Box {
+    Box(modifier = Modifier.onSizeChanged { anchorHeightPx = it.height }) {
         CeroFiaoButtonGroup(
             items = listOf(
                 ButtonGroupItem(
@@ -400,78 +409,67 @@ private fun CurrencyButtonGroup(
             size = ButtonSize.Small,
         )
 
-        // OneUI-style dropdown (scale + fade, custom Surface)
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn(animationSpec = tween(durationMillis = 150)),
-            exit = fadeOut(animationSpec = tween(durationMillis = 100)),
-            modifier = Modifier.matchParentSize().zIndex(99f),
-        ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) { expanded = false },
-            )
-        }
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn(animationSpec = tween(durationMillis = 150)) +
-                scaleIn(
-                    initialScale = 0.5f,
-                    transformOrigin = TransformOrigin(0f, 0f),
-                    animationSpec = spring(
-                        dampingRatio = 0.7f,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
-                ),
-            exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
-                scaleOut(
-                    targetScale = 0.5f,
-                    transformOrigin = TransformOrigin(0f, 0f),
-                    animationSpec = tween(durationMillis = 100),
-                ),
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .zIndex(100f)
-                .padding(top = 4.dp),
-        ) {
-            Surface(
-                shape = RoundedCornerShape(26.dp),
-                color = colors.SurfaceVariant,
-                shadowElevation = 8.dp,
-                modifier = Modifier.width(220.dp),
+        // OneUI-style dropdown — Popup overlay (doesn't push layout)
+        if (dropdownState.currentState || dropdownState.targetState) {
+            Popup(
+                onDismissRequest = { expanded = false },
+                alignment = Alignment.TopStart,
+                offset = IntOffset(0, anchorHeightPx + with(density) { 4.dp.roundToPx() }),
+                properties = PopupProperties(focusable = true),
             ) {
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    ChartDisplayCurrency.entries.forEach { currency ->
-                        val isSelected = currency == selected
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onSelect(currency)
-                                    expanded = false
+                AnimatedVisibility(
+                    visibleState = dropdownState,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 150)) +
+                        scaleIn(
+                            initialScale = 0.5f,
+                            transformOrigin = TransformOrigin(0f, 0f),
+                            animationSpec = spring(
+                                dampingRatio = 0.7f,
+                                stiffness = Spring.StiffnessMediumLow,
+                            ),
+                        ),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
+                        scaleOut(
+                            targetScale = 0.5f,
+                            transformOrigin = TransformOrigin(0f, 0f),
+                            animationSpec = tween(durationMillis = 100),
+                        ),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(26.dp),
+                        color = colors.SurfaceVariant,
+                        shadowElevation = 8.dp,
+                        modifier = Modifier.width(220.dp),
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            ChartDisplayCurrency.entries.forEach { currency ->
+                                val isSelected = currency == selected
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onSelect(currency)
+                                            expanded = false
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(
+                                        text = "${currency.symbol}  ${currency.displayName}",
+                                        fontSize = 15.sp,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isSelected) colors.Primary else colors.TextPrimary,
+                                    )
+                                    if (currency.sourceLabel.isNotEmpty()) {
+                                        Text(
+                                            text = currency.sourceLabel,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = if (isSelected) colors.Primary.copy(alpha = 0.7f) else colors.TextSecondary,
+                                        )
+                                    }
                                 }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(
-                                text = "${currency.symbol}  ${currency.displayName}",
-                                fontSize = 15.sp,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) colors.Primary else colors.TextPrimary,
-                            )
-                            if (currency.sourceLabel.isNotEmpty()) {
-                                Text(
-                                    text = currency.sourceLabel,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (isSelected) colors.Primary.copy(alpha = 0.7f) else colors.TextSecondary,
-                                )
                             }
                         }
                     }
