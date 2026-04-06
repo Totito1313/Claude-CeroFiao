@@ -146,9 +146,11 @@ class TransactionListViewModel @Inject constructor(
             }
             .map { (dayMillis, txs) ->
                 val dayNet = txs.sumOf { twc ->
-                    when (twc.transaction.type) {
-                        TransactionType.INCOME -> twc.transaction.amountInUsd
-                        TransactionType.EXPENSE -> -twc.transaction.amountInUsd
+                    val tx = twc.transaction
+                    val amtUsd = rateTable.convert(tx.amount, tx.currencyCode, "USD")
+                    when (tx.type) {
+                        TransactionType.INCOME -> amtUsd
+                        TransactionType.EXPENSE -> -amtUsd
                         TransactionType.TRANSFER -> 0.0
                     }
                 }
@@ -165,12 +167,15 @@ class TransactionListViewModel @Inject constructor(
                 )
             }
 
+        // Use current RateTable to convert each transaction's original amount to USD,
+        // so the hero totals are consistent with the dashboard and account balances
+        // (which also use the current RateTable, not snapshot amountInUsd).
         val totalIncome = filtered
             .filter { it.type == TransactionType.INCOME }
-            .sumOf { it.amountInUsd }
+            .sumOf { rateTable.convert(it.amount, it.currencyCode, "USD") }
         val totalExpense = filtered
             .filter { it.type == TransactionType.EXPENSE }
-            .sumOf { it.amountInUsd }
+            .sumOf { rateTable.convert(it.amount, it.currencyCode, "USD") }
 
         val (curStart, curEnd) = DateUtils.getCurrentMonthRange()
         val prevMonthSomeDay = curStart - 32L * 24 * 60 * 60 * 1000
@@ -180,12 +185,12 @@ class TransactionListViewModel @Inject constructor(
         val currentMonthTotal = transactions
             .filter { it.date in curStart..curEnd }
             .filter { filter.typeFilter == null || it.type == filter.typeFilter }
-            .sumOf { it.amountInUsd }
+            .sumOf { rateTable.convert(it.amount, it.currencyCode, "USD") }
 
         val prevMonthTotal = transactions
             .filter { it.date in prevMonthStart..prevMonthEnd }
             .filter { filter.typeFilter == null || it.type == filter.typeFilter }
-            .sumOf { it.amountInUsd }
+            .sumOf { rateTable.convert(it.amount, it.currencyCode, "USD") }
 
         val monthPercent = if (prevMonthTotal > 0) {
             ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100.0
