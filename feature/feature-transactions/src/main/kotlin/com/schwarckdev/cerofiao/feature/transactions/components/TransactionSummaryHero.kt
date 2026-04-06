@@ -1,23 +1,30 @@
 package com.schwarckdev.cerofiao.feature.transactions.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,8 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.TrendingDown
@@ -155,7 +164,7 @@ fun TransactionSummaryHero(
 
         Spacer(Modifier.height(8.dp))
 
-        // Currency switcher — CeroFiaoButtonGroup (matches accounts donut chart style)
+        // Currency switcher — ButtonGroup trigger + OneUI dropdown
         val selected = displayOptions.first { it.code == displayCurrencyCode }
         Box {
             CeroFiaoButtonGroup(
@@ -176,38 +185,82 @@ fun TransactionSummaryHero(
                 size = ButtonSize.Small,
             )
 
-            DropdownMenu(
-                expanded = showCurrencyMenu,
-                onDismissRequest = { showCurrencyMenu = false },
+            // OneUI-style dropdown (scale + fade, custom Surface, no Material3 DropdownMenu)
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showCurrencyMenu,
+                enter = fadeIn(animationSpec = tween(durationMillis = 150)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                modifier = Modifier.matchParentSize().zIndex(99f),
             ) {
-                displayOptions.forEach { option ->
-                    DropdownMenuItem(
-                        text = {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { showCurrencyMenu = false },
+                )
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showCurrencyMenu,
+                enter = fadeIn(animationSpec = tween(durationMillis = 150)) +
+                    scaleIn(
+                        initialScale = 0.5f,
+                        transformOrigin = TransformOrigin(0.5f, 0f),
+                        animationSpec = spring(
+                            dampingRatio = 0.7f,
+                            stiffness = Spring.StiffnessMediumLow,
+                        ),
+                    ),
+                exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
+                    scaleOut(
+                        targetScale = 0.5f,
+                        transformOrigin = TransformOrigin(0.5f, 0f),
+                        animationSpec = tween(durationMillis = 100),
+                    ),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(100f)
+                    .padding(top = 4.dp),
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(26.dp),
+                    color = colors.SurfaceVariant,
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.width(220.dp),
+                ) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        displayOptions.forEach { option ->
+                            val isSelected = option.code == displayCurrencyCode
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onCurrencyChange(option.code)
+                                        showCurrencyMenu = false
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(
                                     text = "${option.symbol}  ${option.label}",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = colors.TextPrimary,
+                                    fontSize = 15.sp,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (isSelected) colors.Primary else colors.TextPrimary,
                                 )
                                 if (option.sourceLabel.isNotEmpty()) {
                                     Text(
                                         text = option.sourceLabel,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = colors.Primary,
+                                        color = if (isSelected) colors.Primary.copy(alpha = 0.7f) else colors.TextSecondary,
                                     )
                                 }
                             }
-                        },
-                        onClick = {
-                            onCurrencyChange(option.code)
-                            showCurrencyMenu = false
-                        },
-                    )
+                        }
+                    }
                 }
             }
         }

@@ -2,13 +2,19 @@ package com.schwarckdev.cerofiao.feature.accounts
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +26,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,8 +47,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -89,7 +96,6 @@ fun AccountListScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.Background)
             .statusBarsPadding()
             .padding(top = 70.dp, start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -373,6 +379,7 @@ private fun CurrencyButtonGroup(
     onSelect: (ChartDisplayCurrency) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val colors = CeroFiaoDesign.colors
 
     Box {
         CeroFiaoButtonGroup(
@@ -393,38 +400,82 @@ private fun CurrencyButtonGroup(
             size = ButtonSize.Small,
         )
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
+        // OneUI-style dropdown (scale + fade, custom Surface)
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn(animationSpec = tween(durationMillis = 150)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+            modifier = Modifier.matchParentSize().zIndex(99f),
         ) {
-            ChartDisplayCurrency.entries.forEach { currency ->
-                DropdownMenuItem(
-                    text = {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { expanded = false },
+            )
+        }
+
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn(animationSpec = tween(durationMillis = 150)) +
+                scaleIn(
+                    initialScale = 0.5f,
+                    transformOrigin = TransformOrigin(0f, 0f),
+                    animationSpec = spring(
+                        dampingRatio = 0.7f,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                ),
+            exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
+                scaleOut(
+                    targetScale = 0.5f,
+                    transformOrigin = TransformOrigin(0f, 0f),
+                    animationSpec = tween(durationMillis = 100),
+                ),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .zIndex(100f)
+                .padding(top = 4.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(26.dp),
+                color = colors.SurfaceVariant,
+                shadowElevation = 8.dp,
+                modifier = Modifier.width(220.dp),
+            ) {
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    ChartDisplayCurrency.entries.forEach { currency ->
+                        val isSelected = currency == selected
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelect(currency)
+                                    expanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
                                 text = "${currency.symbol}  ${currency.displayName}",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = CeroFiaoDesign.colors.TextPrimary,
+                                fontSize = 15.sp,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) colors.Primary else colors.TextPrimary,
                             )
                             if (currency.sourceLabel.isNotEmpty()) {
                                 Text(
                                     text = currency.sourceLabel,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = CeroFiaoDesign.colors.Primary,
+                                    color = if (isSelected) colors.Primary.copy(alpha = 0.7f) else colors.TextSecondary,
                                 )
                             }
                         }
-                    },
-                    onClick = {
-                        onSelect(currency)
-                        expanded = false
-                    },
-                )
+                    }
+                }
             }
         }
     }
