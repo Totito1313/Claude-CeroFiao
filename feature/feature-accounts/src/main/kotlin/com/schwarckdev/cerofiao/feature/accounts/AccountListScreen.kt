@@ -52,6 +52,7 @@ import com.composables.icons.lucide.Banknote
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.Landmark
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.ChartPie
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Wallet
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
@@ -94,23 +95,21 @@ fun AccountListScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // ── Section: Repartición por cuentas ──
-        if (uiState.pieSlices.isNotEmpty()) {
-            item {
-                SectionHeader(
-                    title = "Repartición por cuentas",
-                    titleFontSize = 18,
-                    actionText = "Ver más",
-                )
-            }
+        item {
+            SectionHeader(
+                title = "Repartición por cuentas",
+                titleFontSize = 18,
+                actionText = if (uiState.pieSlices.isNotEmpty()) "Ver más" else null,
+            )
+        }
 
-            item {
-                PieChartCard(
-                    slices = uiState.pieSlices,
-                    totalConverted = uiState.totalConverted,
-                    displayCurrency = uiState.displayCurrency,
-                    onCurrencyChange = viewModel::setChartCurrency,
-                )
-            }
+        item {
+            PieChartCard(
+                slices = uiState.pieSlices,
+                totalConverted = uiState.totalConverted,
+                displayCurrency = uiState.displayCurrency,
+                onCurrencyChange = viewModel::setChartCurrency,
+            )
         }
 
         // ── Section: Cuentas header ──
@@ -289,45 +288,76 @@ private fun PieChartCard(
                     onSelect = onCurrencyChange,
                 )
 
-                // Pencil: fontSize 12, fontWeight normal, fill #000000cc
-                AnimatedContent(
-                    targetState = CurrencyFormatter.format(totalConverted, displayCurrency),
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "total",
-                ) { formattedTotal ->
-                    Text(
-                        text = "Total: $formattedTotal",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = colors.TextPrimary.copy(alpha = 0.8f),
-                    )
+                if (slices.isNotEmpty()) {
+                    // Pencil: fontSize 12, fontWeight normal, fill #000000cc
+                    AnimatedContent(
+                        targetState = CurrencyFormatter.format(totalConverted, displayCurrency),
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "total",
+                    ) { formattedTotal ->
+                        Text(
+                            text = "Total: $formattedTotal",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = colors.TextPrimary.copy(alpha = 0.8f),
+                        )
+                    }
                 }
             }
 
-            // Chart + Legend — Pencil: gap 16
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // Pencil: 130x130 chart
-                DonutChart(
-                    slices = slices,
-                    modifier = Modifier.size(130.dp),
-                )
-
-                // Legend — Pencil: gap 8
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+            if (slices.isNotEmpty()) {
+                // Chart + Legend — Pencil: gap 16
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    slices.forEach { slice ->
-                        PieLegendItem(
-                            name = slice.accountName,
-                            amount = CurrencyFormatter.format(slice.balanceConverted, displayCurrency),
-                            color = slice.color,
-                        )
+                    // Pencil: 130x130 chart
+                    DonutChart(
+                        slices = slices,
+                        modifier = Modifier.size(130.dp),
+                    )
+
+                    // Legend — Pencil: gap 8
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        slices.forEach { slice ->
+                            PieLegendItem(
+                                name = slice.accountName,
+                                amount = CurrencyFormatter.format(slice.balanceConverted, displayCurrency),
+                                color = slice.color,
+                            )
+                        }
                     }
+                }
+            } else {
+                // Empty state — chart area
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        Lucide.ChartPie,
+                        contentDescription = null,
+                        tint = colors.TextPrimary.copy(alpha = 0.15f),
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Sin datos para graficar",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.TextPrimary.copy(alpha = 0.4f),
+                    )
+                    Text(
+                        "Agrega cuentas con saldo para ver la distribución",
+                        fontSize = 12.sp,
+                        color = colors.TextPrimary.copy(alpha = 0.25f),
+                    )
                 }
             }
         }

@@ -36,6 +36,9 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.TrendingDown
 import com.composables.icons.lucide.TrendingUp
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.designsystem.components.buttons.ButtonGroupItem
+import com.schwarckdev.cerofiao.core.designsystem.components.buttons.ButtonSize
+import com.schwarckdev.cerofiao.core.designsystem.components.buttons.CeroFiaoButtonGroup
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import kotlin.math.abs
@@ -47,15 +50,17 @@ private data class HeroData(
 
 private data class DisplayOption(
     val code: String,
+    val symbol: String,
     val label: String,
+    val sourceLabel: String,
 )
 
 private val displayOptions = listOf(
-    DisplayOption("USD", "USD"),
-    DisplayOption("VES", "Bs"),
-    DisplayOption("USDT", "USDT"),
-    DisplayOption("EUR", "EUR"),
-    DisplayOption("EURI", "EURI"),
+    DisplayOption("USD", "$", "Dolar", "BCV"),
+    DisplayOption("VES", "Bs", "Bolívares", ""),
+    DisplayOption("USDT", "\u20AE", "USDT", "Paralelo"),
+    DisplayOption("EUR", "\u20AC", "Euro", "BCV"),
+    DisplayOption("EURI", "\u20AC", "EURI", "Paralelo"),
 )
 
 @Composable
@@ -119,19 +124,30 @@ fun TransactionSummaryHero(
             },
             label = "heroAmount",
         ) { (_, amount, symbol) ->
+            val isNegative = amount < 0
+            val amountColor = if (isNegative) colors.ExpenseColor else colors.TextPrimary
             Row(verticalAlignment = Alignment.Bottom) {
+                if (isNegative) {
+                    Text(
+                        text = "-",
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Black,
+                        color = amountColor,
+                        letterSpacing = (-2).sp,
+                    )
+                }
                 Text(
                     text = symbol,
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Black,
-                    color = colors.TextSecondary,
+                    color = if (isNegative) amountColor.copy(alpha = 0.6f) else colors.TextSecondary,
                     letterSpacing = (-2).sp,
                 )
                 Text(
                     text = CurrencyFormatter.format(abs(amount), displayFormatCode, showSymbol = false),
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Black,
-                    color = colors.TextPrimary,
+                    color = amountColor,
                     letterSpacing = (-2).sp,
                 )
             }
@@ -139,45 +155,53 @@ fun TransactionSummaryHero(
 
         Spacer(Modifier.height(8.dp))
 
-        // Currency switcher pill
+        // Currency switcher — CeroFiaoButtonGroup (matches accounts donut chart style)
+        val selected = displayOptions.first { it.code == displayCurrencyCode }
         Box {
-            Surface(
-                onClick = { showCurrencyMenu = true },
-                shape = RoundedCornerShape(100.dp),
-                color = colors.SurfaceVariant,
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = displayLabel,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.TextPrimary,
-                    )
-                    Icon(
-                        imageVector = Lucide.ChevronDown,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = colors.TextSecondary,
-                    )
-                }
-            }
+            CeroFiaoButtonGroup(
+                items = listOf(
+                    ButtonGroupItem(
+                        key = "currency",
+                        text = "${selected.symbol}  ${selected.label}",
+                        badge = selected.sourceLabel.ifEmpty { null },
+                        isActive = true,
+                        onClick = { showCurrencyMenu = true },
+                    ),
+                    ButtonGroupItem(
+                        key = "dropdown",
+                        icon = Lucide.ChevronDown,
+                        onClick = { showCurrencyMenu = true },
+                    ),
+                ),
+                size = ButtonSize.Small,
+            )
+
             DropdownMenu(
                 expanded = showCurrencyMenu,
                 onDismissRequest = { showCurrencyMenu = false },
             ) {
                 displayOptions.forEach { option ->
-                    val isSelected = option.code == displayCurrencyCode
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = option.label,
-                                color = if (isSelected) colors.Primary else colors.TextPrimary,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = "${option.symbol}  ${option.label}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = colors.TextPrimary,
+                                )
+                                if (option.sourceLabel.isNotEmpty()) {
+                                    Text(
+                                        text = option.sourceLabel,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = colors.Primary,
+                                    )
+                                }
+                            }
                         },
                         onClick = {
                             onCurrencyChange(option.code)
