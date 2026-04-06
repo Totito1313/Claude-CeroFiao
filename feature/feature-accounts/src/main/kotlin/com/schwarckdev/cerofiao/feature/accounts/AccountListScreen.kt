@@ -350,7 +350,7 @@ private fun CurrencyButtonGroup(
                 ButtonGroupItem(
                     key = "currency",
                     text = "${selected.symbol}  ${selected.displayName}",
-                    badge = selected.sourceLabel,
+                    badge = selected.sourceLabel.ifEmpty { null },
                     isActive = true,
                     onClick = { expanded = true },
                 ),
@@ -380,12 +380,14 @@ private fun CurrencyButtonGroup(
                                 fontWeight = FontWeight.Medium,
                                 color = CeroFiaoDesign.colors.TextPrimary,
                             )
-                            Text(
-                                text = currency.sourceLabel,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = CeroFiaoDesign.colors.Primary,
-                            )
+                            if (currency.sourceLabel.isNotEmpty()) {
+                                Text(
+                                    text = currency.sourceLabel,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = CeroFiaoDesign.colors.Primary,
+                                )
+                            }
                         }
                     },
                     onClick = {

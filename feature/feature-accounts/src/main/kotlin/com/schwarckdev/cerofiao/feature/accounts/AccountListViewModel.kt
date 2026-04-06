@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
@@ -50,8 +51,10 @@ enum class ChartDisplayCurrency(
     val sourceLabel: String,
 ) {
     USD("USD", "$", "Dolar", "BCV"),
+    VES("VES", "Bs", "Bolívares", ""),
     USDT("USDT", "\u20AE", "USDT", "Paralelo"),
     EUR("EUR", "\u20AC", "Euro", "BCV"),
+    EURI("EURI", "\u20AC", "EURI", "Paralelo"),
 }
 
 @HiltViewModel
@@ -83,9 +86,13 @@ class AccountListViewModel @Inject constructor(
                     val relative = DateUtils.relativeDate(tx.date)
                     "$sign$formatted ($relative)"
                 }
-                val progress = if (account.initialBalance > 0.0) {
+                // Progress bar only when spending has occurred (balance < initialBalance)
+                // Per Pencil design: cards without spending show just the balance, no bar
+                val progress = if (account.initialBalance > 0.0 && account.balance < account.initialBalance) {
                     (account.balance / account.initialBalance).toFloat().coerceIn(0f, 1f)
-                } else null
+                } else {
+                    null
+                }
 
                 AccountCardData(
                     account = account,
@@ -95,13 +102,26 @@ class AccountListViewModel @Inject constructor(
                 )
             }
 
+            // ── Pie chart conversion ──
+            // SKILL: Always use ResolveExchangeRateUseCase for all conversions.
+            // Never raw repo lookups. USD ≠ USDT, EUR ≠ EURI.
+            // All cross-currency conversions triangulate through VES.
             val targetCode = chartCurrency.code
             val pieSlices = accounts.mapIndexedNotNull { index, account ->
+                // Skip zero/negative balances for the pie chart
                 if (account.balance <= 0.0) return@mapIndexedNotNull null
+
+                // SKILL: Use resolve() for every conversion — handles:
+                //   - Identity (same currency → rate 1.0)
+                //   - Direct lookup (USD→VES, EUR→VES, etc.)
+                //   - Parity loss (USD↔USDT, EUR↔EURI via VES triangulation)
+                //   - Cross-currency (USD→EUR, USDT→EURI, etc. via VES)
                 val rateResult = resolveExchangeRate.resolve(
                     account.currencyCode, targetCode, prefs.preferredRateSource,
                 )
-                val converted = account.balance * rateResult.rate
+
+                // SKILL: Use MoneyCalculator.convert for final amount (BigDecimal precision)
+                val converted = MoneyCalculator.convert(account.balance, rateResult.rate)
                 AccountPieSlice(
                     accountName = account.name,
                     balanceConverted = converted,
