@@ -38,13 +38,26 @@ open class ResolveExchangeRateUseCase @Inject constructor(
 
         val implicitFrom = Currencies.implicitSource(from)
         val implicitTo = Currencies.implicitSource(to)
-        val sourceFrom = implicitFrom ?: preferredSource
-        val sourceTo = implicitTo ?: preferredSource
+        val isParityLoss = baseFrom == baseTo && from != to
+
+        // CRITICAL: For parity-loss conversions (USD↔USDT, EUR↔EURI), each leg
+        // MUST use a different source. Otherwise the cross-rate cancels to 1.0.
+        // Example bug: preferred=USDT → both legs use USDT → 48*(1/48)=1.0
+        // Fix: the currency WITH an implicit source uses it; the one WITHOUT
+        // always uses BCV (the official rate). preferredSource is IGNORED for
+        // parity-loss to guarantee the two legs use different exchange rates.
+        val sourceFrom: ExchangeRateSource
+        val sourceTo: ExchangeRateSource
+        if (isParityLoss) {
+            sourceFrom = implicitFrom ?: ExchangeRateSource.BCV
+            sourceTo = implicitTo ?: ExchangeRateSource.BCV
+        } else {
+            sourceFrom = implicitFrom ?: preferredSource
+            sourceTo = implicitTo ?: preferredSource
+        }
 
         // For direct lookups, prefer the implicit source (most specific) from either currency
         val directSource = implicitFrom ?: implicitTo ?: preferredSource
-
-        val isParityLoss = baseFrom == baseTo && from != to
 
         // Try direct lookup using the most specific source first
         val direct = exchangeRateRepository.getLatestRateBySource(baseFrom, baseTo, directSource)

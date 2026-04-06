@@ -297,7 +297,48 @@ class TriangulationTest {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 7. EDGE CASES
+    // 7. PREFERRED SOURCE MUST NOT COLLAPSE PARITY-LOSS RATES
+    // ═══════════════════════════════════════════════════════════════
+
+    @Test
+    fun `USD to USDT with preferred=USDT is still NOT 1-to-1`() = runTest {
+        // REGRESSION: When preferred=USDT, both legs used USDT source:
+        // 48.0 × (1/48.0) = 1.0 — making USD=USDT which is WRONG.
+        // Fix: parity-loss ignores preferred, forces BCV for the base currency.
+        val result = resolver.resolve("USD", "USDT", ExchangeRateSource.USDT)
+        assertNotEquals(
+            "USD→USDT must NOT be 1.0 even when preferred=USDT",
+            1.0, result.rate, 0.001,
+        )
+        val usdtAmount = 100.0 * result.rate
+        assertTrue("100 USD should buy < 100 USDT (got $usdtAmount)", usdtAmount < 100.0)
+        assertEquals(94.79, usdtAmount, 0.5)
+    }
+
+    @Test
+    fun `USDT to USD with preferred=USDT is still NOT 1-to-1`() = runTest {
+        val result = resolver.resolve("USDT", "USD", ExchangeRateSource.USDT)
+        assertNotEquals(
+            "USDT→USD must NOT be 1.0 even when preferred=USDT",
+            1.0, result.rate, 0.001,
+        )
+        val usdEquivalent = 100.0 * result.rate
+        assertTrue("100 USDT should be > 100 USD (got $usdEquivalent)", usdEquivalent > 100.0)
+    }
+
+    @Test
+    fun `EUR to EURI with preferred=EURI is still NOT 1-to-1`() = runTest {
+        val result = resolver.resolve("EUR", "EURI", ExchangeRateSource.EURI)
+        assertNotEquals(
+            "EUR→EURI must NOT be 1.0 even when preferred=EURI",
+            1.0, result.rate, 0.001,
+        )
+        val euriAmount = 100.0 * result.rate
+        assertTrue("100 EUR should buy < 100 EURI (got $euriAmount)", euriAmount < 100.0)
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 8. EDGE CASES
     // ═══════════════════════════════════════════════════════════════
 
     @Test
