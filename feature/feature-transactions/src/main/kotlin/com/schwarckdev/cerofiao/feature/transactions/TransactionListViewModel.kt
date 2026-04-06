@@ -6,11 +6,11 @@ import com.schwarckdev.cerofiao.core.common.DateUtils
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
+import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.DeleteTransactionUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetTransactionsUseCase
-import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Category
 import com.schwarckdev.cerofiao.core.model.AccountPlatform
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -89,7 +88,7 @@ class TransactionListViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val categoryRepository: CategoryRepository,
-    private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
@@ -101,8 +100,14 @@ class TransactionListViewModel @Inject constructor(
         getAccountsUseCase(),
         getCategoriesUseCase(),
         filters,
-        _displayCurrency,
-    ) { transactions, accounts, allCategories, filter, displayCurrency ->
+        combine(_displayCurrency, userPreferencesRepository.userPreferences) { dc, prefs ->
+            dc to prefs
+        },
+    ) { transactions, accounts, allCategories, filter, (displayCurrency, prefs) ->
+        // Build rate table ONCE per emission — all display conversions derive from it
+        val rateTable = buildRateTable.build(prefs.preferredRateSource)
+        val displayRate = rateTable.rate("USD", displayCurrency.code)
+
         val filtered = transactions.filter { tx ->
             val matchType = filter.typeFilter == null || tx.type == filter.typeFilter
             val matchAccount = filter.accountId == null || tx.accountId == filter.accountId
@@ -204,7 +209,7 @@ class TransactionListViewModel @Inject constructor(
             displayFormatCode = displayCurrency.formatCode,
             displaySymbol = displayCurrency.symbol,
             displayLabel = displayCurrency.label,
-            displayRate = displayCurrency.rate,
+            displayRate = displayRate,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -237,45 +242,27 @@ class TransactionListViewModel @Inject constructor(
     }
 
     /**
-     * Sets the display currency for the hero amounts using VES-intermediary triangulation.
-     *
-     * Uses [ResolveExchangeRateUseCase] which handles:
-     * - USD→VES rates from BCV official source
-     * - USD→VES rates from USDT parallel source
-     * - EUR→VES rates from BCV and EURI sources
-     * - Cross-currency via VES: e.g., USD→USDT = (USD→VES_bcv) × (VES→USD_usdt) ≈ 0.95
-     *
-     * This ensures that 100 USD ≠ 100 USDT (the parallel market premium is reflected).
+     * Sets the display currency for the hero amounts.
+     * The actual rate is derived reactively from the RateTable in the combine block,
+     * so this only needs to update the display metadata.
      */
     fun setDisplayCurrency(code: String) {
-        viewModelScope.launch {
-            if (code == "USD") {
-                _displayCurrency.update {
-                    DisplayCurrencySettings("USD", "USD", "$", "USD", 1.0)
-                }
-                return@launch
-            }
-
-            val prefs = userPreferencesRepository.userPreferences.first()
-            val result = resolveExchangeRate.resolve("USD", code, prefs.preferredRateSource)
-
-            val (formatCode, symbol, label) = when (code) {
-                "VES" -> Triple("VES", "Bs.", "Bs")
-                "USDT" -> Triple("USDT", "₮", "USDT")
-                "EUR" -> Triple("EUR", "€", "EUR")
-                "EURI" -> Triple("EURI", "€", "EURI")
-                else -> Triple(code, code, code)
-            }
-
-            _displayCurrency.update {
-                DisplayCurrencySettings(
-                    code = code,
-                    formatCode = formatCode,
-                    symbol = symbol,
-                    label = label,
-                    rate = result.rate,
-                )
-            }
+        val (formatCode, symbol, label) = when (code) {
+            "USD" -> Triple("USD", "$", "USD")
+            "VES" -> Triple("VES", "Bs.", "Bs")
+            "USDT" -> Triple("USDT", "\u20AE", "USDT")
+            "EUR" -> Triple("EUR", "\u20AC", "EUR")
+            "EURI" -> Triple("EURI", "\u20AC", "EURI")
+            else -> Triple(code, code, code)
+        }
+        _displayCurrency.update {
+            DisplayCurrencySettings(
+                code = code,
+                formatCode = formatCode,
+                symbol = symbol,
+                label = label,
+                rate = it.rate, // will be overwritten by combine block
+            )
         }
     }
 

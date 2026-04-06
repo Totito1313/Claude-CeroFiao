@@ -12,6 +12,7 @@ import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetActiveGoalsUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetCategoriesUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.RecordTransactionUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.SuggestCategoryByTitleUseCase
@@ -63,6 +64,7 @@ class TransactionEntryViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val suggestCategoryByTitle: SuggestCategoryByTitleUseCase,
 ) : ViewModel() {
@@ -172,28 +174,13 @@ class TransactionEntryViewModel @Inject constructor(
                 return@launch
             }
             val selectedCurrency = uiState.value.selectedCurrencyCode ?: return@launch
-            val allCurrencies = listOf("USD", "VES", "USDT", "EUR")
-            val equivalents = mutableMapOf<String, Double>()
             val prefs = userPreferencesRepository.userPreferences.first()
+            val rateTable = buildRateTable.build(prefs.preferredRateSource)
 
-            for (targetCurrency in allCurrencies) {
-                if (targetCurrency == selectedCurrency) continue
-                try {
-                    // Convert to USD first, then to target
-                    val toUsdResult = resolveExchangeRate.toUsd(selectedCurrency, prefs.preferredRateSource)
-                    val amountUsd = MoneyCalculator.toUsd(amount, selectedCurrency, toUsdResult.rate)
-                    if (targetCurrency == "USD") {
-                        equivalents[targetCurrency] = amountUsd
-                    } else {
-                        val fromUsdResult = resolveExchangeRate.toUsd(targetCurrency, prefs.preferredRateSource)
-                        if (fromUsdResult.rate > 0) {
-                            equivalents[targetCurrency] = MoneyCalculator.fromUsd(amountUsd, targetCurrency, fromUsdResult.rate)
-                        }
-                    }
-                } catch (_: Exception) {
-                    // Skip currencies we can't convert
-                }
-            }
+            val allCurrencies = listOf("USD", "VES", "USDT", "EUR", "EURI")
+            val equivalents = allCurrencies
+                .filter { it != selectedCurrency }
+                .associateWith { target -> rateTable.convert(amount, selectedCurrency, target) }
 
             formState.update { it.copy(currencyEquivalents = equivalents) }
         }

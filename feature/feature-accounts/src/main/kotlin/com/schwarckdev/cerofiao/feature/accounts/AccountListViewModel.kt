@@ -5,11 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
-import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
+import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.GetAccountsUseCase
-import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
@@ -61,7 +60,7 @@ enum class ChartDisplayCurrency(
 class AccountListViewModel @Inject constructor(
     getAccountsUseCase: GetAccountsUseCase,
     private val transactionRepository: TransactionRepository,
-    private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
@@ -102,26 +101,17 @@ class AccountListViewModel @Inject constructor(
                 )
             }
 
-            // ── Pie chart conversion ──
-            // SKILL: Always use ResolveExchangeRateUseCase for all conversions.
-            // Never raw repo lookups. USD ≠ USDT, EUR ≠ EURI.
-            // All cross-currency conversions triangulate through VES.
+            // ── Pie chart conversion via RateTable ──
+            // Build rate table ONCE, then use for all account conversions.
+            // Handles triangulation, parity-loss, cross-currency — all via
+            // ResolveExchangeRateUseCase internally.
             val targetCode = chartCurrency.code
+            val rateTable = buildRateTable.build(prefs.preferredRateSource)
+
             val pieSlices = accounts.mapIndexedNotNull { index, account ->
-                // Skip zero/negative balances for the pie chart
                 if (account.balance <= 0.0) return@mapIndexedNotNull null
 
-                // SKILL: Use resolve() for every conversion — handles:
-                //   - Identity (same currency → rate 1.0)
-                //   - Direct lookup (USD→VES, EUR→VES, etc.)
-                //   - Parity loss (USD↔USDT, EUR↔EURI via VES triangulation)
-                //   - Cross-currency (USD→EUR, USDT→EURI, etc. via VES)
-                val rateResult = resolveExchangeRate.resolve(
-                    account.currencyCode, targetCode, prefs.preferredRateSource,
-                )
-
-                // SKILL: Use MoneyCalculator.convert for final amount (BigDecimal precision)
-                val converted = MoneyCalculator.convert(account.balance, rateResult.rate)
+                val converted = rateTable.convert(account.balance, account.currencyCode, targetCode)
                 AccountPieSlice(
                     accountName = account.name,
                     balanceConverted = converted,

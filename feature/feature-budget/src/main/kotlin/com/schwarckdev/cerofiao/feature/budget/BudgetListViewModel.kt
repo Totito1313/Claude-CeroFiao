@@ -3,12 +3,11 @@ package com.schwarckdev.cerofiao.feature.budget
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.DateUtils
-import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.BudgetRepository
 import com.schwarckdev.cerofiao.core.domain.repository.CategoryRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
-import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
 import com.schwarckdev.cerofiao.core.model.Budget
 import com.schwarckdev.cerofiao.core.model.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +37,7 @@ class BudgetListViewModel @Inject constructor(
     budgetRepository: BudgetRepository,
     categoryRepository: CategoryRepository,
     transactionRepository: TransactionRepository,
-    private val resolveExchangeRate: ResolveExchangeRateUseCase,
+    private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val budgetRepo: BudgetRepository,
 ) : ViewModel() {
@@ -55,6 +54,7 @@ class BudgetListViewModel @Inject constructor(
     ) { budgets, categories, categoryExpenses, prefs ->
         val expenseMap = categoryExpenses.toMap()
         val categoryMap = categories.associateBy { it.id }
+        val rateTable = buildRateTable.build(prefs.preferredRateSource)
 
         val budgetsWithProgress = budgets.map { budget ->
             val category = budget.categoryId?.let { categoryMap[it] }
@@ -64,14 +64,9 @@ class BudgetListViewModel @Inject constructor(
                 categoryExpenses.sumOf { it.second }
             }
 
-            // Convert spent from USD to budget's anchor currency
+            // Convert spent from USD to budget's anchor currency via RateTable
             val budgetCurrency = budget.anchorCurrencyCode
-            val spentInBudgetCurrency = if (budgetCurrency == "USD") {
-                spentInUsd
-            } else {
-                val rate = resolveExchangeRate.fromUsd(budgetCurrency, prefs.preferredRateSource)
-                MoneyCalculator.convert(spentInUsd, rate.rate)
-            }
+            val spentInBudgetCurrency = rateTable.convert(spentInUsd, "USD", budgetCurrency)
 
             val limit = budget.limitAmount
             val progress = if (limit > 0) (spentInBudgetCurrency / limit).toFloat().coerceIn(0f, 1.5f) else 0f

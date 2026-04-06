@@ -3,13 +3,11 @@ package com.schwarckdev.cerofiao.feature.billsplitter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
-import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
+import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
+import com.schwarckdev.cerofiao.core.model.RateTable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -41,21 +39,22 @@ data class BillSplitterState(
 
 @HiltViewModel
 class BillSplitterViewModel @Inject constructor(
-    private val resolveExchangeRateUseCase: ResolveExchangeRateUseCase,
+    private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BillSplitterState())
     val state = _state.asStateFlow()
 
+    private var rateTable: RateTable = RateTable.IDENTITY
+
     init {
         viewModelScope.launch {
-            // Get default currency and BCV rate
             userPreferencesRepository.userPreferences.collect { prefs ->
-                val bcvRate = resolveExchangeRateUseCase.fromUsd("VES", prefs.preferredRateSource).rate
+                rateTable = buildRateTable.build(prefs.preferredRateSource)
                 _state.update { it.copy(
                     baseCurrency = prefs.displayCurrencyCode.ifBlank { "USD" },
-                    bcvRate = bcvRate
+                    bcvRate = rateTable.rate("USD", "VES"),
                 ) }
                 recalculate()
             }
@@ -127,6 +126,7 @@ class BillSplitterViewModel @Inject constructor(
     private fun recalculate() {
         val currentState = _state.value
         val totalAmount = currentState.totalAmountStr.toDoubleOrNull() ?: 0.0
+        val baseCurrency = currentState.baseCurrency
 
         var fixedSum = 0.0
         var percentageSumAmounts = 0.0
@@ -145,7 +145,7 @@ class BillSplitterViewModel @Inject constructor(
                 }
                 SplitType.EQUAL -> {
                     equalCount++
-                    p // Calculate equal later
+                    p
                 }
             }
         }
@@ -155,29 +155,25 @@ class BillSplitterViewModel @Inject constructor(
 
         val finalParticipants = calculatedParts.map { p ->
             val finalBase = if (p.splitType == SplitType.EQUAL) equalAmount else p.finalAmountBaseCurrency
-            // Convert Final Base Amount to VES and USD
-            val (usd, ves) = if (currentState.baseCurrency == "USD") {
-                Pair(finalBase, finalBase * currentState.bcvRate)
-            } else { // Assume VES base
-                val inUsd = if (currentState.bcvRate > 0) finalBase / currentState.bcvRate else 0.0
-                Pair(inUsd, finalBase)
-            }
+            // Convert via RateTable — handles any base currency, not just USD/VES
+            val usd = rateTable.convert(finalBase, baseCurrency, "USD")
+            val ves = rateTable.convert(finalBase, baseCurrency, "VES")
 
             p.copy(
                 finalAmountBaseCurrency = finalBase,
                 equivalentUsd = usd,
-                equivalentVes = ves
+                equivalentVes = ves,
             )
         }
 
         val totalAllocated = finalParticipants.sumOf { it.finalAmountBaseCurrency }
-        val unallocated = (totalAmount - totalAllocated)
+        val unallocated = totalAmount - totalAllocated
 
-        _state.update { 
+        _state.update {
             it.copy(
                 participants = finalParticipants,
                 totalAllocatedBase = totalAllocated,
-                unallocatedBase = unallocated
+                unallocatedBase = unallocated,
             )
         }
     }
