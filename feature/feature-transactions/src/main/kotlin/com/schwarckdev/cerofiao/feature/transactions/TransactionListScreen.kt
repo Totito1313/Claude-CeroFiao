@@ -88,15 +88,14 @@ fun TransactionListScreen(
     ) {
         // Summary Hero with animated content
         TransactionSummaryHero(
-            totalIncomeUsd = uiState.totalIncomeUsd,
-            totalExpenseUsd = uiState.totalExpenseUsd,
+            totalIncomeDisplay = uiState.totalIncomeDisplay,
+            totalExpenseDisplay = uiState.totalExpenseDisplay,
             selectedTypeFilter = uiState.selectedTypeFilter,
             monthOverMonthPercent = uiState.monthOverMonthPercent,
             displayCurrencyCode = uiState.displayCurrencyCode,
             displayFormatCode = uiState.displayFormatCode,
             displaySymbol = uiState.displaySymbol,
             displayLabel = uiState.displayLabel,
-            displayRate = uiState.displayRate,
             onCurrencyChange = { viewModel.setDisplayCurrency(it) },
         )
 

@@ -36,7 +36,6 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.TrendingDown
 import com.composables.icons.lucide.TrendingUp
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
-import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import kotlin.math.abs
@@ -61,28 +60,28 @@ private val displayOptions = listOf(
 
 @Composable
 fun TransactionSummaryHero(
-    totalIncomeUsd: Double,
-    totalExpenseUsd: Double,
+    totalIncomeDisplay: Double,
+    totalExpenseDisplay: Double,
     selectedTypeFilter: TransactionType?,
     monthOverMonthPercent: Double?,
     displayCurrencyCode: String,
     displayFormatCode: String,
     displaySymbol: String,
     displayLabel: String,
-    displayRate: Double,
     onCurrencyChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = CeroFiaoDesign.colors
     var showCurrencyMenu by remember { mutableStateOf(false) }
 
+    // Amounts are already converted to display currency by the ViewModel via RateTable
     val heroData = when (selectedTypeFilter) {
-        TransactionType.INCOME -> HeroData("TOTAL DE INGRESOS", totalIncomeUsd)
-        TransactionType.EXPENSE -> HeroData("TOTAL DE GASTOS", totalExpenseUsd)
-        else -> HeroData("BALANCE NETO", totalIncomeUsd - totalExpenseUsd)
+        TransactionType.INCOME -> HeroData("TOTAL DE INGRESOS", totalIncomeDisplay)
+        TransactionType.EXPENSE -> HeroData("TOTAL DE GASTOS", totalExpenseDisplay)
+        else -> HeroData("BALANCE NETO", totalIncomeDisplay - totalExpenseDisplay)
     }
 
-    val convertedAmount = MoneyCalculator.convert(heroData.totalAmountUsd, displayRate)
+    val convertedAmount = heroData.totalAmountUsd
 
     Column(
         modifier = modifier.padding(top = 24.dp, bottom = 16.dp),
