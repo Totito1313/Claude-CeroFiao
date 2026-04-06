@@ -36,6 +36,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.TrendingDown
 import com.composables.icons.lucide.TrendingUp
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
+import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import kotlin.math.abs
@@ -81,7 +82,7 @@ fun TransactionSummaryHero(
         else -> HeroData("BALANCE NETO", totalIncomeUsd - totalExpenseUsd)
     }
 
-    val convertedAmount = heroData.totalAmountUsd * displayRate
+    val convertedAmount = MoneyCalculator.convert(heroData.totalAmountUsd, displayRate)
 
     Column(
         modifier = modifier.padding(top = 24.dp, bottom = 16.dp),

@@ -1,6 +1,5 @@
 package com.schwarckdev.cerofiao.core.domain.usecase
 
-import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.model.Currencies
 import com.schwarckdev.cerofiao.core.model.ExchangeRateSource
@@ -60,7 +59,13 @@ open class ResolveExchangeRateUseCase @Inject constructor(
             ?: exchangeRateRepository.getLatestRate("VES", baseTo))?.rate
 
         if (toVes != null && fromVes != null) {
-            return RateResult(MoneyCalculator.convert(toVes, fromVes), sourceFrom, isParityLoss, toVes)
+            // IMPORTANT: Use raw multiplication for cross-rate computation to preserve
+            // full Double precision (~15 significant digits). MoneyCalculator.convert()
+            // rounds to 2 decimal places which destroys rate precision.
+            // Example: 45.50 × 0.02083 = 0.9479 (correct), NOT 0.95 (2dp rounded).
+            // The 2dp rounding should only happen on FINAL displayed amounts.
+            val crossRate = toVes * fromVes
+            return RateResult(crossRate, sourceFrom, isParityLoss, toVes)
         }
 
         return RateResult(1.0, ExchangeRateSource.MANUAL)

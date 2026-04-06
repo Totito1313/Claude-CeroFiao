@@ -2,6 +2,7 @@ package com.schwarckdev.cerofiao.feature.exchangerates
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.RefreshExchangeRatesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
@@ -166,12 +167,12 @@ class ExchangeRateViewModel @Inject constructor(
                 
                 var diffAmount: Double? = null
                 var diffVes: Double? = null
-                val finalResult = amount * result.rate
-                
+                val finalResult = MoneyCalculator.convert(amount, result.rate)
+
                 val baseToVesRate = result.baseToVesRate
                 if (result.isParityLoss && baseToVesRate != null && amount > 0) {
                     diffAmount = kotlin.math.abs(amount - finalResult)
-                    diffVes = diffAmount * baseToVesRate
+                    diffVes = MoneyCalculator.convert(diffAmount, baseToVesRate)
                 }
 
                 _uiState.update {
