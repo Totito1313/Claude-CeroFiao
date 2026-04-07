@@ -124,6 +124,7 @@ fun ExchangeRateScreen(
                     title = "Histórico Euro € / Bs",
                     currentRate = uiState.bcvEurRate?.rate,
                     historicalRates = uiState.historicalEur,
+                    animate = uiState.shouldAnimateCharts,
                 )
 
                 // USD rate cards row
@@ -150,6 +151,7 @@ fun ExchangeRateScreen(
                     title = "Histórico USD $ / Bs",
                     currentRate = uiState.bcvUsdRate?.rate,
                     historicalRates = uiState.historicalUsd,
+                    animate = uiState.shouldAnimateCharts,
                 )
             }
         }

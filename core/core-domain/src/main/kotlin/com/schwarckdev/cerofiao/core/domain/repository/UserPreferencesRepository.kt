@@ -12,4 +12,7 @@ interface UserPreferencesRepository {
     suspend fun setThemeMode(mode: ThemeMode)
     suspend fun setUseDynamicColor(enabled: Boolean)
     suspend fun setOnboardingCompleted()
+    suspend fun setConverterCurrencies(from: String, to: String)
+    fun getConverterFromCurrency(): Flow<String>
+    fun getConverterToCurrency(): Flow<String>
 }

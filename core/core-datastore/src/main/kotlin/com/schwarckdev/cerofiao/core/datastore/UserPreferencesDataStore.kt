@@ -28,6 +28,8 @@ class UserPreferencesDataStore @Inject constructor(
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
         val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
+        val CONVERTER_FROM_CURRENCY = stringPreferencesKey("converter_from_currency")
+        val CONVERTER_TO_CURRENCY = stringPreferencesKey("converter_to_currency")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -63,4 +65,17 @@ class UserPreferencesDataStore @Inject constructor(
     suspend fun setOnboardingCompleted() {
         context.dataStore.edit { it[Keys.HAS_COMPLETED_ONBOARDING] = true }
     }
+
+    suspend fun setConverterCurrencies(from: String, to: String) {
+        context.dataStore.edit {
+            it[Keys.CONVERTER_FROM_CURRENCY] = from
+            it[Keys.CONVERTER_TO_CURRENCY] = to
+        }
+    }
+
+    fun getConverterFromCurrency(): kotlinx.coroutines.flow.Flow<String> =
+        context.dataStore.data.map { it[Keys.CONVERTER_FROM_CURRENCY] ?: "USD" }
+
+    fun getConverterToCurrency(): kotlinx.coroutines.flow.Flow<String> =
+        context.dataStore.data.map { it[Keys.CONVERTER_TO_CURRENCY] ?: "VES" }
 }

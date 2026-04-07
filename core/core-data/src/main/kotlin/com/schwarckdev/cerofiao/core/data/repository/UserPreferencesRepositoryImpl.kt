@@ -35,4 +35,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setOnboardingCompleted() {
         dataStore.setOnboardingCompleted()
     }
+
+    override suspend fun setConverterCurrencies(from: String, to: String) {
+        dataStore.setConverterCurrencies(from, to)
+    }
+
+    override fun getConverterFromCurrency(): Flow<String> = dataStore.getConverterFromCurrency()
+
+    override fun getConverterToCurrency(): Flow<String> = dataStore.getConverterToCurrency()
 }

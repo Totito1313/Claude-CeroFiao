@@ -41,6 +41,7 @@ fun HistoricalRateCard(
     currentRate: Double?,
     historicalRates: List<ExchangeRate>,
     modifier: Modifier = Modifier,
+    animate: Boolean = true,
 ) {
     val colors = CeroFiaoDesign.colors
     val dataPoints = historicalRates.map { it.rate }
@@ -106,6 +107,7 @@ fun HistoricalRateCard(
                         .fillMaxWidth()
                         .height(80.dp),
                     lineBrush = TransferGradient,
+                    animate = animate,
                 )
             }
 

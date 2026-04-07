@@ -21,13 +21,13 @@ import com.schwarckdev.cerofiao.core.designsystem.util.CurrencyFormatter
 
 /**
  * RateBanner — Exchange rate display ribbon from Figma.
- * Shows the current PARALELO rate as a compact banner.
+ * Shows the current market rate as a compact banner.
  */
 @Composable
 fun CeroFiaoRateBanner(
     rateValue: String,
     modifier: Modifier = Modifier,
-    source: String = "Paralelo"
+    source: String = "Mercado"
 ) {
     Row(
         modifier = modifier

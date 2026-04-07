@@ -341,7 +341,7 @@ private fun RateSourceStep(
     val sources = listOf(
         Triple(ExchangeRateSource.BCV, "BCV (Oficial)", "Tasa del Banco Central de Venezuela"),
         Triple(ExchangeRateSource.USDT, "USDT (Mercado)", "Tasa del dólar cripto en el mercado"),
-        Triple(ExchangeRateSource.EURI, "EURI (Mercado)", "Tasa del euro en el mercado paralelo"),
+        Triple(ExchangeRateSource.EURI, "EURI (Mercado)", "Tasa del euro en el mercado"),
     )
 
     Column {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.MoneyCalculator
 import com.schwarckdev.cerofiao.core.domain.repository.ExchangeRateRepository
+import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.RefreshExchangeRatesUseCase
 import com.schwarckdev.cerofiao.core.domain.usecase.ResolveExchangeRateUseCase
 import com.schwarckdev.cerofiao.core.model.ExchangeRate
@@ -25,6 +26,7 @@ data class ExchangeRateUiState(
     val historicalUsd: List<ExchangeRate> = emptyList(),
     val historicalEur: List<ExchangeRate> = emptyList(),
     val isLoading: Boolean = false,
+    val shouldAnimateCharts: Boolean = true,
     // Calculator state
     val calculatorAmount: String = "",
     val calculatorFromCurrency: String = "USD",
@@ -44,6 +46,7 @@ class ExchangeRateViewModel @Inject constructor(
     private val exchangeRateRepository: ExchangeRateRepository,
     private val refreshExchangeRatesUseCase: RefreshExchangeRatesUseCase,
     private val resolveExchangeRateUseCase: ResolveExchangeRateUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExchangeRateUiState())
@@ -52,7 +55,31 @@ class ExchangeRateViewModel @Inject constructor(
     private var calculatorJob: Job? = null
 
     init {
+        loadSavedConverterCurrencies()
         refresh()
+    }
+
+    private fun loadSavedConverterCurrencies() {
+        viewModelScope.launch {
+            userPreferencesRepository.getConverterFromCurrency().collect { fromCurrency ->
+                _uiState.update { it.copy(calculatorFromCurrency = fromCurrency) }
+            }
+        }
+        viewModelScope.launch {
+            userPreferencesRepository.getConverterToCurrency().collect { toCurrency ->
+                _uiState.update { it.copy(calculatorToCurrency = toCurrency) }
+            }
+        }
+    }
+
+    private fun saveConverterCurrencies() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            userPreferencesRepository.setConverterCurrencies(
+                from = state.calculatorFromCurrency,
+                to = state.calculatorToCurrency,
+            )
+        }
     }
 
     private suspend fun loadRates() {
@@ -95,7 +122,7 @@ class ExchangeRateViewModel @Inject constructor(
             }
             loadRates()
             loadHistorical()
-            _uiState.update { it.copy(isLoading = false) }
+            _uiState.update { it.copy(isLoading = false, shouldAnimateCharts = false) }
         }
     }
 
@@ -106,21 +133,29 @@ class ExchangeRateViewModel @Inject constructor(
 
     fun updateCalculatorFromCurrency(code: String) {
         _uiState.update { it.copy(calculatorFromCurrency = code) }
+        saveConverterCurrencies()
         recalculate()
     }
 
     fun updateCalculatorToCurrency(code: String) {
         _uiState.update { it.copy(calculatorToCurrency = code) }
+        saveConverterCurrencies()
         recalculate()
     }
 
     fun swapCalculatorCurrencies() {
         _uiState.update {
+            val swappedAmount = it.calculatorResult?.let { result ->
+                if (result == result.toLong().toDouble()) result.toLong().toString()
+                else String.format("%.2f", result)
+            } ?: it.calculatorAmount
             it.copy(
                 calculatorFromCurrency = it.calculatorToCurrency,
                 calculatorToCurrency = it.calculatorFromCurrency,
+                calculatorAmount = swappedAmount,
             )
         }
+        saveConverterCurrencies()
         recalculate()
     }
 

@@ -22,17 +22,22 @@ fun HistoricalRateChart(
     modifier: Modifier = Modifier,
     lineBrush: Brush = TransferGradient,
     fillAlpha: Float = 0.15f,
+    animate: Boolean = true,
 ) {
     if (dataPoints.size < 2) return
 
-    val animationProgress = remember { Animatable(0f) }
+    val animationProgress = remember { Animatable(if (animate) 0f else 1f) }
 
-    LaunchedEffect(dataPoints) {
-        animationProgress.snapTo(0f)
-        animationProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 800)
-        )
+    LaunchedEffect(dataPoints, animate) {
+        if (animate) {
+            animationProgress.snapTo(0f)
+            animationProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 800)
+            )
+        } else {
+            animationProgress.snapTo(1f)
+        }
     }
 
     Canvas(modifier = modifier) {

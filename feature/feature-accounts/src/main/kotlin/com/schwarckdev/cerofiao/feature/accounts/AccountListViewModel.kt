@@ -51,9 +51,9 @@ enum class ChartDisplayCurrency(
 ) {
     USD("USD", "$", "Dolar", "BCV"),
     VES("VES", "Bs", "Bolívares", ""),
-    USDT("USDT", "\u20AE", "USDT", "Paralelo"),
+    USDT("USDT", "\u20AE", "USDT", "Mercado"),
     EUR("EUR", "\u20AC", "Euro", "BCV"),
-    EURI("EURI", "\u20AC", "EURI", "Paralelo"),
+    EURI("EURI", "\u20AC", "EURI", "Mercado"),
 }
 
 @HiltViewModel

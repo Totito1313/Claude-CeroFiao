@@ -66,14 +66,10 @@ class MainActivity : ComponentActivity() {
             val themePrefs by themePreferencesManager.preferencesFlow
                 .collectAsStateWithLifecycle(initialValue = ThemeUserPreferences())
 
-            val isDark = when (themePrefs.themeMode) {
-                com.schwarckdev.cerofiao.core.designsystem.theme.ThemeMode.Dark -> true
-                com.schwarckdev.cerofiao.core.designsystem.theme.ThemeMode.Light -> false
-                com.schwarckdev.cerofiao.core.designsystem.theme.ThemeMode.Auto -> when (preferences.themeMode) {
-                    ThemeMode.DARK -> true
-                    ThemeMode.LIGHT -> false
-                    ThemeMode.SYSTEM -> isSystemInDarkTheme()
-                }
+            val isDark = when (preferences.themeMode) {
+                ThemeMode.DARK -> true
+                ThemeMode.LIGHT -> false
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
             val accentColor = if (isDark) themePrefs.accentPreset.darkColor else themePrefs.accentPreset.lightColor

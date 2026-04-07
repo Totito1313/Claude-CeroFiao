@@ -38,7 +38,7 @@ fun ExchangeRateBanner(
             }
             if (parallelRate != null) {
                 RateLabel(
-                    label = "Paralelo",
+                    label = "USDT",
                     rate = parallelRate,
                 )
             }

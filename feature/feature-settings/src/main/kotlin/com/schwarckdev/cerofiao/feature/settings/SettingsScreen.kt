@@ -78,7 +78,7 @@ private data class RateSourceOption(
 
 private val rateSourceOptions = listOf(
     RateSourceOption(ExchangeRateSource.BCV, "BCV (Oficial)", "Tasa oficial del Banco Central"),
-    RateSourceOption(ExchangeRateSource.USDT, "Paralelo (USDT)", "Tasa del mercado paralelo"),
+    RateSourceOption(ExchangeRateSource.USDT, "USDT (Mercado)", "Tasa USDT del mercado"),
 )
 
 @Composable

@@ -907,7 +907,7 @@ fun StandardHeader(
          Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(100.dp)
                 .align(Alignment.TopCenter)
                 .zIndex(-1f)
                 .graphicsLayer { alpha = 0.99f * scrollAlpha }

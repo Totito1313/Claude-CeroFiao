@@ -72,9 +72,9 @@ private data class DisplayOption(
 private val displayOptions = listOf(
     DisplayOption("USD", "$", "Dolar", "BCV"),
     DisplayOption("VES", "Bs", "Bolívares", ""),
-    DisplayOption("USDT", "\u20AE", "USDT", "Paralelo"),
+    DisplayOption("USDT", "\u20AE", "USDT", "Mercado"),
     DisplayOption("EUR", "\u20AC", "Euro", "BCV"),
-    DisplayOption("EURI", "\u20AC", "EURI", "Paralelo"),
+    DisplayOption("EURI", "\u20AC", "EURI", "Mercado"),
 )
 
 @Composable
