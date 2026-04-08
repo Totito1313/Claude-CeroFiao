@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# AI & IDE Caches
+.vscode/
+.cloudcode/
+.idea/
+.gradle/
+build/
+*/build/

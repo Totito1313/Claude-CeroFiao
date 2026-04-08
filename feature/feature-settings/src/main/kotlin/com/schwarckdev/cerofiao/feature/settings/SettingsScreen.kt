@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -103,6 +104,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
+            .background(CeroFiaoDesign.colors.Background)
             .verticalScroll(rememberScrollState())
             .padding(bottom = 110.dp, top = 70.dp),
     ) {
