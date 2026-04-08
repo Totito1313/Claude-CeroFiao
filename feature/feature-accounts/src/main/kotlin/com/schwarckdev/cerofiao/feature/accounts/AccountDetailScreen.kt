@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,20 +31,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Receipt
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.designsystem.components.buttons.ButtonVariant
+import com.schwarckdev.cerofiao.core.designsystem.components.buttons.CeroFiaoButton
 import com.schwarckdev.cerofiao.core.designsystem.components.cards.CeroFiaoCard
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.CeroFiaoIcons
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
-import com.schwarckdev.cerofiao.core.designsystem.components.utilities.FeedbackVariant
-import com.schwarckdev.cerofiao.core.designsystem.components.utilities.pressableFeedback
 import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.Account
 import com.schwarckdev.cerofiao.core.model.AccountType
 import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
+import com.schwarckdev.cerofiao.core.ui.EmptyState
 
 @Composable
 fun AccountDetailScreen(
@@ -54,6 +58,8 @@ fun AccountDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val account = uiState.account
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val radius = CeroFiaoDesign.radius
 
     ConfigureTopBar(
         variant = TopBarVariant.Detail,
@@ -68,7 +74,7 @@ fun AccountDetailScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.Background)
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .padding(top = 70.dp),
     ) {
@@ -79,7 +85,7 @@ fun AccountDetailScreen(
             return@Column
         }
 
-        // Account hero card
+        // ── Hero Card ──
         val (badgeBg, badgeText) = when (account.type) {
             AccountType.BANK -> AccountBadgeColors.BankBg to AccountBadgeColors.BankText
             AccountType.CRYPTO_EXCHANGE -> AccountBadgeColors.CryptoBg to AccountBadgeColors.CryptoText
@@ -90,18 +96,19 @@ fun AccountDetailScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(20.dp),
+                .padding(horizontal = spacing.screenHorizontal),
+            shape = RoundedCornerShape(radius.xxl),
             color = colors.CardBackground,
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(spacing.xxl),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Account avatar
                 Box(
                     modifier = Modifier
                         .size(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(radius.lg))
                         .background(badgeBg),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -113,8 +120,9 @@ fun AccountDetailScreen(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(spacing.md))
 
+                // Balance
                 Text(
                     text = CurrencyFormatter.format(account.balance, account.currencyCode),
                     color = colors.TextPrimary,
@@ -122,67 +130,52 @@ fun AccountDetailScreen(
                     fontWeight = FontWeight.Bold,
                 )
 
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(spacing.xxs))
 
+                // Platform & currency info
                 Text(
                     text = "${account.platform.displayName} · ${account.currencyCode}",
+                    style = MaterialTheme.typography.bodySmall,
                     color = colors.TextSecondary,
-                    fontSize = 13.sp,
                 )
 
-                Spacer(Modifier.height(16.dp))
-
-                // Delete button
-                Surface(
-                    modifier = Modifier
-                        .pressableFeedback(
-                            onClick = { viewModel.deleteAccount() },
-                            variant = FeedbackVariant.ScaleHighlight,
-                        ),
-                    shape = RoundedCornerShape(10.dp),
-                    color = colors.ExpenseColor.copy(alpha = 0.1f),
-                ) {
+                // Initial balance indicator
+                if (account.initialBalance > 0.0 && account.initialBalance != account.balance) {
+                    Spacer(Modifier.height(spacing.sm))
                     Text(
-                        text = "Eliminar cuenta",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = colors.ExpenseColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
+                        text = "Saldo inicial: ${CurrencyFormatter.format(account.initialBalance, account.currencyCode)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.TextSecondary.copy(alpha = 0.7f),
                     )
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(spacing.xxl))
 
-        // Transactions header
+        // ── Transactions Section ──
         Text(
             text = "Transacciones",
-            modifier = Modifier.padding(horizontal = 16.dp),
+            style = MaterialTheme.typography.titleMedium,
             color = colors.TextPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = spacing.screenHorizontal),
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(spacing.sm))
 
         if (uiState.transactions.isEmpty()) {
-            Box(
+            EmptyState(
+                icon = Lucide.Receipt,
+                title = "Sin transacciones",
+                description = "Las transacciones de esta cuenta aparecerán aquí",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Sin transacciones en esta cuenta",
-                    color = colors.TextSecondary,
-                    fontSize = 14.sp,
-                )
-            }
+                    .weight(1f),
+            )
         } else {
             LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = spacing.screenHorizontal),
+                verticalArrangement = Arrangement.spacedBy(spacing.xs),
             ) {
                 items(
                     items = uiState.transactions,
@@ -193,26 +186,44 @@ fun AccountDetailScreen(
                 item { Spacer(Modifier.height(100.dp)) }
             }
         }
+
+        // ── Delete Button at bottom ──
+        Spacer(Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = spacing.screenHorizontal)
+                .padding(bottom = 110.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            CeroFiaoButton(
+                onClick = { viewModel.deleteAccount() },
+                text = "Eliminar cuenta",
+                variant = ButtonVariant.DangerSoft,
+            )
+        }
     }
 }
 
 @Composable
 private fun AccountTransactionItem(transaction: Transaction) {
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val radius = CeroFiaoDesign.radius
     val isExpense = transaction.type == TransactionType.EXPENSE
 
     CeroFiaoCard(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(spacing.cardPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(radius.sm))
                     .background(
-                        if (isExpense) colors.ExpenseColor.copy(alpha = 0.1f)
-                        else colors.IncomeColor.copy(alpha = 0.1f)
+                        if (isExpense) colors.expenseSoft
+                        else colors.incomeSoft,
                     ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -224,27 +235,27 @@ private fun AccountTransactionItem(transaction: Transaction) {
                 )
             }
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(spacing.md))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.note ?: transaction.type.name.lowercase()
                         .replaceFirstChar { it.uppercase() },
-                    color = colors.TextPrimary,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
+                    color = colors.TextPrimary,
                 )
                 Text(
                     text = DateUtils.formatDisplayDate(transaction.date),
+                    style = MaterialTheme.typography.bodySmall,
                     color = colors.TextSecondary,
-                    fontSize = 12.sp,
                 )
             }
 
             Text(
                 text = "${if (isExpense) "-" else "+"}${CurrencyFormatter.format(transaction.amount, transaction.currencyCode)}",
                 color = if (isExpense) colors.ExpenseColor else colors.IncomeColor,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
         }

@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.budget
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -57,6 +58,7 @@ fun AddBudgetScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)

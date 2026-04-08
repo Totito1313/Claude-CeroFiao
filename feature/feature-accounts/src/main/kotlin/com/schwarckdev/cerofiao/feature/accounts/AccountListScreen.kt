@@ -15,7 +15,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,10 +31,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,22 +55,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.composables.icons.lucide.Banknote
+import com.composables.icons.lucide.ChartPie
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.Landmark
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.ChartPie
 import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.Wallet
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.designsystem.components.buttons.ButtonGroupItem
@@ -77,14 +85,11 @@ import com.schwarckdev.cerofiao.core.designsystem.components.utilities.FeedbackV
 import com.schwarckdev.cerofiao.core.designsystem.components.utilities.pressableFeedback
 import com.schwarckdev.cerofiao.core.designsystem.theme.AccountBadgeColors
 import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
-import com.schwarckdev.cerofiao.core.designsystem.theme.LocalCardConfig
 import com.schwarckdev.cerofiao.core.model.AccountType
+import com.schwarckdev.cerofiao.core.ui.CeroFiaoFAB
+import com.schwarckdev.cerofiao.core.ui.EmptyState
 
-// ── Pencil design tokens (from .pen file) ──
-private val PieCardCornerRadius = 48.dp
-private val AccountCardCornerRadius = 32.dp
-private val ProgressGreen = Color(0xFF0C7652)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountListScreen(
     onAccountClick: (String) -> Unit,
@@ -97,132 +102,149 @@ fun AccountListScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val haptic = LocalHapticFeedback.current
 
-    LazyColumn(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .padding(top = 70.dp, start = 16.dp, end = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(CeroFiaoDesign.colors.Background),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // ── Section: Repartición por cuentas ──
-        item {
-            SectionHeader(
-                title = "Repartición por cuentas",
-                titleFontSize = 18,
-                actionText = if (uiState.pieSlices.isNotEmpty()) "Ver más" else null,
+        if (uiState.accounts.isEmpty() && uiState.pieSlices.isEmpty()) {
+            // Full empty state — centered vertically with top bar offset
+            Spacer(Modifier.weight(1f))
+            EmptyState(
+                icon = Lucide.Wallet,
+                title = "Sin cuentas",
+                description = "Agrega tu primera cuenta para empezar a rastrear tus finanzas",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
             )
-        }
-
-        item {
-            PieChartCard(
-                slices = uiState.pieSlices,
-                totalConverted = uiState.totalConverted,
-                displayCurrency = uiState.displayCurrency,
-                onCurrencyChange = viewModel::setChartCurrency,
-            )
-        }
-
-        // ── Section: Cuentas header ──
-        item {
-            SectionHeader(
-                title = "Cuentas",
-                titleFontSize = 20,
-                actionText = "Crear Nueva Cuenta",
-                onAction = onAddAccount,
-            )
-        }
-
-        // ── Account Cards ──
-        if (uiState.accounts.isEmpty()) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Lucide.Wallet,
-                            contentDescription = null,
-                            tint = colors.TextPrimary.copy(alpha = 0.25f),
-                            modifier = Modifier.size(48.dp),
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            "No tienes cuentas",
-                            color = colors.TextPrimary.copy(alpha = 0.5f),
-                            fontSize = 15.sp,
-                        )
-                        Text(
-                            "Agrega tu primera cuenta para empezar",
-                            color = colors.TextPrimary.copy(alpha = 0.35f),
-                            fontSize = 13.sp,
-                        )
-                    }
-                }
-            }
+            Spacer(Modifier.weight(1f))
         } else {
-            itemsIndexed(
-                items = uiState.accounts,
-                key = { _, data -> data.account.id },
-            ) { _, cardData ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 5 }),
-                ) {
-                    AccountCard(
-                        data = cardData,
-                        onClick = { onAccountClick(cardData.account.id) },
-                    )
-                }
-            }
-        }
-
-        // ── "CREAR CUENTA" card ──
-        item {
-            Surface(
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .pressableFeedback(onClick = onAddAccount, variant = FeedbackVariant.ScaleHighlight),
-                shape = RoundedCornerShape(AccountCardCornerRadius),
-                color = colors.CardBackground,
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(spacing.lg),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = spacing.screenHorizontal,
+                    end = spacing.screenHorizontal,
+                    top = 100.dp,
+                    bottom = 50.dp,
+                ),
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    // Plus icon circle — Pencil: #1616160d bg, #00000066 icon
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(
-                                Color(0x0D161616),
-                                CircleShape,
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Lucide.Plus,
-                            contentDescription = null,
-                            tint = colors.TextPrimary.copy(alpha = 0.4f),
-                            modifier = Modifier.size(14.dp),
-                        )
-                    }
-                    Text(
-                        text = "CREAR cuenta",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.TextPrimary.copy(alpha = 0.4f),
-                        letterSpacing = 1.2.sp,
+                // ── Section: Repartición por cuentas ──
+                item {
+                    SectionHeader(
+                        title = "Repartición por cuentas",
                     )
                 }
+
+                item {
+                    PieChartCard(
+                        slices = uiState.pieSlices,
+                        totalConverted = uiState.totalConverted,
+                        displayCurrency = uiState.displayCurrency,
+                        onCurrencyChange = viewModel::setChartCurrency,
+                    )
+                }
+
+                // ── Section: Cuentas header ──
+                item {
+                    SectionHeader(
+                        title = "Cuentas",
+                        actionText = "Crear Nueva",
+                        onAction = onAddAccount,
+                    )
+                }
+
+                // ── Account Cards with swipe-to-delete ──
+                itemsIndexed(
+                    items = uiState.accounts,
+                    key = { _, data -> data.account.id },
+                ) { _, cardData ->
+                    var visible by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { visible = true }
+
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) +
+                            slideInVertically(
+                                initialOffsetY = { it / 3 },
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow,
+                                ),
+                            ),
+                    ) {
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value == SwipeToDismissBoxValue.EndToStart) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.deleteAccount(cardData.account.id)
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = false,
+                            backgroundContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(CeroFiaoDesign.radius.xxl))
+                                        .background(colors.ExpenseColor),
+                                    contentAlignment = Alignment.CenterEnd,
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(end = spacing.xl),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                                    ) {
+                                        Text(
+                                            text = "Eliminar",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                        )
+                                        Icon(
+                                            imageVector = Lucide.Trash2,
+                                            contentDescription = "Eliminar",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
+                                }
+                            },
+                        ) {
+                            AccountCard(
+                                data = cardData,
+                                onClick = { onAccountClick(cardData.account.id) },
+                            )
+                        }
+                    }
+                }
+
+                item { Spacer(Modifier.height(spacing.lg)) }
             }
         }
 
-        item { Spacer(Modifier.height(110.dp)) }
+        // FAB — always visible
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = spacing.screenHorizontal, bottom = 100.dp),
+            contentAlignment = Alignment.BottomEnd,
+        ) {
+            CeroFiaoFAB(
+                onClick = onAddAccount,
+                icon = Lucide.Plus,
+            )
+        }
     }
 }
 
@@ -231,11 +253,11 @@ fun AccountListScreen(
 @Composable
 private fun SectionHeader(
     title: String,
-    titleFontSize: Int = 20,
     actionText: String? = null,
     onAction: (() -> Unit)? = null,
 ) {
     val colors = CeroFiaoDesign.colors
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -243,25 +265,22 @@ private fun SectionHeader(
     ) {
         Text(
             text = title,
-            fontSize = titleFontSize.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             color = colors.TextPrimary,
-            letterSpacing = (-0.6).sp,
         )
         if (actionText != null) {
             Text(
                 text = actionText,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.Primary,
                 fontWeight = FontWeight.Bold,
-                // Pencil: #00000080
-                color = colors.TextPrimary.copy(alpha = 0.5f),
-                letterSpacing = 1.2.sp,
+                letterSpacing = 0.5.sp,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
+                    .clip(RoundedCornerShape(CeroFiaoDesign.radius.sm))
                     .then(
                         if (onAction != null) Modifier.clickable(onClick = onAction) else Modifier,
                     )
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
             )
         }
     }
@@ -277,18 +296,19 @@ private fun PieChartCard(
     onCurrencyChange: (ChartDisplayCurrency) -> Unit,
 ) {
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val radius = CeroFiaoDesign.radius
 
-    // Pencil: cornerRadius 48, fill #fcfcffff, padding [20, 30], gap 12
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(PieCardCornerRadius),
+        shape = RoundedCornerShape(radius.xxxl),
         color = colors.CardBackground,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(horizontal = spacing.xxl, vertical = spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(spacing.md),
         ) {
-            // Currency ButtonGroup + Total — Pencil: row with space_between
+            // Currency ButtonGroup + Total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -300,7 +320,6 @@ private fun PieChartCard(
                 )
 
                 if (slices.isNotEmpty()) {
-                    // Pencil: fontSize 12, fontWeight normal, fill #000000cc
                     AnimatedContent(
                         targetState = CurrencyFormatter.format(totalConverted, displayCurrency),
                         transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -308,8 +327,7 @@ private fun PieChartCard(
                     ) { formattedTotal ->
                         Text(
                             text = "Total: $formattedTotal",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
+                            style = MaterialTheme.typography.bodySmall,
                             color = colors.TextPrimary.copy(alpha = 0.8f),
                         )
                     }
@@ -317,22 +335,20 @@ private fun PieChartCard(
             }
 
             if (slices.isNotEmpty()) {
-                // Chart + Legend — Pencil: gap 16
+                // Chart + Legend
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.lg),
                 ) {
-                    // Pencil: 130x130 chart
                     DonutChart(
                         slices = slices,
                         modifier = Modifier.size(130.dp),
                     )
 
-                    // Legend — Pencil: gap 8
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(spacing.sm),
                     ) {
                         slices.forEach { slice ->
                             PieLegendItem(
@@ -344,30 +360,30 @@ private fun PieChartCard(
                     }
                 }
             } else {
-                // Empty state — chart area
+                // Empty chart state
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp),
+                        .padding(vertical = spacing.xxl),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
                         Lucide.ChartPie,
                         contentDescription = null,
-                        tint = colors.TextPrimary.copy(alpha = 0.15f),
+                        tint = colors.TextSecondary.copy(alpha = 0.4f),
                         modifier = Modifier.size(48.dp),
                     )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(spacing.md))
                     Text(
                         "Sin datos para graficar",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = colors.TextPrimary.copy(alpha = 0.4f),
+                        color = colors.TextSecondary,
                     )
                     Text(
                         "Agrega cuentas con saldo para ver la distribución",
-                        fontSize = 12.sp,
-                        color = colors.TextPrimary.copy(alpha = 0.25f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.TextSecondary.copy(alpha = 0.6f),
                     )
                 }
             }
@@ -376,7 +392,6 @@ private fun PieChartCard(
 }
 
 // ── Currency ButtonGroup + Dropdown ──
-// Pencil: ButtonGroup with "$ Dolar [BCV]" left button + ChevronDown right button
 
 @Composable
 private fun CurrencyButtonGroup(
@@ -385,6 +400,7 @@ private fun CurrencyButtonGroup(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val colors = CeroFiaoDesign.colors
+    val radius = CeroFiaoDesign.radius
     val density = LocalDensity.current
     var anchorHeightPx by remember { mutableStateOf(0) }
     val dropdownState = remember { MutableTransitionState(false) }
@@ -409,7 +425,6 @@ private fun CurrencyButtonGroup(
             size = ButtonSize.Small,
         )
 
-        // OneUI-style dropdown — Popup overlay (doesn't push layout)
         if (dropdownState.currentState || dropdownState.targetState) {
             Popup(
                 onDismissRequest = { expanded = false },
@@ -436,7 +451,7 @@ private fun CurrencyButtonGroup(
                         ),
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(26.dp),
+                        shape = RoundedCornerShape(radius.xxl),
                         color = colors.SurfaceVariant,
                         shadowElevation = 8.dp,
                         modifier = Modifier.width(220.dp),
@@ -464,7 +479,7 @@ private fun CurrencyButtonGroup(
                                     if (currency.sourceLabel.isNotEmpty()) {
                                         Text(
                                             text = currency.sourceLabel,
-                                            fontSize = 12.sp,
+                                            style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Medium,
                                             color = if (isSelected) colors.Primary.copy(alpha = 0.7f) else colors.TextSecondary,
                                         )
@@ -522,7 +537,6 @@ private fun PieLegendItem(
 ) {
     val colors = CeroFiaoDesign.colors
 
-    // Pencil legend row: height 18, gap between dot+name and amount
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -530,27 +544,23 @@ private fun PieLegendItem(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(CeroFiaoDesign.spacing.sm),
         ) {
-            // Pencil: 8x8 colored dot
             Box(
                 modifier = Modifier
                     .size(8.dp)
                     .background(color, CircleShape),
             )
-            // Pencil: fontSize 12, fontWeight 500, fill #0000008c
             Text(
                 text = name,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
-                color = colors.TextPrimary.copy(alpha = 0.55f),
+                color = colors.TextSecondary,
             )
         }
-        // Pencil: fontSize 12, fontWeight normal, fill #000000ff
         Text(
             text = amount,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Normal,
+            style = MaterialTheme.typography.bodySmall,
             color = colors.TextPrimary,
         )
     }
@@ -565,6 +575,8 @@ private fun AccountCard(
 ) {
     val account = data.account
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val radius = CeroFiaoDesign.radius
 
     val (badgeBg, badgeText) = when (account.type) {
         AccountType.BANK -> AccountBadgeColors.BankBg to AccountBadgeColors.BankText
@@ -573,7 +585,6 @@ private fun AccountCard(
         AccountType.CASH -> AccountBadgeColors.CashBg to AccountBadgeColors.CashText
     }
 
-    // Pencil: type labels use title case (e.g. "Banco -", "CRypto -")
     val typeLabel = when (account.type) {
         AccountType.BANK -> "Banco"
         AccountType.CRYPTO_EXCHANGE -> "Crypto"
@@ -583,15 +594,14 @@ private fun AccountCard(
 
     val hasProgress = data.progressRatio != null
 
-    // Pencil: cornerRadius 32, fill #fcfcffff, padding 24, background_blur effect
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .pressableFeedback(onClick = onClick, variant = FeedbackVariant.ScaleHighlight),
-        shape = RoundedCornerShape(AccountCardCornerRadius),
+        shape = RoundedCornerShape(radius.xxl),
         color = colors.CardBackground,
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(spacing.xxl)) {
             // ── Header: type label + name + platform badge ──
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -599,42 +609,36 @@ private fun AccountCard(
                 verticalAlignment = Alignment.Top,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    // Pencil: "Banco -" fontSize 11, fontWeight 700, letterSpacing 1.1, fill #00000066
-                    //         "BS" fontSize 12, fontWeight 900, letterSpacing 1.1, fill #00000066
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(spacing.xxs),
                     ) {
                         Text(
                             text = "$typeLabel -",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.TextPrimary.copy(alpha = 0.4f),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.TextSecondary,
                             letterSpacing = 1.1.sp,
                         )
                         Text(
                             text = account.currencyCode,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
-                            color = colors.TextPrimary.copy(alpha = 0.4f),
+                            color = colors.TextSecondary,
                             letterSpacing = 1.1.sp,
                         )
                     }
-                    // Pencil: fontSize 18, fontWeight 700, fill #000000ff, lineHeight 1.556
                     Text(
                         text = account.name,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
                         color = colors.TextPrimary,
                         lineHeight = 28.sp,
                     )
                 }
 
-                // Pencil: 30x30, cornerRadius 12, image fill
                 Box(
                     modifier = Modifier
                         .size(30.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(radius.md))
                         .background(badgeBg),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -642,17 +646,13 @@ private fun AccountCard(
                 }
             }
 
-            // Pencil: gap ~40dp for progress card, ~36dp for non-progress
-            Spacer(Modifier.height(if (hasProgress) 40.dp else 36.dp))
+            Spacer(Modifier.height(if (hasProgress) spacing.huge else spacing.xxxl))
 
             // ── Balance section ──
             if (hasProgress) {
-                // Pencil: spent "800,00 Bs" fontSize 16, fontWeight 700, fill #000000b2
-                //         "/" fontSize 20, fontWeight 700, fill #000000ff
-                //         total "$1.200,00 Bs" fontSize 20, fontWeight 700, fill #000000ff
                 Row(
                     verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.xs),
                 ) {
                     Text(
                         text = CurrencyFormatter.format(account.balance, account.currencyCode),
@@ -674,15 +674,14 @@ private fun AccountCard(
                     )
                 }
 
-                // Pencil: gap 12.5 between balance and progress bar
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(spacing.md))
 
-                // Pencil: height 4, cornerRadius 9999, bg #0000001a, fill #0c7652ff
+                // Progress bar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(4.dp)
-                        .clip(RoundedCornerShape(9999.dp))
+                        .clip(RoundedCornerShape(CeroFiaoDesign.radius.circle))
                         .background(colors.TextPrimary.copy(alpha = 0.1f)),
                 ) {
                     val ratio = data.progressRatio ?: 0f
@@ -690,12 +689,11 @@ private fun AccountCard(
                         modifier = Modifier
                             .fillMaxWidth(ratio)
                             .height(4.dp)
-                            .clip(RoundedCornerShape(9999.dp))
-                            .background(ProgressGreen),
+                            .clip(RoundedCornerShape(CeroFiaoDesign.radius.circle))
+                            .background(colors.AccentGreen),
                     )
                 }
             } else {
-                // Pencil: fontSize 20, fontWeight 700, fill #000000ff, lineHeight 1.6
                 Text(
                     text = CurrencyFormatter.format(account.balance, account.currencyCode),
                     fontSize = 20.sp,
@@ -706,13 +704,12 @@ private fun AccountCard(
 
                 val label = data.lastTransactionLabel
                 if (label != null) {
-                    // Pencil: gap 4.5, fontSize 12, fontWeight 700, fill #000000b2
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(spacing.xxs))
                     Text(
                         text = label,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        color = colors.TextPrimary.copy(alpha = 0.7f),
+                        color = colors.TextSecondary,
                     )
                 }
             }
@@ -720,7 +717,7 @@ private fun AccountCard(
     }
 }
 
-// ── Platform Icon (mirrors dashboard pattern) ──
+// ── Platform Icon ──
 
 @Composable
 private fun PlatformIcon(

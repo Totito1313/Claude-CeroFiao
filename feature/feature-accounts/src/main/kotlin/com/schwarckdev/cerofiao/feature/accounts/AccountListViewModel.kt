@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schwarckdev.cerofiao.core.common.CurrencyFormatter
 import com.schwarckdev.cerofiao.core.common.DateUtils
+import com.schwarckdev.cerofiao.core.domain.repository.AccountRepository
 import com.schwarckdev.cerofiao.core.domain.repository.TransactionRepository
 import com.schwarckdev.cerofiao.core.domain.repository.UserPreferencesRepository
 import com.schwarckdev.cerofiao.core.domain.usecase.BuildRateTableUseCase
@@ -14,6 +15,7 @@ import com.schwarckdev.cerofiao.core.model.Transaction
 import com.schwarckdev.cerofiao.core.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -59,6 +61,7 @@ enum class ChartDisplayCurrency(
 @HiltViewModel
 class AccountListViewModel @Inject constructor(
     getAccountsUseCase: GetAccountsUseCase,
+    private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
     private val buildRateTable: BuildRateTableUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
@@ -137,6 +140,12 @@ class AccountListViewModel @Inject constructor(
 
     fun setChartCurrency(currency: ChartDisplayCurrency) {
         _chartCurrency.update { currency }
+    }
+
+    fun deleteAccount(accountId: String) {
+        viewModelScope.launch {
+            accountRepository.deleteAccount(accountId)
+        }
     }
 
     companion object {

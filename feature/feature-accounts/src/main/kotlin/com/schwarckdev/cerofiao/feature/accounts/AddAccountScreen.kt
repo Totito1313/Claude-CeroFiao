@@ -15,6 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +55,8 @@ fun AddAccountScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val colors = CeroFiaoDesign.colors
+    val spacing = CeroFiaoDesign.spacing
+    val radius = CeroFiaoDesign.radius
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) onAccountCreated()
@@ -61,106 +65,132 @@ fun AddAccountScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.Background)
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp, end = 16.dp, top = 70.dp, bottom = 110.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(
+                start = spacing.screenHorizontal,
+                end = spacing.screenHorizontal,
+                top = 70.dp,
+                bottom = 110.dp,
+            ),
+        verticalArrangement = Arrangement.spacedBy(spacing.xl),
     ) {
-        // Platform selection — CeroFiaoSelect dropdown
-        CeroFiaoSelect(
-            selected = uiState.platform.takeIf { it != AccountPlatform.NONE },
-            onSelectedChange = viewModel::setPlatform,
-            options = AccountPlatform.entries.toList(),
-            label = "Plataforma",
-            placeholder = "Seleccionar plataforma...",
-            displayText = { it.displayName },
+        // ── Form fields inside a card ──
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Name
-        CeroFiaoTextField(
-            value = uiState.name,
-            onValueChange = viewModel::setName,
-            label = "Nombre",
-            placeholder = "Ej: Banesco, Efectivo",
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Currency selection — CeroFiaoToggleButtonGroup
-        Column {
-            Text(
-                text = "Moneda",
-                color = colors.TextPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.height(8.dp))
-            CeroFiaoToggleButtonGroup(
-                items = listOf("USD", "VES", "USDT", "EUR").map {
-                    ToggleButtonItem(key = it, text = it)
-                },
-                selectedKey = uiState.currencyCode,
-                onSelect = viewModel::setCurrency,
-            )
-        }
-
-        // Initial balance
-        CeroFiaoTextField(
-            value = uiState.initialBalance,
-            onValueChange = viewModel::setInitialBalance,
-            label = "Saldo inicial",
-            placeholder = "0.00",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Include in total toggle — CeroFiaoSwitch
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            shape = RoundedCornerShape(radius.xxl),
+            color = colors.CardBackground,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Incluir en balance total",
-                    color = colors.TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+            Column(
+                modifier = Modifier.padding(spacing.xxl),
+                verticalArrangement = Arrangement.spacedBy(spacing.xl),
+            ) {
+                // Platform selection
+                CeroFiaoSelect(
+                    selected = uiState.platform.takeIf { it != AccountPlatform.NONE },
+                    onSelectedChange = viewModel::setPlatform,
+                    options = AccountPlatform.entries.toList(),
+                    label = "Plataforma",
+                    placeholder = "Seleccionar plataforma...",
+                    displayText = { it.displayName },
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Text(
-                    "Suma al balance global",
-                    color = colors.TextSecondary,
-                    fontSize = 12.sp,
+
+                // Name
+                CeroFiaoTextField(
+                    value = uiState.name,
+                    onValueChange = viewModel::setName,
+                    label = "Nombre",
+                    placeholder = "Ej: Banesco, Efectivo",
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                // Currency selection
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.sm)) {
+                    Text(
+                        text = "Moneda",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.TextPrimary,
+                    )
+                    CeroFiaoToggleButtonGroup(
+                        items = listOf("USD", "VES", "USDT", "EUR").map {
+                            ToggleButtonItem(key = it, text = it)
+                        },
+                        selectedKey = uiState.currencyCode,
+                        onSelect = viewModel::setCurrency,
+                    )
+                }
+
+                // Initial balance
+                CeroFiaoTextField(
+                    value = uiState.initialBalance,
+                    onValueChange = viewModel::setInitialBalance,
+                    label = "Saldo inicial",
+                    placeholder = "0.00",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
-            CeroFiaoSwitch(
-                checked = uiState.includeInTotal,
-                onCheckedChange = { viewModel.setIncludeInTotal(it) },
-            )
         }
 
-        // Save button
+        // ── Include in total toggle ──
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(radius.xxl),
+            color = colors.CardBackground,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = spacing.xxl, vertical = spacing.lg),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Incluir en balance total",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.TextPrimary,
+                    )
+                    Text(
+                        "Suma al balance global",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.TextSecondary,
+                    )
+                }
+                CeroFiaoSwitch(
+                    checked = uiState.includeInTotal,
+                    onCheckedChange = { viewModel.setIncludeInTotal(it) },
+                )
+            }
+        }
+
+        Spacer(Modifier.height(spacing.sm))
+
+        // ── Save button ──
+        val isEnabled = uiState.name.isNotBlank()
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(radius.lg))
                 .background(
-                    if (uiState.name.isNotBlank()) BrandGradient
+                    if (isEnabled) BrandGradient
                     else Brush.horizontalGradient(listOf(colors.SurfaceVariant, colors.SurfaceVariant)),
-                    RoundedCornerShape(16.dp),
+                    RoundedCornerShape(radius.lg),
                 )
                 .then(
-                    if (uiState.name.isNotBlank()) Modifier.pressableFeedback(
+                    if (isEnabled) Modifier.pressableFeedback(
                         onClick = { viewModel.save() },
                         variant = FeedbackVariant.ScaleHighlight,
-                    ) else Modifier
+                    ) else Modifier,
                 )
-                .padding(vertical = 16.dp),
+                .padding(vertical = spacing.lg),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = if (uiState.isSaving) "Guardando..." else "Crear cuenta",
-                color = if (uiState.name.isNotBlank()) colors.TextOnDark else colors.TextSecondary,
+                color = if (isEnabled) colors.TextOnDark else colors.TextSecondary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
             )

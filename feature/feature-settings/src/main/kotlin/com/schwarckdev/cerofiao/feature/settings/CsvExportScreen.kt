@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,6 +65,7 @@ fun CsvExportScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
@@ -157,13 +159,13 @@ fun CsvExportScreen(
         if (error != null) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = colors.ExpenseColor.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(20.dp),
+                color = colors.DangerSoft,
             ) {
                 Text(
                     text = error,
                     fontSize = 14.sp,
-                    color = colors.ExpenseColor,
+                    color = colors.Error,
                     modifier = Modifier.padding(16.dp),
                 )
             }

@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.debt
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,6 +68,7 @@ fun DebtDetailScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .padding(top = 70.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(

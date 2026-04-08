@@ -1,5 +1,6 @@
 package com.schwarckdev.cerofiao.feature.debt
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import com.schwarckdev.cerofiao.core.designsystem.components.CeroFiaoPrimaryButt
 import com.schwarckdev.cerofiao.core.designsystem.components.forms.CeroFiaoTextField
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.ConfigureTopBar
 import com.schwarckdev.cerofiao.core.designsystem.components.navigation.TopBarVariant
+import com.schwarckdev.cerofiao.core.designsystem.theme.CeroFiaoDesign
 import com.schwarckdev.cerofiao.core.model.DebtType
 
 @Composable
@@ -36,6 +38,7 @@ fun AddDebtScreen(
     viewModel: AddDebtViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colors = CeroFiaoDesign.colors
 
     ConfigureTopBar(
         variant = TopBarVariant.Detail,
@@ -50,6 +53,7 @@ fun AddDebtScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(CeroFiaoDesign.colors.Background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
